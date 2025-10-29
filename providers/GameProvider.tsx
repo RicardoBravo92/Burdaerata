@@ -1,12 +1,13 @@
+"use client";
 import { Game, Round } from "@/lib/types";
 import { PropsWithChildren, createContext, useContext, useState } from "react";
 
 type GameData = {
   game: Game | null;
-  myCards: string[] | [];
+  myCards: string[];
   round: Round | null;
   setGame: (game: Game | null) => void;
-  setMyCards: (cards: string[] | []) => void;
+  setMyCards: (cards: string[]) => void;
 };
 
 const GameContext = createContext<GameData>({

@@ -1,30 +1,37 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import LobbyView from '@/components/LobbyView';
-import PlayView from '@/components/PlayView';
-import { supabase } from '@/lib/supabaseClient';
-import { Game, RoundAnswer } from '@/lib/types';
-import { useGame } from '@/providers/GameProvider';
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import LobbyView from "@/components/LobbyView";
+import PlayView from "@/components/PlayView";
+import { supabase } from "@/lib/supabaseClient";
+import { Game, RoundAnswer } from "@/lib/types";
+import { useGame } from "@/providers/GameProvider";
 import {
   getGameByID,
   getGamePlayers,
   getLastRoundByGame,
   getPlayerCard,
-} from '@/services/gameService';
-import { useUser } from '@clerk/clerk-react';
+} from "@/services/gameService";
+import { useUser } from "@clerk/clerk-react";
+import {
+  FaSync,
+  FaExclamationTriangle,
+  FaTrophy,
+  FaQuestion,
+} from "react-icons/fa";
 
 // Icons replacement - you can use react-icons or similar
-const RefreshIcon = () => <span className='text-4xl'>🔄</span>;
-const AlertIcon = () => <span className='text-4xl'>⚠️</span>;
-const TrophyIcon = () => <span className='text-4xl'>🏆</span>;
-const HelpIcon = () => <span className='text-4xl'>❓</span>;
+const RefreshIcon = () => <FaSync className="text-4xl" />;
+const AlertIcon = () => <FaExclamationTriangle className="text-4xl" />;
+const TrophyIcon = () => <FaTrophy className="text-4xl" />;
+const HelpIcon = () => <FaQuestion className="text-4xl" />;
 
 export default function GameScreen() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  // Asegúrate que el componente está envuelto por el GameProvider
   const { game, setMyCards, setGame } = useGame();
   const { user } = useUser();
 
@@ -38,19 +45,19 @@ export default function GameScreen() {
     const subscription = supabase
       .channel(`game:${id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'game_players',
+          event: "*",
+          schema: "public",
+          table: "game_players",
           filter: `game_id=eq.${id}`,
         },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
+          if (payload.eventType === "INSERT") {
             const newPlayer: any = payload.new;
             setPlayers((prev) => [...prev, newPlayer]);
           }
-          if (payload.eventType === 'DELETE') {
+          if (payload.eventType === "DELETE") {
             setPlayers((prev) =>
               prev.filter((player) => player.id !== payload.old.id),
             );
@@ -58,46 +65,46 @@ export default function GameScreen() {
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'games',
+          event: "*",
+          schema: "public",
+          table: "games",
           filter: `id=eq.${id} AND status=eq.playing OR status=eq.finished`,
         },
         async (payload: any) => {
           const newGame: Game = payload.new;
           setGame(newGame);
 
-          if (newGame?.status === 'playing') {
+          if (newGame?.status === "playing") {
             fetchCurrentRound();
             fetchPlayerCards();
           }
-          if (newGame?.status === 'finished') {
+          if (newGame?.status === "finished") {
             setTimeout(() => {
-              router.replace('/');
+              router.replace("/");
             }, 3000);
           }
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'rounds',
+          event: "*",
+          schema: "public",
+          table: "rounds",
           filter: `game_id=eq.${id}`,
         },
         async (payload) => {
           const newRound: any = payload.new;
           if (newRound) {
-            if (payload.eventType === 'INSERT' && !isTransitioning) {
+            if (payload.eventType === "INSERT" && !isTransitioning) {
               setIsTransitioning(true);
               setTimeout(() => {
                 setCurrentRound(newRound);
                 setIsTransitioning(false);
               }, 2000);
-            } else if (payload.eventType === 'UPDATE') {
+            } else if (payload.eventType === "UPDATE") {
               setCurrentRound(newRound);
               if (newRound.id) {
                 await fetchAnswers(newRound.id);
@@ -107,11 +114,11 @@ export default function GameScreen() {
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'round_answers',
+          event: "*",
+          schema: "public",
+          table: "round_answers",
           filter: `game_id=eq.${id} AND round_id=eq.${currentRound?.id}`,
         },
         async (payload: any) => {
@@ -123,7 +130,7 @@ export default function GameScreen() {
               return prev;
             }
 
-            if (payload.eventType === 'DELETE') {
+            if (payload.eventType === "DELETE") {
               return prev.filter(
                 (answer: RoundAnswer) => answer.id !== payload.old.id,
               );
@@ -149,15 +156,21 @@ export default function GameScreen() {
       setLoading(true);
       const gameData = await getGameByID(id as string);
 
-      setGame(gameData);
-      await fetchPlayers();
+      if (gameData) {
+        console.log("gamedata", gameData);
+        setGame(gameData);
+        console.log("game", game);
+        await fetchPlayers();
 
-      if (gameData?.status === 'playing') {
-        await fetchCurrentRound();
-        await fetchPlayerCards();
+        if (gameData?.status === "playing") {
+          await fetchCurrentRound();
+          await fetchPlayerCards();
+        }
+      } else {
+        console.error("No se encontraron datos del juego");
       }
     } catch (error) {
-      console.error('Error fetching game state:', error);
+      console.error("Error fetching game state:", error);
     } finally {
       setLoading(false);
     }
@@ -168,7 +181,7 @@ export default function GameScreen() {
       const playersData = await getGamePlayers(id as string);
       setPlayers(playersData || []);
     } catch (error) {
-      console.error('Error fetching players:', error);
+      console.error("Error fetching players:", error);
       setPlayers([]);
     }
   }
@@ -182,7 +195,7 @@ export default function GameScreen() {
         await fetchAnswers(roundData.id);
       }
     } catch (error) {
-      console.error('Error fetching current round:', error);
+      console.error("Error fetching current round:", error);
       setCurrentRound(undefined);
     }
   }
@@ -190,20 +203,20 @@ export default function GameScreen() {
   async function fetchAnswers(roundId: string) {
     try {
       const { data, error } = await supabase
-        .from('round_answers')
+        .from("round_answers")
         .select(
           `
           *,
           user:users(full_name)
         `,
         )
-        .eq('round_id', roundId)
-        .order('created_at', { ascending: true });
+        .eq("round_id", roundId)
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
       setAnswers(data || []);
     } catch (error) {
-      console.error('Error fetching answers:', error);
+      console.error("Error fetching answers:", error);
       setAnswers([]);
     }
   }
@@ -215,7 +228,7 @@ export default function GameScreen() {
       const data = await getPlayerCard(user.id, id as string);
       setMyCards(data?.cards || []);
     } catch (error) {
-      console.error('Error in fetchPlayerCards:', error);
+      console.error("Error in fetchPlayerCards:", error);
       setMyCards([]);
     }
   }
@@ -223,10 +236,10 @@ export default function GameScreen() {
   // Loading State
   if (loading) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-4 text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white'></div>
-          <p className='text-white text-xl font-semibold'>Loading Game...</p>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-4 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          <p className="text-white text-xl font-semibold">Loading Game...</p>
         </div>
       </div>
     );
@@ -235,18 +248,18 @@ export default function GameScreen() {
   // Transition State
   if (isTransitioning) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-6 text-center'>
-          <div className='bg-white/20 p-6 rounded-full'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-6 text-center">
+          <div className="bg-white/20 p-6 rounded-full">
             <RefreshIcon />
           </div>
-          <h1 className='text-white text-2xl font-bold text-center'>
+          <h1 className="text-white text-2xl font-bold text-center">
             Starting Next Round
           </h1>
-          <p className='text-white/80 text-lg text-center'>
+          <p className="text-white/80 text-lg text-center">
             Get ready for the next challenge!
           </p>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white'></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
       </div>
     );
@@ -254,13 +267,13 @@ export default function GameScreen() {
 
   if (!game) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-4 p-6 text-center'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-4 p-6 text-center">
           <AlertIcon />
-          <h1 className='text-white text-xl font-semibold text-center'>
+          <h1 className="text-white text-xl font-semibold text-center">
             Game Not Found
           </h1>
-          <p className='text-white/70 text-center text-base'>
+          <p className="text-white/70 text-center text-base">
             The game you're looking for doesn't exist or you don't have access.
           </p>
         </div>
@@ -269,20 +282,20 @@ export default function GameScreen() {
   }
 
   // Game Finished State
-  if (game.status === 'finished') {
+  if (game.status === "finished") {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-6 p-6 text-center'>
-          <div className='bg-yellow-500 p-6 rounded-full'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-6 p-6 text-center">
+          <div className="bg-yellow-500 p-6 rounded-full">
             <TrophyIcon />
           </div>
-          <h1 className='text-white text-3xl font-bold text-center'>
+          <h1 className="text-white text-3xl font-bold text-center">
             Game Finished!
           </h1>
-          <p className='text-white/80 text-lg text-center'>
+          <p className="text-white/80 text-lg text-center">
             Congratulations to all players!
           </p>
-          <p className='text-white/60 text-center'>
+          <p className="text-white/60 text-center">
             Returning to home screen...
           </p>
         </div>
@@ -291,14 +304,13 @@ export default function GameScreen() {
   }
 
   // Game States
-  if (game.status === 'waiting') {
+  if (game.status === "waiting") {
     return <LobbyView user={user} game={game} players={players} />;
   }
 
-  if (game.status === 'playing') {
+  if (game.status === "playing") {
     return (
       <PlayView
-        user={user}
         currentRound={currentRound}
         players={players}
         answers={answers}
@@ -309,10 +321,10 @@ export default function GameScreen() {
 
   // Fallback
   return (
-    <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-      <div className='items-center space-y-4 text-center'>
+    <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+      <div className="items-center space-y-4 text-center">
         <HelpIcon />
-        <h1 className='text-white text-xl font-semibold'>Unknown Game State</h1>
+        <h1 className="text-white text-xl font-semibold">Unknown Game State</h1>
       </div>
     </div>
   );
