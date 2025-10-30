@@ -99,7 +99,7 @@ export async function getGamePlayers(
       .select(
         `
         *,
-        profile:users(full_name)
+        profile:users("*")
       `,
       )
       .eq("game_id", gameId);
@@ -164,7 +164,7 @@ export async function getGamePlayerWithProfile(
       .select(
         `
         *,
-        profile:users(full_name)
+        user:users(full_name)
       `,
       )
       .eq("id", id)

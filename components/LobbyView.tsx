@@ -1,7 +1,7 @@
 import { Game, GamePlayer } from "@/lib/types";
 import { startGame } from "@/services/gameService";
 import { FaUser, FaStar } from "react-icons/fa";
-
+import Image from "next/image";
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 
@@ -60,9 +60,9 @@ export default function LobbyView({
   }
 
   return (
-    <div className="flex-1  p-6 h-screen">
+    <div className="flex-1  md:max-w-xl mx-auto px-6 h-screen">
       {/* Header */}
-      <div className="items-center mb-8">
+      <div className="items-center mb-8 md:mb-4">
         <div className="text-3xl font-bold text-white text-center mb-4 py-2 bg-[#99184e]/90 rounded-lg">
           Game Lobby
         </div>
@@ -127,10 +127,23 @@ export default function LobbyView({
             >
               <div className=" items-center flex flex-row">
                 <div className="w-5 h-5 bg-[#99184e] rounded-full flex items-center justify-center mr-1">
-                  <FaUser className="text-base text-white" />
+                  {/* <FaUser className="text-base text-white" /> */}
+                  {/* item.profile?.avatar_url*/}
+                  {item.profile?.avatar_url &&
+                  item.profile?.avatar_url !== "" ? (
+                    <img
+                      src={item.profile?.avatar_url}
+                      alt="Profile"
+                      className="w-5 h-5 rounded-full"
+                    />
+                  ) : (
+                    <FaUser className="text-base text-white" />
+                  )}
                 </div>
                 <div className=" font-semibold div-gray-800 text-base">
-                  {item.user?.full_name || "Unknown Player"}
+                  {item.profile?.full_name ||
+                    item.user?.full_name ||
+                    "Unknown Player"}
                   {item.id === user?.id && (
                     <div className="div-[#99184e]"> (You)</div>
                   )}
@@ -205,22 +218,6 @@ export default function LobbyView({
           </div>
         </div>
       )}
-
-      {/* Quick Actions Footer */}
-      <div className="flex-row justify-center space-x-6 mt-3">
-        <button
-          className="flex-row items-center bg-white/20 px-4 py-3 rounded-2xl hover:bg-white/40"
-          onClick={handleCopyCode}
-        >
-          <div className="div-white font-semibold ml-2">Copy Code</div>
-        </button>
-        <button
-          className="flex-row items-center bg-white/20 px-4 py-3 rounded-2xl hover:bg-white/40 "
-          onClick={handleShareGame}
-        >
-          <div className="div-white font-semibold ml-2">Share</div>
-        </button>
-      </div>
     </div>
   );
 }

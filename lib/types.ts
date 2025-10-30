@@ -45,6 +45,7 @@ export interface GamePlayer {
   score: number | null;
   created_at: string | null;
   user: User | null;
+  profile: User | null;
 }
 
 export interface playerCards {

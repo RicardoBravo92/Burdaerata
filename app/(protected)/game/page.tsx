@@ -1,10 +1,11 @@
 "use client";
 import { createGame, joinGame } from "@/services/gameService";
 import { useState } from "react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/clerk-react";
 
 export default function HomeTab() {
+  const router = useRouter();
   const { user } = useUser();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,10 +22,13 @@ export default function HomeTab() {
         throw new Error("User not found");
       }
       const newGame = await createGame(user.id, maxPlayers, scoreToWin);
-      redirect(`/game/${newGame.id}`);
+      if (newGame) {
+        router.push(`/game/${newGame.id}`);
+      } else {
+        console.error("Failed to create game");
+      }
     } catch (error: any) {
       console.error("Error creating game:", error);
-      alert(error.message || "Failed to create game");
     } finally {
       setLoading(false);
     }
@@ -37,10 +41,13 @@ export default function HomeTab() {
         throw new Error("User not found");
       }
       const joinedGame = await joinGame(user.id, code);
-      redirect(`/game/${joinedGame.id}`);
+      if (joinedGame) {
+        router.push(`/game/${joinedGame.id}`);
+      } else {
+        console.error("Failed to join game");
+      }
     } catch (error: any) {
       console.error("Error joining game:", error);
-      alert(error.message || "Failed to join game");
     } finally {
       setJoinLoading(false);
     }
