@@ -165,7 +165,7 @@ export default function GameScreen() {
           await fetchPlayerCards();
         }
       } else {
-        router.replace("/home");
+        router.replace("/game");
       }
     } catch (error) {
       console.error("Error fetching game state:", error);
