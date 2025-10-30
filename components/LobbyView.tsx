@@ -131,10 +131,12 @@ export default function LobbyView({
                   {/* item.profile?.avatar_url*/}
                   {item.profile?.avatar_url &&
                   item.profile?.avatar_url !== "" ? (
-                    <img
+                    <Image
                       src={item.profile?.avatar_url}
                       alt="Profile"
                       className="w-5 h-5 rounded-full"
+                      width={20}
+                      height={20}
                     />
                   ) : (
                     <FaUser className="text-base text-white" />
