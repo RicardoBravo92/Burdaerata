@@ -1,16 +1,18 @@
-import { Database } from '@/database.types';
+import { Database } from "@/database.types";
 
-export type Tables<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Row'];
-export type Enums<T extends keyof Database['public']['Enums']> =
-  Database['public']['Enums'][T];
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type Enums<T extends keyof Database["public"]["Enums"]> =
+  Database["public"]["Enums"][T];
 
-export type GameState = 'waiting' | 'playing' | 'finished';
+export type GameState = "waiting" | "playing" | "finished";
 
 export interface User {
   id: string;
-  name: string;
+  first_name: string;
   avatar_url?: string;
+  last_name: string;
+  full_name: string;
 }
 
 export interface QuestionCard {
@@ -42,6 +44,7 @@ export interface GamePlayer {
   user_id: string | null;
   score: number | null;
   created_at: string | null;
+  user: User | null;
 }
 
 export interface playerCards {
@@ -69,6 +72,7 @@ export interface Round {
   status: string | null;
   updated_at: string | null;
   winning_answer_id: string | null;
+  judge: User | null;
 }
 
 export interface RoundAnswer {
@@ -79,4 +83,5 @@ export interface RoundAnswer {
   is_winner: boolean | null;
   round_id: string | null;
   user_id: string;
+  user: User | null;
 }

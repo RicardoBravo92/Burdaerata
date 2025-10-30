@@ -1,28 +1,31 @@
-'use client';
-import { createGame, joinGame } from '@/services/gameService';
-import { useState } from 'react';
-
-import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/clerk-react';
+"use client";
+import { createGame, joinGame } from "@/services/gameService";
+import { useState } from "react";
+import { redirect, useRouter } from "next/navigation";
+import { useUser } from "@clerk/clerk-react";
 
 export default function HomeTab() {
   const router = useRouter();
   const { user } = useUser();
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
+  const [maxPlayers, setMaxPlayers] = useState(8);
+  const [scoreToWin, setScoreToWin] = useState(10);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   async function handleCreateGame() {
     setLoading(true);
     try {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
-      const newGame = await createGame(user.id);
-
-      router.push(`/game/${newGame.id}`);
+      const newGame = await createGame(user.id, maxPlayers, scoreToWin);
+      redirect(`/game/${newGame.id}`);
     } catch (error: any) {
-      console.error('Error creating game:', error);
+      console.error("Error creating game:", error);
+      alert(error.message || "Failed to create game");
     } finally {
       setLoading(false);
     }
@@ -30,132 +33,179 @@ export default function HomeTab() {
 
   async function handleJoinGame() {
     setJoinLoading(true);
-
     try {
       if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
       const joinedGame = await joinGame(user.id, code);
-      router.push(`/game/${joinedGame.id}`);
+      redirect(`/game/${joinedGame.id}`);
     } catch (error: any) {
-      console.error('Error joining game:', error);
+      console.error("Error joining game:", error);
+      alert(error.message || "Failed to join game");
     } finally {
       setJoinLoading(false);
     }
   }
 
   return (
-    <div className='flex-1 bg-[#99184e] tems-center justify-center p-6'>
-      {/* Header Section */}
-      <div className='items-center mb-12'>
-        <div className='bg-white/20 p-6 rounded-full mb-4'></div>
-        <div className='text-5xl font-bold text-white text-center mb-2'>
-          Burdaerata
-        </div>
-        <div className='text-xl text-white/80 text-center'>
-          The Ultimate Word Game
-        </div>
-      </div>
-
+    <div className="h-lvh   items-center justify-center p-6 ">
       {/* Main Actions Container */}
-      <div className='w-full max-w-md  mx-auto p-6'>
+      <div className="w-full max-w-md md:max-w-2xl lg:max-w-2xl mx-auto">
         {/* Create Game Card */}
-        <div className='bg-white rounded-3xl p-6 shadow-lg mb-6'>
-          <div className='flex-row items-center mb-4'>
-            <div className='text-2xl font-bold text-gray-800'>
+        <div className="bg-white rounded-3xl p-8 md:p-2 shadow-lg mb-8 md:mb-4">
+          <div className="text-center mb-6 md:mb-2">
+            <h2 className="text-3xl md:text-xl font-bold text-gray-800 mb-1">
               Create New Game
-            </div>
+            </h2>
+            <p className="text-gray-600 text-lg md:text-sm leading-6">
+              Start a new game session and invite your friends to join the fun!
+            </p>
           </div>
-          <div className='text-gray-600 text-lg mb-6 leading-6'>
-            Start a new game session and invite your friends to join the fun!
-          </div>
-          <button
-            className={`
-              flex-row items-center justify-center py-4 rounded-2xl hover:bg-green-300
-              ${loading ? 'bg-green-400' : 'bg-green-500'}
-            `}
-            onClick={handleCreateGame}
-            disabled={loading}
-          >
-            {loading ? (
-              <div className='flex-row items-center justify-center mx-2'>
-                loadding...
-              </div>
-            ) : (
-              <>
-                <div className='flex-row items-center justify-center'>
-                  <div className='text-white text-lg font-semibold mx-2'>
-                    Create Game
-                  </div>
-                </div>
-              </>
-            )}
-          </button>
-        </div>
 
-        {/* Divider */}
-        <div className='flex-row items-center my-6'>
-          <div className='flex-1 h-px bg-white/30' />
-          <div className='text-white/70 mx-4 text-lg font-semibold'>OR</div>
-          <div className='flex-1 h-px bg-white/30' />
+          {/* Game Settings */}
+          {showSettings && (
+            <div className="mb-6 space-y-4 p-4 bg-gray-50 rounded-2xl">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Players: {maxPlayers}
+                </label>
+                <input
+                  type="range"
+                  min="3"
+                  max="12"
+                  value={maxPlayers}
+                  onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Score to Win: {scoreToWin}
+                </label>
+                <input
+                  type="range"
+                  min="5"
+                  max="20"
+                  value={scoreToWin}
+                  onChange={(e) => setScoreToWin(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-4 md:space-y-1">
+            <button
+              onClick={handleCreateGame}
+              disabled={loading}
+              className={`
+                block mx-auto w-full md:w-[280px] px-6 py-4 md:py-3 rounded-2xl text-white
+                font-semibold text-lg md:text-sm transition-all duration-200
+                flex items-center justify-center
+                ${
+                  loading
+                    ? "bg-green-400 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600 hover:scale-105"
+                }
+              `}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Creating Game...
+                </div>
+              ) : (
+                "Create Game"
+              )}
+            </button>
+
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="w-full py-3 md:py-1 text-gray-600 hover:text-gray-800 font-medium"
+            >
+              {showSettings ? "Hide Settings" : "Game Settings"}
+            </button>
+          </div>
         </div>
 
         {/* Join Game Card */}
-        <div className='bg-white rounded-3xl p-6 shadow-lg'>
-          <div className='flex-row items-center mb-4'>
-            <div className='bg-blue-500 p-3 rounded-full mr-4'></div>
-            <div className='text-2xl font-bold text-gray-800'>Join Game</div>
+        <div className="bg-white rounded-3xl p-8 md:p-4 shadow-lg">
+          <div className="text-center mb-6 md:mb-2">
+            <h2 className="text-3xl md:text-xl font-bold text-gray-800 mb-2">
+              Join Game
+            </h2>
+            <p className="text-gray-600 text-lg md:text-sm leading-6">
+              Enter a game code to join your friend's session
+            </p>
           </div>
-          <div className='text-gray-600 text-lg mb-4 leading-6'>
-            Enter a game code to join your friends game session
-          </div>
-
-          <input
-            className='
-              border-2 border-gray-200 p-4 rounded-2xl
-              text-lg mb-6 bg-gray-50
-              text-center font-semibold
-              tracking-widest
-            '
-            placeholder='ENTER CODE'
-            value={code}
-            autoCapitalize='characters'
-            maxLength={6}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-          />
 
           <button
-            className={`
-              flex-row items-center justify-center py-4 rounded-2xl
-              ${!code.trim() || joinLoading ? 'bg-blue-400' : 'bg-blue-500'}
-            `}
-            onClick={handleJoinGame}
-            disabled={!code.trim() || joinLoading}
+            onClick={() => setShowJoinModal(true)}
+            className="block mx-auto w-full md:w-[280px] px-6 py-4 md:py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg md:text-sm rounded-2xl transition-all duration-200 hover:scale-105"
           >
-            {joinLoading ? (
-              <div className='flex-row items-center justify-center mx-2'>
-                loadding...
-              </div>
-            ) : (
-              <>
-                <div className='text-white text-lg font-semibold mx-2'>
-                  Join Game
-                </div>
-              </>
-            )}
+            Join with Code
           </button>
         </div>
+      </div>
 
-        {/* Quick Tips */}
-        <div className='mt-8 p-4 bg-white/10 rounded-2xl'>
-          <div className='text-white/90 text-center text-sm mb-2'>
-            💡 Pro tip: Share the game code with friends to play together!
-          </div>
-          <div className='text-white/70 text-center text-xs'>
-            Game codes are 6 characters long
+      {/* Join Game Modal */}
+      {showJoinModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                Enter Game Code
+              </h3>
+              <p className="text-gray-600">
+                Ask your friend for the 6-character game code
+              </p>
+            </div>
+
+            <input
+              className="
+                w-full border-2 border-gray-200 p-4 rounded-2xl
+                text-lg mb-6 bg-gray-50 text-center font-semibold
+                tracking-widest uppercase focus:border-blue-500 focus:outline-none
+              "
+              placeholder="ENTER CODE"
+              value={code}
+              maxLength={6}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              autoFocus
+            />
+
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setShowJoinModal(false)}
+                className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleJoinGame}
+                disabled={!code.trim() || code.length !== 6 || joinLoading}
+                className={`
+                  flex-1 py-3 text-white font-semibold rounded-2xl transition-all
+                  ${
+                    !code.trim() || code.length !== 6 || joinLoading
+                      ? "bg-blue-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }
+                `}
+              >
+                {joinLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Joining...
+                  </div>
+                ) : (
+                  "Join Game"
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

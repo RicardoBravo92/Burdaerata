@@ -1,18 +1,18 @@
-import { User, Game } from "@/lib/types";
+import { Game, GamePlayer } from "@/lib/types";
 import { startGame } from "@/services/gameService";
 import { FaUser, FaStar } from "react-icons/fa";
 
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 
 export default function LobbyView({
-  user,
   game,
   players,
 }: {
-  user: User;
   game: Game;
-  players: any;
+  players: GamePlayer[];
 }) {
+  const { user } = useUser();
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -46,6 +46,9 @@ export default function LobbyView({
 
     setLoading(true);
     try {
+      if (!user) {
+        return;
+      }
       if (!game?.id) {
         return;
       }
@@ -57,7 +60,7 @@ export default function LobbyView({
   }
 
   return (
-    <div className="flex-1 bg-[#99184e] p-6">
+    <div className="flex-1  p-6 h-screen">
       {/* Header */}
       <div className="items-center mb-8">
         <div className="text-3xl font-bold text-white text-center mb-4 py-2 bg-[#99184e]/90 rounded-lg">
@@ -69,11 +72,11 @@ export default function LobbyView({
       </div>
 
       {/* Game Code Card */}
-      <div className="bg-white rounded-3xl p-6 shadow-lg mb-6">
-        <div className="div-gray-600 div-base font-medium mb-3">
+      <div className="bg-white rounded-3xl p-2  shadow-lg mb-6 md:mb-2 flex flex-col md:flex-row justify-around items-center ">
+        <div className="div-gray-600  font-medium mb-3 md:mb-1">
           Share this code with friends:
         </div>
-        <div className="flex-row justify-between items-center mb-4">
+        <div className=" justify-between items-center mb-4 md:mb-1 flex flex-col md:flex-row gap-4 ">
           <div className="div-4xl font-bold div-[#99184e] tracking-widest">
             {game?.code}
           </div>
@@ -102,8 +105,8 @@ export default function LobbyView({
       </div>
 
       {/* Players Card */}
-      <div className="bg-white rounded-3xl p-6 shadow-lg mb-6 flex-1">
-        <div className="flex-row justify-between items-center mb-4">
+      <div className="bg-white rounded-3xl p-6 shadow-lg mb-6 md:mb-2 flex-1">
+        <div className="flex-row justify-between items-center mb-2">
           <div className="div-xl font-bold div-gray-800">
             Players ({players?.length || 0})
           </div>
@@ -117,17 +120,17 @@ export default function LobbyView({
         </div>
 
         {players && players.length > 0 ? (
-          players.map((item: any) => (
+          players.map((item: GamePlayer) => (
             <div
-              className="flex-row justify-between items-center p-4 bg-gray-50 rounded-2xl mb-3"
+              className="flex-row justify-between items-center px-4 py-2 bg-gray-50 rounded-2xl mb-3"
               key={item.id}
             >
-              <div className="flex-row items-center flex-1">
-                <div className="w-10 h-10 bg-[#99184e] rounded-full flex items-center justify-center mr-3">
-                  <FaUser className="text-xl text-white" />
+              <div className=" items-center flex flex-row">
+                <div className="w-5 h-5 bg-[#99184e] rounded-full flex items-center justify-center mr-1">
+                  <FaUser className="text-base text-white" />
                 </div>
-                <div className="div-lg font-semibold div-gray-800">
-                  {item.profile?.full_name || "Unknown Player"}
+                <div className=" font-semibold div-gray-800 text-base">
+                  {item.user?.full_name || "Unknown Player"}
                   {item.id === user?.id && (
                     <div className="div-[#99184e]"> (You)</div>
                   )}
@@ -155,7 +158,7 @@ export default function LobbyView({
 
       {/* Action Buttons */}
       {isHost ? (
-        <div className="bg-white rounded-3xl p-6 shadow-lg">
+        <div className="bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around">
           <button
             className={`
               py-4 rounded-2xl items-center
@@ -204,7 +207,7 @@ export default function LobbyView({
       )}
 
       {/* Quick Actions Footer */}
-      <div className="flex-row justify-center space-x-6 mt-6">
+      <div className="flex-row justify-center space-x-6 mt-3">
         <button
           className="flex-row items-center bg-white/20 px-4 py-3 rounded-2xl hover:bg-white/40"
           onClick={handleCopyCode}

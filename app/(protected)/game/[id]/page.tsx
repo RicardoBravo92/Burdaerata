@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, redirect } from "next/navigation";
 import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import { supabase } from "@/lib/supabaseClient";
@@ -157,9 +157,7 @@ export default function GameScreen() {
       const gameData = await getGameByID(id as string);
 
       if (gameData) {
-        console.log("gamedata", gameData);
         setGame(gameData);
-        console.log("game", game);
         await fetchPlayers();
 
         if (gameData?.status === "playing") {
@@ -167,7 +165,7 @@ export default function GameScreen() {
           await fetchPlayerCards();
         }
       } else {
-        console.error("No se encontraron datos del juego");
+        router.replace("/home");
       }
     } catch (error) {
       console.error("Error fetching game state:", error);
@@ -232,6 +230,10 @@ export default function GameScreen() {
       setMyCards([]);
     }
   }
+
+  // if (!user) {
+  //   redirect("/");
+  // }
 
   // Loading State
   if (loading) {
@@ -305,7 +307,11 @@ export default function GameScreen() {
 
   // Game States
   if (game.status === "waiting") {
-    return <LobbyView user={user} game={game} players={players} />;
+    return (
+      <div className="h-lvh">
+        <LobbyView game={game} players={players} />
+      </div>
+    );
   }
 
   if (game.status === "playing") {

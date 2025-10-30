@@ -36,22 +36,33 @@ export default function RootLayout({
       <GameProvider>
         <html lang="en">
           <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-indigo-50/20 to-violet-100/20`}
           >
-            <header className="flex justify-end items-center p-4 gap-4 h-16">
+            <header className="flex justify-between items-center p-4 gap-4 h-16 md:h-10 bg-[#6c47ff] shadow-sm">
+              <h1 className="text-5xl md:text-xl font-bold text-white my-2 text-start">
+                Burdaerata
+              </h1>
               <SignedOut>
-                <SignInButton />
+                <SignInButton>
+                  <button className="text-[#6c47ff] bg-white rounded-full font-medium text-sm h-10 px-4 hover:bg-white/90 transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
                 <SignUpButton>
-                  <button className="bg-[#6c47ff] text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
+                  <button className="bg-white text-[#6c47ff] rounded-full font-medium text-sm h-10 px-4 hover:bg-white/90 transition-colors">
                     Sign Up
                   </button>
                 </SignUpButton>
               </SignedOut>
               <SignedIn>
-                <UserButton />
+                <UserButton
+                  appearance={{ variables: { colorPrimary: "#6c47ff" } }}
+                />
               </SignedIn>
             </header>
-            {children}
+            <main className="flex-1 container max-w-full mx-auto bg-[#99184e] ">
+              {children}
+            </main>
           </body>
         </html>
       </GameProvider>
