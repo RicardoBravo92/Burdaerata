@@ -1,11 +1,10 @@
 "use client";
 import { createGame, joinGame } from "@/services/gameService";
 import { useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useUser } from "@clerk/clerk-react";
 
 export default function HomeTab() {
-  const router = useRouter();
   const { user } = useUser();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +56,7 @@ export default function HomeTab() {
             <h2 className="text-3xl md:text-xl font-bold text-gray-800 mb-1">
               Create New Game
             </h2>
-            <p className="text-gray-600 text-lg md:text-sm leading-6">
+            <p className="text-gray-600 text-lg md:text-base leading-6">
               Start a new game session and invite your friends to join the fun!
             </p>
           </div>
@@ -121,7 +120,7 @@ export default function HomeTab() {
 
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="w-full py-3 md:py-1 text-gray-600 hover:text-gray-800 font-medium"
+              className="w-full py-3 md:py-2 text-gray-600 hover:text-gray-800 font-medium"
             >
               {showSettings ? "Hide Settings" : "Game Settings"}
             </button>
@@ -134,7 +133,7 @@ export default function HomeTab() {
             <h2 className="text-3xl md:text-xl font-bold text-gray-800 mb-2">
               Join Game
             </h2>
-            <p className="text-gray-600 text-lg md:text-sm leading-6">
+            <p className="text-gray-600 text-lg md:text-base leading-6">
               Enter a game code to join your friend's session
             </p>
           </div>
@@ -156,7 +155,7 @@ export default function HomeTab() {
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
                 Enter Game Code
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-base">
                 Ask your friend for the 6-character game code
               </p>
             </div>
