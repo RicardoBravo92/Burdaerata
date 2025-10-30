@@ -191,8 +191,9 @@ export async function getLastRoundByGame(
       `,
       )
       .eq("game_id", gameId)
-      .order("id", { ascending: false })
-      .single();
+      .order("round_number", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (error) throw error;
     return round || null;
@@ -316,7 +317,7 @@ export async function getPlayerCard(
       .from("player_cards")
       .select("*")
       .eq("game_id", game_id)
-      .eq("owner_id", user_id)
+      .eq("user_id", user_id)
       .maybeSingle(); // Cambiar a maybeSingle
 
     return error ? null : card;

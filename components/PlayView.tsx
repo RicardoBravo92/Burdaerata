@@ -115,9 +115,9 @@ export default function PlayView({
   }
 
   return (
-    <div className="flex-1 bg-[#99184e] min-h-screen">
+    <div className="flex-1  md:max-w-4xl mx-auto px-6 h-screen md:h-full py-2">
       {/* Header */}
-      <div className="pt-12 pb-6 px-6">
+      <div className="pt-12 pb-6 ">
         <div className="flex items-center justify-between mb-4">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white text-center">
@@ -149,7 +149,7 @@ export default function PlayView({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-white rounded-t-3xl p-6">
+      <div className="flex-1 bg-white rounded-3xl p-6">
         {/* Answer Submission Section */}
         {canSubmit && (
           <div className="mb-6">
@@ -263,11 +263,22 @@ export default function PlayView({
                     `}
                   >
                     <div className="flex justify-between items-center">
+                      <p className="text-gray-800 text-base font-medium line-clamp-3">
+                        <ul>
+                          {item.cards_used &&
+                            item.cards_used.map((cardId: string) => {
+                              return (
+                                <li key={cardId}>
+                                  {getCardAnswer(cardId)?.text}
+                                </li>
+                              );
+                            })}
+                        </ul>
+                      </p>
                       <span className="text-gray-600 text-sm">
                         by {item.user?.full_name || "Unknown"}
                         {item.user_id === user?.id && " (You)"}
                       </span>
-
                       {item.is_winner ? (
                         <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                           <TrophyIcon />

@@ -62,7 +62,7 @@ export default function RootLayout({
                 </SignedIn>
               </div>
             </header>
-            <main className="flex-1 container max-w-full mx-auto bg-[#99184e] pt-8">
+            <main className="flex-1 container max-w-full mx-auto bg-[#99184e] pt-8 ">
               {children}
             </main>
           </body>
