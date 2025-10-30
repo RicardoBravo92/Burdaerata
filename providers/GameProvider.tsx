@@ -8,6 +8,7 @@ type GameData = {
   round: Round | null;
   setGame: (game: Game | null) => void;
   setMyCards: (cards: string[]) => void;
+  setRound?: (round: Round | null) => void;
 };
 
 const GameContext = createContext<GameData>({
@@ -21,9 +22,18 @@ const GameContext = createContext<GameData>({
 export default function GameProvider({ children }: PropsWithChildren) {
   const [game, setGame] = useState<Game | null>(null);
   const [myCards, setMyCards] = useState<string[] | []>([]);
+  const [round, setRound] = useState<Round | null>(null);
 
   return (
-    <GameContext.Provider value={{ game, myCards, setMyCards, setGame }}>
+    <GameContext.Provider 
+      value={{ 
+        game, 
+        myCards, 
+        round,
+        setMyCards, 
+        setGame,
+        setRound
+      }}>
       {children}
     </GameContext.Provider>
   );

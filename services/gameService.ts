@@ -381,13 +381,8 @@ export async function createGame(
     let attempts = 0;
 
     while (!isUnique && attempts < 5) {
-      code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      code = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // const { data: existingGame } = await supabase
-      //   .from("games")
-      //   .select("id")
-      //   .eq("code", code)
-      //   .single();
       const existingGame = await getGameByCode(code);
 
       if (!existingGame) {
@@ -604,7 +599,7 @@ export async function submitAnswer(
     await updatePlayerCard({
       user_id: userId,
       cards: newPlayerCards,
-      game_id: round.game_id,
+      game_id: round.game_id!,
     });
     setMyCards(newPlayerCards);
 
@@ -727,7 +722,7 @@ export async function selectWinner(
     }
 
     // OBTENER Y ACTUALIZAR SCORE - VERSIÓN MEJORADA
-    const currentPlayer = await getGamePlayer(round.game_id, answer.user_id);
+    const currentPlayer = await getGamePlayer(round.game_id!, answer.user_id);
 
     if (!currentPlayer) {
       console.error("❌ Error fetching player score:", currentPlayer);
@@ -744,7 +739,7 @@ export async function selectWinner(
 
     // ACTUALIZAR SCORE
     await updateGamePlayer({
-      game_id: round.game_id,
+      game_id: round.game_id!,
       user_id: answer.user_id,
       score: newScore,
     });
@@ -774,7 +769,7 @@ export async function selectWinner(
       throw new Error(`Failed to update round: ${updateRoundError.message}`);
     }
     //if newScore is equal to game score_to_win
-    const game = await getGameByID(round.game_id);
+    const game = await getGameByID(round.game_id!);
     if (newScore === game?.score_to_win) {
       // Mark game as finished
       const { error: updateGameError } = await supabase
@@ -794,7 +789,7 @@ export async function selectWinner(
     // Iniciar siguiente ronda después de un delay
     setTimeout(async () => {
       try {
-        await startNextRound(round.game_id);
+        await startNextRound(userId, round.game_id!);
       } catch (error) {
         console.error("❌ Error starting next round:", error);
       }
