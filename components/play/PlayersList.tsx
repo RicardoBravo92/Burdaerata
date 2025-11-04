@@ -16,7 +16,6 @@ export default function PlayersList({
   players,
   currentRound,
   currentUserId,
-  currentUser,
 }: PlayersListProps) {
   return (
     <div className="mb-6">
@@ -46,9 +45,7 @@ export default function PlayersList({
               {item.user_id === currentUserId && (
                 <span className="text-blue-600 font-bold">(You)</span>
               )}
-              {item.user_id === currentRound?.judge_user_id && (
-                <StarIcon />
-              )}
+              {item.user_id === currentRound?.judge_user_id && <StarIcon />}
               <div className="bg-white px-2 py-1 rounded-full ml-2">
                 <span className="text-gray-700 font-bold text-xs">
                   {item.score || 0} Pts
@@ -61,4 +58,3 @@ export default function PlayersList({
     </div>
   );
 }
-

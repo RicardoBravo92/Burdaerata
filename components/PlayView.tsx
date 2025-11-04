@@ -34,8 +34,7 @@ export default function PlayView({
   const [loading, setLoading] = useState(false);
   const [selectedCards, setSelectedCards] = useState<any[]>([]);
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
-  
-  
+
   // Reset selected cards when round changes
   useEffect(() => {
     setSelectedCards([]);
@@ -73,7 +72,12 @@ export default function PlayView({
 
     const requiredCards = handleBlankCount();
     if (selectedCards.length !== requiredCards) {
-      showToast(`Debes seleccionar exactamente ${requiredCards} carta${requiredCards > 1 ? 's' : ''}`, "warning");
+      showToast(
+        `Debes seleccionar exactamente ${requiredCards} carta${
+          requiredCards > 1 ? "s" : ""
+        }`,
+        "warning",
+      );
       return;
     }
 
@@ -182,7 +186,6 @@ export default function PlayView({
           players={players}
           currentRound={currentRound}
           currentUserId={userId}
-          currentUser={user}
         />
 
         {/* Round Status */}

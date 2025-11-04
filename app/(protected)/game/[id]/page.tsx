@@ -39,9 +39,9 @@ export default function GameScreen() {
   const id = params.id as string;
   const router = useRouter();
   // Asegúrate que el componente está envuelto por el GameProvider
-  const { game, setMyCards, setGame } = useGame();
+  const { game, setMyCards, setGame, myCards } = useGame();
   const { user, isLoaded, isSignedIn } = useUser();
-
+  const userId = user?.id as string;
   const [players, setPlayers] = useState<any[]>([]);
   const [currentRound, setCurrentRound] = useState<any>(undefined);
   const [previousRound, setPreviousRound] = useState<any>(null);
@@ -61,7 +61,7 @@ export default function GameScreen() {
           : false;
       if (!confirmed) return;
       if (!isLoaded || !isSignedIn || !user) return;
-      await leaveGame(user.id, id as string);
+      await leaveGame(userId as string, id as string);
       showToast("Saliste de la partida", "info");
       router.replace("/game");
     } catch (error) {
@@ -103,6 +103,7 @@ export default function GameScreen() {
           .order("created_at", { ascending: true });
 
         if (error) throw error;
+        console.log("round_answers", data);
         setAnswers(data || []);
       } else {
         // Clear answers if no round
@@ -117,16 +118,15 @@ export default function GameScreen() {
   }, [id]);
 
   const fetchPlayerCards = useCallback(async () => {
-    if (!isLoaded || !isSignedIn || !user) return;
-
+    if (!userId || !id) return;
     try {
-      const data = await getPlayerCard(user.id, id as string);
+      const data = await getPlayerCard(userId, id);
       setMyCards(data?.cards || []);
     } catch (error) {
       logError(error, "fetchPlayerCards");
       setMyCards([]);
     }
-  }, [isLoaded, isSignedIn, user, id, setMyCards]);
+  }, [id, userId]);
 
   const fetchAnswers = useCallback(async (roundId: string) => {
     try {
@@ -328,6 +328,7 @@ export default function GameScreen() {
             // Handle INSERT
             if (payload.eventType === "INSERT") {
               const newAnswer = payload.new;
+              //
               if (
                 prev.some((answer: RoundAnswer) => answer.id === newAnswer.id)
               ) {
@@ -363,7 +364,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     fetchGameState();
-  }, [id]);
+  }, [id, userId]);
 
   // Detect fewer than 3 players while playing → show modal and redirect
   useEffect(() => {
@@ -382,39 +383,23 @@ export default function GameScreen() {
     }
   }, [players.length, game?.status, router]);
 
-  // Membership guard: if user not in game
-  useEffect(() => {
-    if (!isLoaded || !isSignedIn || !user) return;
-    if (!game) return;
-    if (!Array.isArray(players)) return;
-
-    const member = players.some((p: any) => p.user_id === user.id);
-    setIsMember(member);
-
-    if (!member) {
-      if (game.status === "waiting") {
-        setShowJoinPrompt(true);
-      } else {
-        showToast("No perteneces a esta partida", "warning");
-        router.replace("/game");
-      }
-    } else {
-      setShowJoinPrompt(false);
-    }
-  }, [isLoaded, isSignedIn, user, players, game, router]);
-
   async function handleJoinGameFromPrompt() {
     try {
-      if (!isLoaded || !isSignedIn || !user) return;
-      await createUserToGame({ game_id: id as string, user_id: user.id });
+      await createUserToGame({
+        game_id: id,
+        user_id: userId,
+      });
       setShowJoinPrompt(false);
-      await fetchPlayers();
+
+      // Actualizar lista de jugadores y estado sin redirigir
+      const updatedPlayers = await getGamePlayers(id);
+      setPlayers(updatedPlayers || []);
+
       setIsMember(true);
       showToast("Te uniste a la partida", "success");
     } catch (error) {
       logError(error, "handleJoinGameFromPrompt");
       showToast(getErrorMessage(error), "error");
-      router.replace("/game");
     }
   }
 
@@ -451,7 +436,14 @@ export default function GameScreen() {
   async function fetchPlayers() {
     try {
       const playersData = await getGamePlayers(id as string);
-      setPlayers(playersData || []);
+      //check if user is in the game
+      if (params) {
+        const member = playersData?.some(
+          (p: any) => p.user_id === (userId as string),
+        );
+        setIsMember(member);
+        setPlayers(playersData || []);
+      }
     } catch (error) {
       logError(error, "fetchPlayers");
       setPlayers([]);

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Round, RoundAnswer } from '@/lib/types';
-import { getCardAnswer } from '@/lib/getCards';
-import { UserResource } from '@clerk/types';
+import { Round, RoundAnswer } from "@/lib/types";
+import { getCardAnswer } from "@/lib/getCards";
+import { UserResource } from "@clerk/types";
 
 interface AnswersListProps {
   answers: RoundAnswer[];
@@ -15,8 +15,8 @@ interface AnswersListProps {
   currentUser: UserResource | null | undefined;
 }
 
-const TrophyIcon = () => <span className='text-2xl'>🏆</span>;
-const TimeIcon = () => <span className='text-2xl'>⏰</span>;
+const TrophyIcon = () => <span className="text-2xl">🏆</span>;
+const TimeIcon = () => <span className="text-2xl">⏰</span>;
 
 export default function AnswersList({
   answers,
@@ -28,19 +28,19 @@ export default function AnswersList({
   currentUserId,
 }: AnswersListProps) {
   return (
-    <div className='mb-6'>
-      <div className='flex justify-between items-center mb-4'>
-        <h2 className='text-xl font-bold text-gray-800'>
-          {isJudge ? 'Select Winner' : 'Submitted Answers'}
+    <div className="mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-800">
+          {isJudge ? "Select Winner" : "Submitted Answers"}
         </h2>
-        <div className='bg-gray-100 px-3 py-1 rounded-full'>
-          <span className='text-gray-700 font-semibold'>
-            {answers.length} {answers.length === 1 ? 'answer' : 'answers'}
+        <div className="bg-gray-100 px-3 py-1 rounded-full">
+          <span className="text-gray-700 font-semibold">
+            {answers.length} {answers.length === 1 ? "answer" : "answers"}
           </span>
         </div>
       </div>
 
-      <div className='space-y-3'>
+      <div className="space-y-3">
         {answers.length > 0 ? (
           answers.map((item) => (
             <div
@@ -49,16 +49,16 @@ export default function AnswersList({
                 rounded-2xl p-4 border-2
                 ${
                   item.is_winner
-                    ? 'bg-yellow-50 border-yellow-400'
-                    : 'bg-gray-50 border-gray-200'
+                    ? "bg-yellow-50 border-yellow-400"
+                    : "bg-gray-50 border-gray-200"
                 }
                 transition-all hover:shadow-md
               `}
             >
-              <div className='flex justify-between items-center gap-4'>
-                <div className='flex-1'>
-                  <p className='text-gray-800 text-base font-medium'>
-                    <ul className='list-disc list-inside space-y-1'>
+              <div className="flex justify-between items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-gray-800 text-base font-medium">
+                    <ul className="list-disc list-inside space-y-1">
                       {item.cards_used &&
                         item.cards_used.map((cardId: string, idx: number) => (
                           <li key={`${item.id}-${idx}`}>
@@ -67,34 +67,34 @@ export default function AnswersList({
                         ))}
                     </ul>
                   </p>
-                  <span className='text-gray-600 text-sm mt-2 block'>
-                    by {item.user?.full_name || 'Unknown'}
-                    {item.user_id === currentUserId && ' (You)'}
+                  <span className="text-gray-600 text-sm mt-2 block">
+                    by {item.user?.full_name || "Unknown"}
+                    {item.user_id === currentUserId && " (You)"}
                   </span>
                 </div>
 
-                <div className='flex items-center gap-2'>
+                <div className="flex items-center gap-2">
                   {item.is_winner ? (
-                    <div className='flex items-center bg-yellow-100 px-3 py-1 rounded-full'>
+                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                       <TrophyIcon />
-                      <span className='text-yellow-800 font-bold ml-1 text-sm'>
+                      <span className="text-yellow-800 font-bold ml-1 text-sm">
                         Winner!
                       </span>
                     </div>
                   ) : (
                     isJudge &&
-                    currentRound?.status === 'submitting' && (
+                    currentRound?.status === "submitting" && (
                       <button
                         className={`flex items-center px-4 py-2 rounded-full ${
                           loading
-                            ? 'bg-gray-400'
-                            : 'bg-[#99184e] hover:bg-[#7a1340]'
+                            ? "bg-gray-400"
+                            : "bg-[#99184e] hover:bg-[#7a1340]"
                         } text-white font-bold text-sm transition-colors`}
                         onClick={() => onSelectWinner(item.id)}
                         disabled={loading || answers.length < playersCount - 1}
                       >
                         <TrophyIcon />
-                        <span className='ml-1'>Select Winner</span>
+                        <span className="ml-1">Select Winner</span>
                       </button>
                     )
                   )}
@@ -103,12 +103,12 @@ export default function AnswersList({
             </div>
           ))
         ) : (
-          <div className='flex flex-col items-center justify-center py-8'>
+          <div className="flex flex-col items-center justify-center py-8">
             <TimeIcon />
-            <p className='text-gray-500 text-lg font-medium mt-4'>
-              {currentRound?.status === 'submitting'
-                ? 'No answers yet...'
-                : 'Waiting for next round...'}
+            <p className="text-gray-500 text-lg font-medium mt-4">
+              {currentRound?.status === "submitting"
+                ? "No answers yet..."
+                : "Waiting for next round..."}
             </p>
           </div>
         )}
