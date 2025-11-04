@@ -436,14 +436,8 @@ export default function GameScreen() {
   async function fetchPlayers() {
     try {
       const playersData = await getGamePlayers(id as string);
-      //check if user is in the game
-      if (params) {
-        const member = playersData?.some(
-          (p: any) => p.user_id === (userId as string),
-        );
-        setIsMember(member);
-        setPlayers(playersData || []);
-      }
+
+      setPlayers(playersData || []);
     } catch (error) {
       logError(error, "fetchPlayers");
       setPlayers([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Round, RoundAnswer } from "@/lib/types";
+import { GamePlayer, Round, RoundAnswer } from "@/lib/types";
 import { getCardAnswer } from "@/lib/getCards";
 import { UserResource } from "@clerk/types";
 
@@ -12,7 +12,7 @@ interface AnswersListProps {
   onSelectWinner: (answerId: string) => void;
   playersCount: number;
   currentUserId: string | undefined;
-  currentUser: UserResource | null | undefined;
+  players: GamePlayer[];
 }
 
 const TrophyIcon = () => <span className="text-2xl">🏆</span>;
@@ -26,7 +26,10 @@ export default function AnswersList({
   onSelectWinner,
   playersCount,
   currentUserId,
+  players,
 }: AnswersListProps) {
+  console.log("players", players);
+  console.log("answers", answers);
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">
@@ -68,7 +71,9 @@ export default function AnswersList({
                     </ul>
                   </p>
                   <span className="text-gray-600 text-sm mt-2 block">
-                    by {item.user?.full_name || "Unknown"}
+                    by{" "}
+                    {players.find((p) => p.user_id === item.user_id)?.profile
+                      ?.full_name || "Unknown"}
                     {item.user_id === currentUserId && " (You)"}
                   </span>
                 </div>

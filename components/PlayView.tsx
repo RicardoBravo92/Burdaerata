@@ -177,7 +177,7 @@ export default function PlayView({
             onSelectWinner={handleSelectWinner}
             playersCount={players.length}
             currentUserId={userId}
-            currentUser={user}
+            players={players}
           />
         )}
 

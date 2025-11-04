@@ -7,7 +7,6 @@ interface PlayersListProps {
   players: GamePlayer[];
   currentRound: Round;
   currentUserId: string | undefined;
-  currentUser: UserResource | null | undefined;
 }
 
 const StarIcon = () => <span className="text-2xl">⭐</span>;
