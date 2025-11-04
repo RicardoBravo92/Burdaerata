@@ -99,25 +99,25 @@ export type Database = {
       }
       player_cards: {
         Row: {
-          cards: string[]
-          created_at: string | null
-          game_id: string
-          id: string
-          user_id: string
+          cards: string[] | null
+          created_at: string
+          game_id: string | null
+          id: number
+          user_id: string | null
         }
         Insert: {
-          cards: string[]
-          created_at?: string | null
-          game_id: string
-          id?: string
-          user_id: string
+          cards?: string[] | null
+          created_at?: string
+          game_id?: string | null
+          id?: number
+          user_id?: string | null
         }
         Update: {
-          cards?: string[]
-          created_at?: string | null
-          game_id?: string
-          id?: string
-          user_id?: string
+          cards?: string[] | null
+          created_at?: string
+          game_id?: string | null
+          id?: number
+          user_id?: string | null
         }
         Relationships: [
           {

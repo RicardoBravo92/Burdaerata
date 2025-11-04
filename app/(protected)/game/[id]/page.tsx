@@ -10,12 +10,14 @@ import { Game, RoundAnswer } from "@/lib/types";
 import { useGame } from "@/providers/GameProvider";
 import {
   getGameByID,
+  getGamePlayerByID,
   getGamePlayers,
   getLastRoundByGame,
   getPlayerCard,
+  createUserToGame,
 } from "@/services/gameService";
 import { leaveGame } from "@/services/gameService";
-import { createUserToGame, getGamePlayer } from "@/services/gameService";
+import { getGamePlayer } from "@/services/gameService";
 import { useUser } from "@clerk/nextjs";
 import {
   FaSync,
@@ -53,7 +55,10 @@ export default function GameScreen() {
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
   async function handleLeaveGame() {
     try {
-      const confirmed = typeof window !== "undefined" ? window.confirm("¿Seguro que quieres salir de la partida?") : false;
+      const confirmed =
+        typeof window !== "undefined"
+          ? window.confirm("¿Seguro que quieres salir de la partida?")
+          : false;
       if (!confirmed) return;
       if (!isLoaded || !isSignedIn || !user) return;
       await leaveGame(user.id, id as string);
@@ -64,7 +69,6 @@ export default function GameScreen() {
       showToast(getErrorMessage(error), "error");
     }
   }
-
 
   // Use refs to avoid recreating subscriptions
   const currentRoundRef = useRef(currentRound);
@@ -113,7 +117,6 @@ export default function GameScreen() {
   }, [id]);
 
   const fetchPlayerCards = useCallback(async () => {
-
     if (!isLoaded || !isSignedIn || !user) return;
 
     try {
@@ -167,17 +170,15 @@ export default function GameScreen() {
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
-            const newPlayer: any = payload.new;
-            setPlayers((prev) => {
-              // Avoid duplicates by user_id
-              if (prev.some((p: any) => p.user_id === newPlayer.user_id)) return prev;
-              return [...prev, newPlayer];
-            });
+            // const newPlayer: any = payload.new;
+            fetchPlayers();
           }
           if (payload.eventType === "DELETE") {
             const oldPlayer: any = payload.old;
             setPlayers((prev) =>
-              prev.filter((player: any) => player.user_id !== oldPlayer.user_id),
+              prev.filter(
+                (player: any) => player.user_id !== oldPlayer.user_id,
+              ),
             );
           }
         },
@@ -220,7 +221,7 @@ export default function GameScreen() {
             if (payload.eventType === "INSERT" && !isTransitioningRef.current) {
               // Save previous round and answers before transition
               const previousRoundData = currentRoundRef.current;
-              
+
               // Fetch previous answers with full data if we have a previous round
               let previousAnswersData: RoundAnswer[] = [];
               if (previousRoundData?.id) {
@@ -240,10 +241,10 @@ export default function GameScreen() {
                   logError(error, "fetchPreviousAnswers");
                 }
               }
-              
+
               setPreviousRound(previousRoundData);
               setPreviousAnswers(previousAnswersData);
-              
+
               // Fetch full next round data with judge info
               let fullNextRound = newRound;
               try {
@@ -257,22 +258,22 @@ export default function GameScreen() {
                   )
                   .eq("id", newRound.id)
                   .single();
-                
+
                 if (fullRoundData) {
                   fullNextRound = fullRoundData;
                 }
               } catch (error) {
                 logError(error, "fetchFullRoundData");
               }
-              
+
               setNextRound(fullNextRound);
-              
+
               // Clear current answers
               setAnswers([]);
-              
+
               // Start transition
               setIsTransitioning(true);
-              
+
               // After transition delay, set new round
               setTimeout(async () => {
                 setCurrentRound(fullNextRound);
@@ -280,7 +281,7 @@ export default function GameScreen() {
                 setPreviousRound(null);
                 setPreviousAnswers([]);
                 setNextRound(null);
-                
+
                 if (fullNextRound.id) {
                   await fetchAnswers(fullNextRound.id);
                 }
@@ -327,7 +328,9 @@ export default function GameScreen() {
             // Handle INSERT
             if (payload.eventType === "INSERT") {
               const newAnswer = payload.new;
-              if (prev.some((answer: RoundAnswer) => answer.id === newAnswer.id)) {
+              if (
+                prev.some((answer: RoundAnswer) => answer.id === newAnswer.id)
+              ) {
                 return prev;
               }
               return [...prev, newAnswer];
@@ -343,7 +346,7 @@ export default function GameScreen() {
             // Handle UPDATE
             if (payload.eventType === "UPDATE") {
               return prev.map((answer: RoundAnswer) =>
-                answer.id === payload.new.id ? payload.new : answer
+                answer.id === payload.new.id ? payload.new : answer,
               );
             }
 
@@ -364,7 +367,12 @@ export default function GameScreen() {
 
   // Detect fewer than 3 players while playing → show modal and redirect
   useEffect(() => {
-    if (game?.status === "playing" && Array.isArray(players) && players.length > 0 && players.length < 3) {
+    if (
+      game?.status === "playing" &&
+      Array.isArray(players) &&
+      players.length > 0 &&
+      players.length < 3
+    ) {
       setInsufficientPlayers(true);
       showToast("Partida finalizada por falta de jugadores", "info");
       const timeout = setTimeout(() => {
@@ -450,12 +458,17 @@ export default function GameScreen() {
     }
   }
 
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-4 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+          <p className="text-white text-xl font-semibold">Loading User...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // if (!user) {
-  //   redirect("/");
-  // }
-
-  // Loading State
   if (loading) {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
@@ -472,8 +485,12 @@ export default function GameScreen() {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
         <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
-          <h2 className="text-lg font-bold text-[#99184e] mb-2">Partida finalizada</h2>
-          <p className="text-gray-700 mb-4">Se necesitan al menos 3 jugadores para continuar.</p>
+          <h2 className="text-lg font-bold text-[#99184e] mb-2">
+            Partida finalizada
+          </h2>
+          <p className="text-gray-700 mb-4">
+            Se necesitan al menos 3 jugadores para continuar.
+          </p>
           <p className="text-gray-500 text-sm">Redirigiendo…</p>
         </div>
       </div>
@@ -485,11 +502,25 @@ export default function GameScreen() {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
         <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
-          <h2 className="text-lg font-bold text-[#99184e] mb-2">Unirte a la partida</h2>
-          <p className="text-gray-700 mb-4">No formas parte de esta partida. ¿Quieres unirte?</p>
+          <h2 className="text-lg font-bold text-[#99184e] mb-2">
+            Unirte a la partida
+          </h2>
+          <p className="text-gray-700 mb-4">
+            No formas parte de esta partida. ¿Quieres unirte?
+          </p>
           <div className="flex justify-center gap-3">
-            <button onClick={handleCancelJoinPrompt} className="px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
-            <button onClick={handleJoinGameFromPrompt} className="px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]">Unirme</button>
+            <button
+              onClick={handleCancelJoinPrompt}
+              className="px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleJoinGameFromPrompt}
+              className="px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]"
+            >
+              Unirme
+            </button>
           </div>
         </div>
       </div>

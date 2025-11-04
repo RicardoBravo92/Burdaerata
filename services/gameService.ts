@@ -112,6 +112,29 @@ export async function getGamePlayers(
   }
 }
 
+export async function getGamePlayerByID(
+  gamePlayerId: string,
+): Promise<GamePlayer | null> {
+  try {
+    const { data: player, error } = await supabase
+      .from("game_players")
+      .select(
+        `
+        *,
+        profile:users("*")
+      `,
+      )
+      .eq("id", gamePlayerId)
+      .single();
+
+    if (error) throw error;
+    return player || null;
+  } catch (error) {
+    console.error("Error in getGamePlayerByID:", error);
+    throw error;
+  }
+}
+
 export async function updateGamePlayer(params: {
   game_id: string;
   user_id: string;
@@ -451,7 +474,6 @@ export async function joinGame(userId: string, code: string) {
       game_id: game.id,
       user_id: userId,
     });
-    console.log("joinGame", joinGame);
     if (!joinGame) {
       console.error("❌ Error in joinGame: Failed to join game");
       throw new Error("Failed to join game");
