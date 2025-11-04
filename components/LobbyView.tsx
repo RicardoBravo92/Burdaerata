@@ -4,6 +4,8 @@ import { FaUser, FaStar } from "react-icons/fa";
 import Image from "next/image";
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { showToast } from "@/components/Toast";
+import { getErrorMessage, logError } from "@/lib/errorHandler";
 
 export default function LobbyView({
   game,
@@ -33,27 +35,38 @@ export default function LobbyView({
           title: "Join my game!",
           text: `Join my game using this code: ${game.code}`,
         });
+        showToast("Game code shared successfully!", "success");
       } catch (error) {
-        console.error("Error sharing game:", error);
+        // User cancelled sharing or error occurred
+        if (error instanceof Error && error.name !== "AbortError") {
+          logError(error, "handleShareGame");
+          showToast(getErrorMessage(error), "error");
+        }
       }
     }
   }
 
   async function handleStartGame() {
     if (players && players.length < 2) {
+      showToast("Necesitas al menos 2 jugadores para iniciar el juego", "warning");
       return;
     }
 
     setLoading(true);
     try {
       if (!user) {
+        showToast("Usuario no encontrado", "error");
         return;
       }
       if (!game?.id) {
+        showToast("Juego no encontrado", "error");
         return;
       }
       await startGame(user.id, game.id as string);
+      showToast("¡Juego iniciado!", "success");
     } catch (error: any) {
+      logError(error, "handleStartGame");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
@@ -73,11 +86,11 @@ export default function LobbyView({
 
       {/* Game Code Card */}
       <div className="bg-white rounded-3xl p-2  shadow-lg mb-6 md:mb-2 flex flex-col md:flex-row justify-around items-center ">
-        <div className="div-gray-600  font-medium mb-3 md:mb-1">
+        <div className="text-gray-600  font-medium mb-3 md:mb-1">
           Share this code with friends:
         </div>
         <div className=" justify-between items-center mb-4 md:mb-1 flex flex-col md:flex-row gap-4 ">
-          <div className="div-4xl font-bold div-[#99184e] tracking-widest">
+          <div className="text-4xl font-bold text-[#99184e] tracking-widest">
             {game?.code}
           </div>
           <div className="flex-row space-x-2">
@@ -98,7 +111,7 @@ export default function LobbyView({
           </div>
         </div>
         {copied && (
-          <div className="div-green-600 div-sm font-medium div-center">
+          <div className="text-green-600 text-sm font-medium text-center">
             ✓ Copied to clipboard!
           </div>
         )}
@@ -107,12 +120,12 @@ export default function LobbyView({
       {/* Players Card */}
       <div className="bg-white rounded-3xl p-6 shadow-lg mb-6 md:mb-2 flex-1">
         <div className="flex-row justify-between items-center mb-2">
-          <div className="div-xl font-bold div-gray-800">
+          <div className="text-xl font-bold text-gray-800">
             Players ({players?.length || 0})
           </div>
           {players && players.length < 2 && (
             <div className="bg-amber-100 px-3 py-1 rounded-full">
-              <div className="div-amber-800 div-sm font-medium">
+              <div className="text-amber-800 text-sm font-medium">
                 Need {3 - players.length} more
               </div>
             </div>
@@ -142,29 +155,29 @@ export default function LobbyView({
                     <FaUser className="text-base text-white" />
                   )}
                 </div>
-                <div className=" font-semibold div-gray-800 text-base">
+                <div className=" font-semibold text-gray-800 text-base">
                   {item.profile?.full_name ||
                     item.user?.full_name ||
                     "Unknown Player"}
                   {item.id === user?.id && (
-                    <div className="div-[#99184e]"> (You)</div>
+                    <span className="text-[#99184e]"> (You)</span>
                   )}
                 </div>
               </div>
               {item.id === game?.host_player_id && (
                 <div className="flex-row items-center bg-[#99184e] px-3 py-1 rounded-full">
                   <FaStar />
-                  <div className="div-white div-sm font-bold ml-1">Host</div>
+                  <div className="text-white text-sm font-bold ml-1">Host</div>
                 </div>
               )}
             </div>
           ))
         ) : (
           <div className="items-center justify-center py-12">
-            <div className="div-gray-500 div-lg font-medium mt-4">
+            <div className="text-gray-500 text-lg font-medium mt-4">
               No players yet
             </div>
-            <div className="div-gray-400 div-center mt-2">
+            <div className="text-gray-400 text-center mt-2">
               Share the game code to invite friends!
             </div>
           </div>
@@ -188,13 +201,13 @@ export default function LobbyView({
           >
             {loading ? (
               <div className="flex-row items-center">
-                <div className="div-white div-lg font-bold ml-2">
+                <div className="text-white text-lg font-bold ml-2">
                   Starting Game...
                 </div>
               </div>
             ) : (
               <div className="flex-row items-center">
-                <div className="div-white div-lg font-bold mx-2">
+                <div className="text-white text-lg font-bold mx-2">
                   Start Game
                 </div>
               </div>
@@ -202,7 +215,7 @@ export default function LobbyView({
           </button>
 
           {players && players.length < 2 && (
-            <div className="div-amber-600 div-sm div-center mt-3 font-medium">
+            <div className="text-amber-600 text-sm text-center mt-3 font-medium">
               Invite {3 - players.length} more player
               {players.length === 1 ? "" : "s"} to start
             </div>
@@ -211,10 +224,10 @@ export default function LobbyView({
       ) : (
         <div className="bg-white rounded-3xl p-6 shadow-lg">
           <div className="items-center">
-            <div className="div-gray-700 div-lg font-semibold div-center mt-2">
+            <div className="text-gray-700 text-lg font-semibold text-center mt-2">
               Waiting for host to start the game
             </div>
-            <div className="div-gray-500 div-center mt-2">
+            <div className="text-gray-500 text-center mt-2">
               Invite more friends while you wait!
             </div>
           </div>

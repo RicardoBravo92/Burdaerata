@@ -3,6 +3,9 @@ import { createGame, joinGame } from "@/services/gameService";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/clerk-react";
+import { showToast } from "@/components/Toast";
+import { getErrorMessage, logError } from "@/lib/errorHandler";
+import { validateGameCode, sanitizeGameCode } from "@/lib/validation";
 
 export default function HomeTab() {
   const router = useRouter();
@@ -19,35 +22,50 @@ export default function HomeTab() {
     setLoading(true);
     try {
       if (!user) {
-        throw new Error("User not found");
+        showToast("Usuario no encontrado. Por favor, inicia sesión.", "error");
+        return;
       }
       const newGame = await createGame(user.id, maxPlayers, scoreToWin);
       if (newGame) {
+        showToast("¡Juego creado exitosamente!", "success");
         router.push(`/game/${newGame.id}`);
       } else {
-        console.error("Failed to create game");
+        showToast("No se pudo crear el juego. Intenta de nuevo.", "error");
       }
     } catch (error: any) {
-      console.error("Error creating game:", error);
+      logError(error, "handleCreateGame");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleJoinGame() {
+    const sanitizedCode = sanitizeGameCode(code);
+    const validation = validateGameCode(sanitizedCode);
+    
+    if (!validation.valid) {
+      showToast(validation.error || "Código de juego inválido", "warning");
+      setCode(sanitizedCode);
+      return;
+    }
+
     setJoinLoading(true);
     try {
       if (!user) {
-        throw new Error("User not found");
+        showToast("Usuario no encontrado. Por favor, inicia sesión.", "error");
+        return;
       }
-      const joinedGame = await joinGame(user.id, code);
+      const joinedGame = await joinGame(user.id, sanitizedCode);
       if (joinedGame) {
+        showToast("¡Te uniste al juego exitosamente!", "success");
         router.push(`/game/${joinedGame.id}`);
       } else {
-        console.error("Failed to join game");
+        showToast("No se pudo unir al juego. Verifica el código.", "error");
       }
     } catch (error: any) {
-      console.error("Error joining game:", error);
+      logError(error, "handleJoinGame");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setJoinLoading(false);
     }
@@ -176,7 +194,10 @@ export default function HomeTab() {
               placeholder="ENTER CODE"
               value={code}
               maxLength={6}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                const sanitized = sanitizeGameCode(e.target.value);
+                setCode(sanitized);
+              }}
               autoFocus
             />
 

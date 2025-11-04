@@ -1,4 +1,4 @@
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
 
 export default function ProtectedLayout({
   children,
@@ -6,13 +6,13 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <>
       <SignedIn>
         {children}
       </SignedIn>
       <SignedOut>
         <RedirectToSignIn />
       </SignedOut>
-    </ClerkProvider>
+    </>
   );
 }
