@@ -15,6 +15,7 @@ import {
   getPlayerCard,
 } from "@/services/gameService";
 import { leaveGame } from "@/services/gameService";
+import { createUserToGame, getGamePlayer } from "@/services/gameService";
 import { useUser } from "@clerk/nextjs";
 import {
   FaSync,
@@ -48,6 +49,8 @@ export default function GameScreen() {
   const [nextRound, setNextRound] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [insufficientPlayers, setInsufficientPlayers] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const [showJoinPrompt, setShowJoinPrompt] = useState(false);
   async function handleLeaveGame() {
     try {
       const confirmed = typeof window !== "undefined" ? window.confirm("¿Seguro que quieres salir de la partida?") : false;
@@ -371,6 +374,47 @@ export default function GameScreen() {
     }
   }, [players.length, game?.status, router]);
 
+  // Membership guard: if user not in game
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return;
+    if (!game) return;
+    if (!Array.isArray(players)) return;
+
+    const member = players.some((p: any) => p.user_id === user.id);
+    setIsMember(member);
+
+    if (!member) {
+      if (game.status === "waiting") {
+        setShowJoinPrompt(true);
+      } else {
+        showToast("No perteneces a esta partida", "warning");
+        router.replace("/game");
+      }
+    } else {
+      setShowJoinPrompt(false);
+    }
+  }, [isLoaded, isSignedIn, user, players, game, router]);
+
+  async function handleJoinGameFromPrompt() {
+    try {
+      if (!isLoaded || !isSignedIn || !user) return;
+      await createUserToGame({ game_id: id as string, user_id: user.id });
+      setShowJoinPrompt(false);
+      await fetchPlayers();
+      setIsMember(true);
+      showToast("Te uniste a la partida", "success");
+    } catch (error) {
+      logError(error, "handleJoinGameFromPrompt");
+      showToast(getErrorMessage(error), "error");
+      router.replace("/game");
+    }
+  }
+
+  function handleCancelJoinPrompt() {
+    setShowJoinPrompt(false);
+    router.replace("/game");
+  }
+
   async function fetchGameState() {
     try {
       setLoading(true);
@@ -431,6 +475,22 @@ export default function GameScreen() {
           <h2 className="text-lg font-bold text-[#99184e] mb-2">Partida finalizada</h2>
           <p className="text-gray-700 mb-4">Se necesitan al menos 3 jugadores para continuar.</p>
           <p className="text-gray-500 text-sm">Redirigiendo…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Join prompt modal if not member and game is waiting
+  if (showJoinPrompt && game?.status === "waiting") {
+    return (
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
+          <h2 className="text-lg font-bold text-[#99184e] mb-2">Unirte a la partida</h2>
+          <p className="text-gray-700 mb-4">No formas parte de esta partida. ¿Quieres unirte?</p>
+          <div className="flex justify-center gap-3">
+            <button onClick={handleCancelJoinPrompt} className="px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50">Cancelar</button>
+            <button onClick={handleJoinGameFromPrompt} className="px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]">Unirme</button>
+          </div>
         </div>
       </div>
     );

@@ -90,7 +90,7 @@ export default function LobbyView({
           Share this code with friends:
         </div>
         <div className=" justify-between items-center mb-4 md:mb-1 flex flex-col md:flex-row gap-4 ">
-          <div className="text-4xl font-bold text-[#99184e] tracking-widest">
+          <div className="text-xl font-bold text-[#99184e] tracking-widest">
             {game?.code}
           </div>
           <div className="flex-row space-x-2">
@@ -197,7 +197,7 @@ export default function LobbyView({
               }
             `}
             onClick={handleStartGame}
-            disabled={loading || !players || players.length < 2}
+            disabled={loading || !players || players.length < 3}
           >
             {loading ? (
               <div className="flex-row items-center">
@@ -208,7 +208,7 @@ export default function LobbyView({
             ) : (
               <div className="flex-row items-center">
                 <div className="text-white text-lg font-bold mx-2">
-                  Start Game
+                  {players.length < 3 ? "Need at least 3 players" : "Start Game"}
                 </div>
               </div>
             )}
