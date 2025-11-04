@@ -14,6 +14,7 @@ import {
   getLastRoundByGame,
   getPlayerCard,
 } from "@/services/gameService";
+import { leaveGame } from "@/services/gameService";
 import { useUser } from "@clerk/nextjs";
 import {
   FaSync,
@@ -46,6 +47,21 @@ export default function GameScreen() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [nextRound, setNextRound] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [insufficientPlayers, setInsufficientPlayers] = useState(false);
+  async function handleLeaveGame() {
+    try {
+      const confirmed = typeof window !== "undefined" ? window.confirm("¿Seguro que quieres salir de la partida?") : false;
+      if (!confirmed) return;
+      if (!isLoaded || !isSignedIn || !user) return;
+      await leaveGame(user.id, id as string);
+      showToast("Saliste de la partida", "info");
+      router.replace("/game");
+    } catch (error) {
+      logError(error, "handleLeaveGame");
+      showToast(getErrorMessage(error), "error");
+    }
+  }
+
 
   // Use refs to avoid recreating subscriptions
   const currentRoundRef = useRef(currentRound);
@@ -94,14 +110,11 @@ export default function GameScreen() {
   }, [id]);
 
   const fetchPlayerCards = useCallback(async () => {
-    console.log("fetchPlayerCards");
-    console.log("clerkLoaded", isLoaded, "signedIn", isSignedIn, "user", user?.id);
-    console.log("id", id);
+
     if (!isLoaded || !isSignedIn || !user) return;
 
     try {
       const data = await getPlayerCard(user.id, id as string);
-      console.log("datafetchPlayerCards", data);
       setMyCards(data?.cards || []);
     } catch (error) {
       logError(error, "fetchPlayerCards");
@@ -153,14 +166,15 @@ export default function GameScreen() {
           if (payload.eventType === "INSERT") {
             const newPlayer: any = payload.new;
             setPlayers((prev) => {
-              // Avoid duplicates
-              if (prev.some((p) => p.id === newPlayer.id)) return prev;
+              // Avoid duplicates by user_id
+              if (prev.some((p: any) => p.user_id === newPlayer.user_id)) return prev;
               return [...prev, newPlayer];
             });
           }
           if (payload.eventType === "DELETE") {
+            const oldPlayer: any = payload.old;
             setPlayers((prev) =>
-              prev.filter((player) => player.id !== payload.old.id),
+              prev.filter((player: any) => player.user_id !== oldPlayer.user_id),
             );
           }
         },
@@ -345,6 +359,18 @@ export default function GameScreen() {
     fetchGameState();
   }, [id]);
 
+  // Detect fewer than 3 players while playing → show modal and redirect
+  useEffect(() => {
+    if (game?.status === "playing" && Array.isArray(players) && players.length > 0 && players.length < 3) {
+      setInsufficientPlayers(true);
+      showToast("Partida finalizada por falta de jugadores", "info");
+      const timeout = setTimeout(() => {
+        router.replace("/game");
+      }, 2500);
+      return () => clearTimeout(timeout);
+    }
+  }, [players.length, game?.status, router]);
+
   async function fetchGameState() {
     try {
       setLoading(true);
@@ -353,9 +379,7 @@ export default function GameScreen() {
       if (gameData) {
         setGame(gameData);
         await fetchPlayers();
-        console.log("gameData", gameData);
         if (gameData?.status == "playing") {
-          console.log("playing");
           await fetchCurrentRound();
           await fetchPlayerCards();
         }
@@ -394,6 +418,19 @@ export default function GameScreen() {
         <div className="items-center space-y-4 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           <p className="text-white text-xl font-semibold">Loading Game...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Insufficient players modal
+  if (insufficientPlayers) {
+    return (
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
+          <h2 className="text-lg font-bold text-[#99184e] mb-2">Partida finalizada</h2>
+          <p className="text-gray-700 mb-4">Se necesitan al menos 3 jugadores para continuar.</p>
+          <p className="text-gray-500 text-sm">Redirigiendo…</p>
         </div>
       </div>
     );
@@ -453,6 +490,14 @@ export default function GameScreen() {
   if (game.status === "waiting") {
     return (
       <div className="h-lvh">
+        <div className="fixed top-20 right-4 z-50">
+          <button
+            onClick={handleLeaveGame}
+            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
+          >
+            Salir
+          </button>
+        </div>
         <LobbyView game={game} players={players} />
       </div>
     );
@@ -460,12 +505,22 @@ export default function GameScreen() {
 
   if (game.status === "playing") {
     return (
-      <PlayView
-        currentRound={currentRound}
-        players={players}
-        answers={answers}
-        isTransitioning={isTransitioning}
-      />
+      <>
+        <div className="fixed top-20 right-4 z-50">
+          <button
+            onClick={handleLeaveGame}
+            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
+          >
+            Salir
+          </button>
+        </div>
+        <PlayView
+          currentRound={currentRound}
+          players={players}
+          answers={answers}
+          isTransitioning={isTransitioning}
+        />
+      </>
     );
   }
 
