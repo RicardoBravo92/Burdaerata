@@ -28,8 +28,6 @@ export default function AnswersList({
   currentUserId,
   players,
 }: AnswersListProps) {
-  console.log("players", players);
-  console.log("answers", answers);
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">

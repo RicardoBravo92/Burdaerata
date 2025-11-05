@@ -1,5 +1,5 @@
-import cardsData from "@/constants/cardsData.json";
-import { supabase } from "@/lib/supabaseClient";
+import cardsData from '@/constants/cardsData.json';
+import { supabase } from '@/lib/supabaseClient';
 import {
   AnswerCard,
   Game,
@@ -8,36 +8,36 @@ import {
   QuestionCard,
   Round,
   RoundAnswer,
-} from "@/lib/types";
+} from '@/lib/types';
 
 const { questions, answers } = cardsData;
 
 export async function getGameByID(gameId: string): Promise<Game | null> {
   try {
     const { data: game, error } = await supabase
-      .from("games")
-      .select("*")
-      .eq("id", gameId)
+      .from('games')
+      .select('*')
+      .eq('id', gameId)
       .maybeSingle(); // Cambiar a maybeSingle
 
     return error ? null : game;
   } catch (error) {
-    console.error("Error in getGameByID:", error);
+    console.error('Error in getGameByID:', error);
     return null;
   }
 }
 export async function getGameByCode(gameCode: string): Promise<Game | null> {
   try {
     const { data: game, error } = await supabase
-      .from("games")
-      .select("*")
-      .eq("code", gameCode)
+      .from('games')
+      .select('*')
+      .eq('code', gameCode)
       .maybeSingle();
 
     if (error) throw error;
     return game;
   } catch (error) {
-    console.error("Error in getGameByCode:", error);
+    console.error('Error in getGameByCode:', error);
     return null;
   }
 }
@@ -49,11 +49,11 @@ export async function createGames(params: {
 }): Promise<Game> {
   try {
     const { data: newGame, error } = await supabase
-      .from("games")
+      .from('games')
       .insert({
         code: params.code,
         host_player_id: params.host_player_id,
-        status: "waiting",
+        status: 'waiting',
         max_players: params.max_players || 8,
         score_to_win: params.score_to_win,
       })
@@ -63,29 +63,29 @@ export async function createGames(params: {
     if (error) throw error;
     return newGame;
   } catch (error) {
-    console.error("Error in newGame:", error);
+    console.error('Error in newGame:', error);
     throw error;
   }
 }
 
 export async function updateGame(params: {
   game_id: string;
-  status?: "waiting" | "playing" | "ended";
+  status?: 'waiting' | 'playing' | 'ended';
 }): Promise<Game | null> {
   try {
     const { data: updatedGame, error } = await supabase
-      .from("games")
+      .from('games')
       .update({
         status: params.status,
       })
-      .eq("id", params.game_id)
-      .select("*")
+      .eq('id', params.game_id)
+      .select('*')
       .single();
 
     if (error) throw error;
     return updatedGame;
   } catch (error) {
-    console.error("Error in updateGame:", error);
+    console.error('Error in updateGame:', error);
     throw error;
   }
 }
@@ -95,19 +95,19 @@ export async function getGamePlayers(
 ): Promise<GamePlayer[] | null> {
   try {
     const { data: players, error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .select(
         `
         *,
         profile:users("*")
       `,
       )
-      .eq("game_id", gameId);
+      .eq('game_id', gameId);
 
     if (error) throw error;
     return players || [];
   } catch (error) {
-    console.error("Error in getGamePlayers:", error);
+    console.error('Error in getGamePlayers:', error);
     throw error;
   }
 }
@@ -117,20 +117,20 @@ export async function getGamePlayerByID(
 ): Promise<GamePlayer | null> {
   try {
     const { data: player, error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .select(
         `
         *,
         profile:users("*")
       `,
       )
-      .eq("id", gamePlayerId)
+      .eq('id', gamePlayerId)
       .single();
 
     if (error) throw error;
     return player || null;
   } catch (error) {
-    console.error("Error in getGamePlayerByID:", error);
+    console.error('Error in getGamePlayerByID:', error);
     throw error;
   }
 }
@@ -142,18 +142,18 @@ export async function updateGamePlayer(params: {
 }): Promise<GamePlayer | null> {
   try {
     const { data: updatedPlayer, error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .update({
         score: params.score,
       })
-      .eq("game_id", params.game_id)
-      .eq("user_id", params.user_id)
+      .eq('game_id', params.game_id)
+      .eq('user_id', params.user_id)
       .single();
 
     if (error) throw error;
     return updatedPlayer;
   } catch (error) {
-    console.error("Error in updateGamePlayer:", error);
+    console.error('Error in updateGamePlayer:', error);
     throw error;
   }
 }
@@ -164,39 +164,39 @@ export async function getGamePlayer(
 ): Promise<GamePlayer | null> {
   try {
     const { data: player, error } = await supabase
-      .from("game_players")
-      .select("*")
-      .eq("game_id", gameId)
-      .eq("user_id", userId)
+      .from('game_players')
+      .select('*')
+      .eq('game_id', gameId)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
     return player || null;
   } catch (error) {
-    console.error("Error in getGamePlayer:", error);
+    console.error('Error in getGamePlayer:', error);
     throw error;
   }
 }
-//getGamePlayer with profile by id
+
 export async function getGamePlayerWithProfile(
   id: string,
 ): Promise<GamePlayer | null> {
   try {
     const { data: player, error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .select(
         `
         *,
         user:users(full_name)
       `,
       )
-      .eq("id", id)
+      .eq('id', id)
       .single();
 
     if (error) throw error;
     return player || null;
   } catch (error) {
-    console.error("Error in getGamePlayer:", error);
+    console.error('Error in getGamePlayer:', error);
     throw error;
   }
 }
@@ -206,22 +206,22 @@ export async function getLastRoundByGame(
 ): Promise<Round | null> {
   try {
     const { data: round, error } = await supabase
-      .from("rounds")
+      .from('rounds')
       .select(
         `
         *,
         judge:users(full_name)
       `,
       )
-      .eq("game_id", gameId)
-      .order("round_number", { ascending: false })
+      .eq('game_id', gameId)
+      .order('round_number', { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (error) throw error;
     return round || null;
   } catch (error) {
-    console.error("Error in getLastRoundByGame:", error);
+    console.error('Error in getLastRoundByGame:', error);
     throw error;
   }
 }
@@ -229,14 +229,14 @@ export async function getLastRoundByGame(
 export async function getRoundByID(roundId: string): Promise<Round | null> {
   try {
     const { data: round, error } = await supabase
-      .from("rounds")
-      .select("*")
-      .eq("id", roundId)
+      .from('rounds')
+      .select('*')
+      .eq('id', roundId)
       .maybeSingle(); // Cambiar a maybeSingle
 
     return error ? null : round;
   } catch (error) {
-    console.error("Error in getRoundByID:", error);
+    console.error('Error in getRoundByID:', error);
     return null;
   }
 }
@@ -249,7 +249,7 @@ export async function createRound(params: {
 }): Promise<Round> {
   try {
     const { data: newRound, error } = await supabase
-      .from("rounds")
+      .from('rounds')
       .insert({
         game_id: params.game_id,
         round_number: params.round_number,
@@ -267,7 +267,7 @@ export async function createRound(params: {
     if (error) throw error;
     return newRound || null;
   } catch (error) {
-    console.error("Error in createRound:", error);
+    console.error('Error in createRound:', error);
     throw error;
   }
 }
@@ -279,7 +279,7 @@ export async function createRoundAnswer(params: {
 }): Promise<RoundAnswer | null> {
   try {
     const { data: newRoundAnswer, error } = await supabase
-      .from("round_answers")
+      .from('round_answers')
       .insert({
         round_id: params.round_id,
         user_id: params.user_id,
@@ -291,7 +291,7 @@ export async function createRoundAnswer(params: {
     if (error) throw error;
     return newRoundAnswer || null;
   } catch (error) {
-    console.error("Error in createRoundAnswer:", error);
+    console.error('Error in createRoundAnswer:', error);
     throw error;
   }
 }
@@ -301,11 +301,17 @@ export function getRandomQuestionCard(): QuestionCard {
   return questions[randomIndex];
 }
 
-export function getRandomAnswerCards(limit: number = 1): AnswerCard[] {
+export function getRandomAnswerCards(
+  limit: number = 1,
+  myCards: string[] = [],
+): AnswerCard[] {
   if (answers.length === 0) {
     return [];
   }
-  const shuffled = [...answers].sort(() => 0.5 - Math.random());
+
+  const shuffled = answers
+    .filter((card) => !myCards.includes(card.id))
+    .sort(() => 0.5 - Math.random());
   return shuffled.slice(0, limit);
 }
 
@@ -315,7 +321,7 @@ export async function createUserToGame(params: {
 }): Promise<GamePlayer | null> {
   try {
     const { data: newGamePlayer, error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .insert({
         game_id: params.game_id,
         user_id: params.user_id,
@@ -326,7 +332,7 @@ export async function createUserToGame(params: {
     if (error) throw error;
     return newGamePlayer || null;
   } catch (error) {
-    console.error("Error in createUserToGame:", error);
+    console.error('Error in createUserToGame:', error);
     throw error;
   }
 }
@@ -337,15 +343,15 @@ export async function getPlayerCard(
 ): Promise<playerCards | null> {
   try {
     const { data: card, error } = await supabase
-      .from("player_cards")
-      .select("*")
-      .eq("game_id", game_id)
-      .eq("user_id", user_id)
+      .from('player_cards')
+      .select('*')
+      .eq('game_id', game_id)
+      .eq('user_id', user_id)
       .maybeSingle(); // Cambiar a maybeSingle
 
     return error ? null : card;
   } catch (error) {
-    console.error("Error en getPlayerCard:", error);
+    console.error('Error en getPlayerCard:', error);
     return null;
   }
 }
@@ -356,19 +362,19 @@ export async function updatePlayerCard(params: {
 }): Promise<playerCards | null> {
   try {
     const { data: updatedPlayerCard, error } = await supabase
-      .from("player_cards")
+      .from('player_cards')
       .update({
         cards: params.cards,
       })
-      .eq("user_id", params.user_id)
-      .eq("game_id", params.game_id)
+      .eq('user_id', params.user_id)
+      .eq('game_id', params.game_id)
       .select()
       .single();
 
     if (error) throw error;
     return updatedPlayerCard || null;
   } catch (error) {
-    console.error("Error in updatePlayerCard:", error);
+    console.error('Error in updatePlayerCard:', error);
     throw error;
   }
 }
@@ -378,16 +384,16 @@ export async function getUserAnwerfromRound(
 ): Promise<RoundAnswer | null> {
   try {
     const { data: roundAnswers, error } = await supabase
-      .from("round_answers")
-      .select("*")
-      .eq("round_id", roundId)
-      .eq("user_id", userId)
+      .from('round_answers')
+      .select('*')
+      .eq('round_id', roundId)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
     return roundAnswers || null;
   } catch (error) {
-    console.error("Error in getUserAnwerfromRound:", error);
+    console.error('Error in getUserAnwerfromRound:', error);
     throw error;
   }
 }
@@ -400,7 +406,7 @@ export async function createGame(
 ) {
   try {
     // Generate unique code
-    let code: string = "";
+    let code: string = '';
     let isUnique = false;
     let attempts = 0;
 
@@ -416,7 +422,7 @@ export async function createGame(
     }
 
     if (!isUnique) {
-      throw new Error("Failed to generate unique game code");
+      throw new Error('Failed to generate unique game code');
     }
 
     const newGame = await createGames({
@@ -426,7 +432,7 @@ export async function createGame(
       score_to_win: score_to_win,
     });
 
-    if (!newGame) throw new Error("Failed to create game");
+    if (!newGame) throw new Error('Failed to create game');
 
     // Auto-join host to the game
     const joinGame = await createUserToGame({
@@ -435,13 +441,13 @@ export async function createGame(
     });
 
     if (!joinGame) {
-      console.error("❌ Error in joinGame: Failed to join game");
-      throw new Error("Failed to join game");
+      console.error('❌ Error in joinGame: Failed to join game');
+      throw new Error('Failed to join game');
     }
 
     return newGame;
   } catch (error) {
-    console.error("Error in createGame:", error);
+    console.error('Error in createGame:', error);
     throw error;
   }
 }
@@ -449,15 +455,15 @@ export async function createGame(
 export async function joinGame(userId: string, code: string) {
   try {
     const game = await getGameByCode(code);
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new Error('Game not found');
 
     // Check if game is full
     const gamePlayers = await getGamePlayers(game.id);
-    if (!gamePlayers) throw new Error("Failed to get game players");
+    if (!gamePlayers) throw new Error('Failed to get game players');
 
     const maxPlayers = game.max_players || 10;
     if (gamePlayers && gamePlayers.length >= maxPlayers) {
-      throw new Error("Game is full");
+      throw new Error('Game is full');
     }
 
     // Check if user is already in the game
@@ -466,8 +472,8 @@ export async function joinGame(userId: string, code: string) {
     );
 
     if (existingPlayer) {
-      console.log("existingPlayer", existingPlayer);
-      throw new Error("You are already in this game");
+      console.log('existingPlayer', existingPlayer);
+      throw new Error('You are already in this game');
     }
 
     const joinGame = await createUserToGame({
@@ -475,13 +481,13 @@ export async function joinGame(userId: string, code: string) {
       user_id: userId,
     });
     if (!joinGame) {
-      console.error("❌ Error in joinGame: Failed to join game");
-      throw new Error("Failed to join game");
+      console.error('❌ Error in joinGame: Failed to join game');
+      throw new Error('Failed to join game');
     }
 
     return game;
   } catch (error) {
-    console.error("Error in joinGame:", error);
+    console.error('Error in joinGame:', error);
     throw error;
   }
 }
@@ -491,44 +497,44 @@ export async function startGame(userId: string, gameId: string) {
     // Get game info
     const game = await getGameByID(gameId);
     if (!game) {
-      console.error("❌ Game fetch error: Game not found");
-      throw new Error("Game not found");
+      console.error('❌ Game fetch error: Game not found');
+      throw new Error('Game not found');
     }
 
-    if (game.status !== "waiting") {
-      throw new Error("Game has already started");
+    if (game.status !== 'waiting') {
+      throw new Error('Game has already started');
     }
 
     // Get all players
     const players = await getGamePlayers(gameId);
     if (!players || players.length === 0) {
-      console.error("❌ Players fetch error: No players in the game");
-      throw new Error("No players in the game");
+      console.error('❌ Players fetch error: No players in the game');
+      throw new Error('No players in the game');
     }
 
     if (!players || players.length < 2) {
-      throw new Error("Need at least 2 players to start the game");
+      throw new Error('Need at least 2 players to start the game');
     }
     // Verify user is in the game
     const playerInGame = players.some((player) => player.user_id === userId);
 
     if (!playerInGame) {
-      console.error("❌ Player not in game:", userId);
-      throw new Error("You are not in this game");
+      console.error('❌ Player not in game:', userId);
+      throw new Error('You are not in this game');
     }
 
     const nextJudgeIndex = 0;
     const judge = players[nextJudgeIndex].user_id || players[0].user_id;
     if (!judge) {
-      console.error("❌ Judge not found");
-      throw new Error("Judge not found");
+      console.error('❌ Judge not found');
+      throw new Error('Judge not found');
     }
 
     // Get random question card
     const question = getRandomQuestionCard();
     if (!question) {
-      console.error("❌ Question not found");
-      throw new Error("Question not found");
+      console.error('❌ Question not found');
+      throw new Error('Question not found');
     }
 
     // Calculate next round numbe
@@ -537,28 +543,28 @@ export async function startGame(userId: string, gameId: string) {
     const roundData = {
       game_id: gameId,
       round_number: 1,
-      question_card_id: question.id || "q1",
+      question_card_id: question.id || 'q1',
       judge_user_id: judge,
-      status: "submitting",
+      status: 'submitting',
     };
 
     const round = await createRound(roundData);
 
     if (!round) {
-      console.error("❌ Round creation error: Failed to create round");
-      throw new Error("Failed to create round");
+      console.error('❌ Round creation error: Failed to create round');
+      throw new Error('Failed to create round');
     }
 
     await updateGame({
       game_id: gameId,
-      status: "playing",
+      status: 'playing',
     });
 
     await dealCardsToPlayers(gameId, 10);
 
     return round;
   } catch (error) {
-    console.error("💥 Error in startGame:", error);
+    console.error('💥 Error in startGame:', error);
     throw error;
   }
 }
@@ -580,17 +586,17 @@ export async function submitAnswer(
     // }
 
     if (!round) {
-      console.error("❌ Error fetching round:", round);
-      throw new Error("Round not found");
+      console.error('❌ Error fetching round:', round);
+      throw new Error('Round not found');
     }
 
     if (round?.judge_user_id === userId) {
-      throw new Error("Judge cannot submit answers");
+      throw new Error('Judge cannot submit answers');
     }
 
     const cleanCardIds = Array.isArray(cardIds)
       ? cardIds.filter(
-          (cardId) => typeof cardId === "string" && cardId.length > 0,
+          (cardId) => typeof cardId === 'string' && cardId.length > 0,
         )
       : [];
 
@@ -601,19 +607,12 @@ export async function submitAnswer(
       cards_used: cleanCardIds,
     });
 
-    // get player cards
-    // const playerCards = await getPlayerCard(userId, round.game_id);
-    // if (!playerCards) {
-    //   console.error("❌ Error fetching player cards");
-    //   throw new Error("Failed to fetch player cards");
-    // }
-
     const newPlayerCards = myCards?.filter(
       (card) => !cleanCardIds.includes(card),
     );
     //add new cards
 
-    const cardsToAdd = getRandomAnswerCards(cleanCardIds.length);
+    const cardsToAdd = getRandomAnswerCards(cleanCardIds.length, myCards);
 
     const onlyIds = cardsToAdd.map((card) => card.id);
 
@@ -628,7 +627,7 @@ export async function submitAnswer(
 
     return newRoundAnswer;
   } catch (error) {
-    console.error("💥 Error in submitAnswer:", error);
+    console.error('💥 Error in submitAnswer:', error);
     throw error;
   }
 }
@@ -638,51 +637,51 @@ export async function startNextRound(userId: string, gameId: string) {
     // Verificar que el usuario está en el juego
     const playerInGame = await getGamePlayer(gameId, userId);
 
-    if (!playerInGame) throw new Error("You are not in this game");
+    if (!playerInGame) throw new Error('You are not in this game');
 
     // Verificar estado actual del juego
     const game = await getGameByID(gameId);
     if (!game) {
-      console.error("❌ Game fetch error: Game not found");
-      throw new Error("Game not found");
+      console.error('❌ Game fetch error: Game not found');
+      throw new Error('Game not found');
     }
 
-    if (game.status !== "playing") {
-      throw new Error("Game is not in playing state");
+    if (game.status !== 'playing') {
+      throw new Error('Game is not in playing state');
     }
 
     // Obtener todos los jugadores
     const players = await getGamePlayers(gameId);
     if (!players || players.length === 0) {
-      console.error("❌ Players fetch error: No players in the game");
-      throw new Error("No players in the game");
+      console.error('❌ Players fetch error: No players in the game');
+      throw new Error('No players in the game');
     }
 
     if (!players || players.length < 2) {
-      throw new Error("Not enough players to continue");
+      throw new Error('Not enough players to continue');
     }
 
     // FIXED: Obtener última ronda - usar limit(1) en lugar de single() inicialmente
     const lastRound = await getLastRoundByGame(gameId);
 
     if (!lastRound) {
-      console.error("❌ Round fetch error: No previous round found");
-      throw new Error("No previous round found");
+      console.error('❌ Round fetch error: No previous round found');
+      throw new Error('No previous round found');
     }
 
     const currentRoundNumber = lastRound?.round_number || 0;
     const nextJudgeIndex = currentRoundNumber % players.length;
     const nextJudge = players[nextJudgeIndex].user_id || players[0].user_id;
     if (!nextJudge) {
-      console.error("❌ Next judge not found");
-      throw new Error("Next judge not found");
+      console.error('❌ Next judge not found');
+      throw new Error('Next judge not found');
     }
 
     // Obtener carta de pregunta aleatoria
     const question = getRandomQuestionCard();
     if (!question) {
-      console.error("❌ Question not found");
-      throw new Error("Question not found");
+      console.error('❌ Question not found');
+      throw new Error('Question not found');
     }
 
     // Calcular número de siguiente ronda
@@ -694,19 +693,19 @@ export async function startNextRound(userId: string, gameId: string) {
       judge_user_id: nextJudge,
       round_number: nextRoundNumber,
       question_card_id: question.id,
-      status: "submitting",
+      status: 'submitting',
     };
 
     const newRound = await createRound(roundData);
 
     if (!newRound) {
-      console.error("❌ Round creation error: Failed to create next round");
-      throw new Error("Failed to create next round");
+      console.error('❌ Round creation error: Failed to create next round');
+      throw new Error('Failed to create next round');
     }
 
     return newRound;
   } catch (error) {
-    console.error("💥 Error in startNextRound:", error);
+    console.error('💥 Error in startNextRound:', error);
     throw error;
   }
 }
@@ -717,26 +716,26 @@ export async function selectWinner(
   round: Round,
 ) {
   try {
-    if (!round) throw new Error("Round not found");
+    if (!round) throw new Error('Round not found');
 
     // Verificar que el usuario es el juez
     if (round.judge_user_id !== userId) {
-      throw new Error("Only the judge can select winners");
+      throw new Error('Only the judge can select winners');
     }
-    if (round.status === "finished") {
-      throw new Error("This round is already finished");
+    if (round.status === 'finished') {
+      throw new Error('This round is already finished');
     }
 
     // VERIFICACIÓN de la respuesta - FIXED: Use .maybeSingle() or handle multiple rows
     const { data: answer, error: answerError } = await supabase
-      .from("round_answers")
-      .select("id, round_id, user_id, final_text")
-      .eq("id", winningAnswerId)
-      .eq("round_id", round.id) // Added this filter for safety
+      .from('round_answers')
+      .select('id, round_id, user_id, final_text')
+      .eq('id', winningAnswerId)
+      .eq('round_id', round.id) // Added this filter for safety
       .maybeSingle(); // Use maybeSingle instead of single
 
     if (answerError) {
-      console.error("❌ Error fetching answer:", answerError);
+      console.error('❌ Error fetching answer:', answerError);
       throw new Error(`Failed to fetch answer: ${answerError.message}`);
     }
 
@@ -748,13 +747,13 @@ export async function selectWinner(
     const currentPlayer = await getGamePlayer(round.game_id!, answer.user_id);
 
     if (!currentPlayer) {
-      console.error("❌ Error fetching player score:", currentPlayer);
+      console.error('❌ Error fetching player score:', currentPlayer);
       throw new Error(`Failed to fetch player score`);
     }
 
     if (!currentPlayer) {
-      console.error("❌ Player not found in game");
-      throw new Error("Player not found in game");
+      console.error('❌ Player not found in game');
+      throw new Error('Player not found in game');
     }
 
     const currentScore = currentPlayer.score || 0;
@@ -769,26 +768,26 @@ export async function selectWinner(
 
     // Marcar la respuesta como ganadora
     const { error: updateAnswerError } = await supabase
-      .from("round_answers")
+      .from('round_answers')
       .update({ is_winner: true })
-      .eq("id", winningAnswerId);
+      .eq('id', winningAnswerId);
 
     if (updateAnswerError) {
-      console.error("❌ Error marking answer as winner:", updateAnswerError);
+      console.error('❌ Error marking answer as winner:', updateAnswerError);
       throw new Error(`Failed to mark winner: ${updateAnswerError.message}`);
     }
 
     // Actualizar la ronda como finished
     const { error: updateRoundError } = await supabase
-      .from("rounds")
+      .from('rounds')
       .update({
         winning_answer_id: winningAnswerId,
-        status: "finished",
+        status: 'finished',
       })
-      .eq("id", round.id);
+      .eq('id', round.id);
 
     if (updateRoundError) {
-      console.error("❌ Error updating round:", updateRoundError);
+      console.error('❌ Error updating round:', updateRoundError);
       throw new Error(`Failed to update round: ${updateRoundError.message}`);
     }
     //if newScore is equal to game score_to_win
@@ -796,14 +795,14 @@ export async function selectWinner(
     if (newScore === game?.score_to_win) {
       // Mark game as finished
       const { error: updateGameError } = await supabase
-        .from("games")
+        .from('games')
         .update({
-          status: "finished",
+          status: 'finished',
         })
-        .eq("id", round.game_id);
+        .eq('id', round.game_id);
 
       if (updateGameError) {
-        console.error("❌ Error updating game:", updateGameError);
+        console.error('❌ Error updating game:', updateGameError);
         throw new Error(`Failed to update game: ${updateGameError.message}`);
       }
       return { success: true };
@@ -814,13 +813,13 @@ export async function selectWinner(
       try {
         await startNextRound(userId, round.game_id!);
       } catch (error) {
-        console.error("❌ Error starting next round:", error);
+        console.error('❌ Error starting next round:', error);
       }
     }, 3000);
 
     return { success: true };
   } catch (error) {
-    console.error("💥 Error in selectWinner:", error);
+    console.error('💥 Error in selectWinner:', error);
     throw error;
   }
 }
@@ -834,7 +833,7 @@ export async function dealCardsToPlayers(
     const players = await getGamePlayers(gameId);
 
     if (!players || players.length === 0) {
-      throw new Error("No players found in the game");
+      throw new Error('No players found in the game');
     }
 
     // Get random answer cards
@@ -843,7 +842,7 @@ export async function dealCardsToPlayers(
     );
 
     if (!answerCards || answerCards.length === 0) {
-      throw new Error("No answer cards available");
+      throw new Error('No answer cards available');
     }
     const onlyIds = answerCards.map((card) => card.id);
 
@@ -857,10 +856,10 @@ export async function dealCardsToPlayers(
       ),
     }));
     if (!cardAssignments) {
-      throw new Error("No players found in the game");
+      throw new Error('No players found in the game');
     }
     const { error: assignmentError } = await supabase
-      .from("player_cards")
+      .from('player_cards')
       .insert(cardAssignments);
 
     if (assignmentError) {
@@ -869,7 +868,7 @@ export async function dealCardsToPlayers(
 
     return cardAssignments.length;
   } catch (error) {
-    console.error("Error dealing cards:", error);
+    console.error('Error dealing cards:', error);
     throw error;
   }
 }
@@ -878,10 +877,10 @@ export async function dealCardsToPlayers(
 export async function leaveGame(userId: string, gameId: string) {
   try {
     const { error } = await supabase
-      .from("game_players")
+      .from('game_players')
       .delete()
-      .eq("game_id", gameId)
-      .eq("user_id", userId);
+      .eq('game_id', gameId)
+      .eq('user_id', userId);
 
     if (error) throw error;
 
@@ -889,12 +888,12 @@ export async function leaveGame(userId: string, gameId: string) {
     const remainingPlayers = await getGamePlayers(gameId);
 
     if (!remainingPlayers || remainingPlayers.length === 0) {
-      await supabase.from("games").delete().eq("id", gameId);
+      await supabase.from('games').delete().eq('id', gameId);
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Error in leaveGame:", error);
+    console.error('Error in leaveGame:', error);
     throw error;
   }
 }
