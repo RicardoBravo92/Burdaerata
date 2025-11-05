@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { showToast } from '@/components/Toast';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
+import { Button } from './ui/button';
+import { CopyIcon, ShareIcon } from 'lucide-react';
 
 export default function LobbyView({
   game,
@@ -89,33 +91,39 @@ export default function LobbyView({
 
       {/* Game Code Card */}
       <div className='bg-white rounded-3xl p-2  shadow-lg mb-6 md:mb-2 flex flex-col md:flex-row justify-around items-center '>
-        <div className='text-gray-600  font-medium mb-3 md:mb-1'>
-          Share this code with friends:
+        <div className='text-gray-600  text-sm font-medium mb-3 md:mb-1'>
+          Share this code with friends
         </div>
         <div className=' justify-between items-center mb-4 md:mb-1 flex flex-col md:flex-row gap-4 '>
           <div className='text-xl font-bold text-[#99184e] tracking-widest'>
             {game?.code}
           </div>
-          <div className='flex-row space-x-2'>
-            <button
+          <div className='flex-row space-x-2  my-auto'>
+            <Button
+              variant='outline'
               className={`p-3 rounded-2xl ${
-                copied ? 'bg-green-100' : 'bg-gray-100 hover:bg-gray-200'
+                copied
+                  ? 'bg-green-100'
+                  : 'border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
               }`}
               onClick={handleCopyCode}
             >
+              <CopyIcon />
               {copied ? 'Copied!' : 'Copy Code'}
-            </button>
-            <button
-              className='p-3 rounded-2xl bg-gray-100 hover:bg-gray-200'
+            </Button>
+            <Button
+              variant='outline'
+              className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
+              }`}
               onClick={handleShareGame}
             >
+              <ShareIcon />
               Share
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Players Card */}
       <div className='bg-white rounded-3xl p-6 shadow-lg mb-6 md:mb-2 flex-1'>
         <div className='flex-row justify-between items-center mb-2'>
           <div className='text-xl font-bold text-gray-800'>
@@ -138,7 +146,6 @@ export default function LobbyView({
             >
               <div className=' items-center flex flex-row'>
                 <div className='w-5 h-5 bg-[#99184e] rounded-full flex items-center justify-center mr-1'>
-             
                   {item.profile?.avatar_url &&
                   item.profile?.avatar_url !== '' ? (
                     <Image

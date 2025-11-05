@@ -31,14 +31,14 @@ export default function HomeTab() {
       if (newGame) {
         showToast('¡Juego creado exitosamente!', 'success');
         router.push(`/game/${newGame.id}`);
+        setLoading(false);
       } else {
         showToast('No se pudo crear el juego. Intenta de nuevo.', 'error');
+        setLoading(false);
       }
     } catch (error: any) {
       logError(error, 'handleCreateGame');
       showToast(getErrorMessage(error), 'error');
-    } finally {
-      setLoading(false);
     }
   }
 

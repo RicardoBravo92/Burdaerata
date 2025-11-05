@@ -27,6 +27,7 @@ import {
 } from 'react-icons/fa';
 import { showToast } from '@/components/Toast';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
+import { Button } from '@/components/ui/button';
 
 // Icons replacement - you can use react-icons or similar
 const RefreshIcon = () => <FaSync className='text-4xl' />;
@@ -497,12 +498,13 @@ export default function GameScreen() {
     return (
       <div className='h-lvh'>
         <div className='fixed top-20 right-4 z-50'>
-          <button
+          <Button
+            variant='destructive'
             onClick={handleLeaveGame}
             className='bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow'
           >
             Salir
-          </button>
+          </Button>
         </div>
         <LobbyView game={game} players={players} />
       </div>
@@ -513,12 +515,13 @@ export default function GameScreen() {
     return (
       <>
         <div className='fixed top-20 right-4 z-50'>
-          <button
+          <Button
+            variant='destructive'
             onClick={handleLeaveGame}
             className='bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow'
           >
             Salir
-          </button>
+          </Button>
         </div>
         <PlayView
           currentRound={currentRound}
