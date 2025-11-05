@@ -49,6 +49,7 @@ export default function GameScreen() {
   const [loading, setLoading] = useState(true);
   const [insufficientPlayers, setInsufficientPlayers] = useState(false);
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
+
   async function handleLeaveGame() {
     try {
       const confirmed =
@@ -65,13 +66,10 @@ export default function GameScreen() {
       showToast(getErrorMessage(error), 'error');
     }
   }
-
-  // Use refs to avoid recreating subscriptions
   const currentRoundRef = useRef(currentRound);
   const isTransitioningRef = useRef(isTransitioning);
   const subscriptionRef = useRef<any>(null);
 
-  // Update refs when state changes
   useEffect(() => {
     currentRoundRef.current = currentRound;
   }, [currentRound]);
@@ -80,7 +78,6 @@ export default function GameScreen() {
     isTransitioningRef.current = isTransitioning;
   }, [isTransitioning]);
 
-  // Memoized callbacks to avoid recreating functions
   const fetchCurrentRound = useCallback(async () => {
     try {
       const roundData = await getLastRoundByGame(id as string);
@@ -144,7 +141,6 @@ export default function GameScreen() {
     }
   }, []);
 
-  // Main subscription effect - only recreate when id changes
   useEffect(() => {
     if (!id) return;
 
@@ -252,13 +248,11 @@ export default function GameScreen() {
 
     subscriptionRef.current = subscription;
 
-    // Separate subscription for round answers that updates when round changes
     return () => {
       subscription.unsubscribe();
     };
   }, [id, fetchCurrentRound, fetchPlayerCards, fetchAnswers, router, setGame]);
 
-  // Separate effect for round_answers subscription - updates when round changes
   useEffect(() => {
     if (!currentRound?.id || !id) return;
 
@@ -315,7 +309,6 @@ export default function GameScreen() {
     fetchGameState();
   }, [id, userId]);
 
-  // Detect fewer than 3 players while playing → show modal and redirect
   useEffect(() => {
     if (
       game?.status === 'playing' &&
@@ -414,7 +407,6 @@ export default function GameScreen() {
     );
   }
 
-  // Insufficient players modal
   if (insufficientPlayers) {
     return (
       <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
@@ -431,7 +423,6 @@ export default function GameScreen() {
     );
   }
 
-  // Join prompt modal if not member and game is waiting
   if (showJoinPrompt && game?.status === 'waiting') {
     return (
       <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
@@ -461,7 +452,6 @@ export default function GameScreen() {
     );
   }
 
-  // Transition State - Show improved transition component
   if (isTransitioning && nextRound) {
     return <RoundTransition nextRound={nextRound} players={players} />;
   }
@@ -482,7 +472,6 @@ export default function GameScreen() {
     );
   }
 
-  // Game Finished State
   if (game.status === 'finished') {
     return (
       <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
@@ -504,7 +493,6 @@ export default function GameScreen() {
     );
   }
 
-  // Game States
   if (game.status === 'waiting') {
     return (
       <div className='h-lvh'>
@@ -542,7 +530,6 @@ export default function GameScreen() {
     );
   }
 
-  // Fallback
   return (
     <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
       <div className='items-center space-y-4 text-center'>
