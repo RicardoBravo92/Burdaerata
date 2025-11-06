@@ -4,10 +4,19 @@ import { FaUser, FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { showToast } from '@/components/Toast';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
 import { Button } from './ui/button';
 import { CopyIcon, ShareIcon } from 'lucide-react';
+import { toast } from 'sonner';
+
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 
 export default function LobbyView({
   game,
@@ -37,12 +46,12 @@ export default function LobbyView({
           title: 'Join my game!',
           text: `Join my game using this code: ${game.code}`,
         });
-        showToast('Game code shared successfully!', 'success');
+        toast.success('Game code shared successfully!', { richColors: true });
       } catch (error) {
         // User cancelled sharing or error occurred
         if (error instanceof Error && error.name !== 'AbortError') {
           logError(error, 'handleShareGame');
-          showToast(getErrorMessage(error), 'error');
+          toast.error(getErrorMessage(error), { richColors: true });
         }
       }
     }
@@ -50,35 +59,35 @@ export default function LobbyView({
 
   async function handleStartGame() {
     if (players && players.length < 2) {
-      showToast(
-        'Necesitas al menos 2 jugadores para iniciar el juego',
-        'warning',
-      );
+      toast.warning('Necesitas al menos 2 jugadores para iniciar el juego', {
+        richColors: true,
+      });
       return;
     }
 
     setLoading(true);
     try {
       if (!user) {
-        showToast('Usuario no encontrado', 'error');
+        toast.error('Usuario no encontrado', { richColors: true });
         return;
       }
       if (!game?.id) {
-        showToast('Juego no encontrado', 'error');
+        toast.error('Juego no encontrado', { richColors: true });
         return;
       }
       await startGame(user.id, game.id as string);
-      showToast('¡Juego iniciado!', 'success');
+      toast.success('¡Juego iniciado!', { richColors: true });
     } catch (error: any) {
       logError(error, 'handleStartGame');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setLoading(false);
     }
   }
+  console.log('player', players);
 
   return (
-    <div className='flex-1  md:max-w-xl mx-auto px-6 h-screen'>
+    <div className='flex-1  md:max-w-xl mx-auto px-6 h-screen flex flex-col gap-2'>
       {/* Header */}
       <div className='items-center mb-8 md:mb-4'>
         <div className='text-3xl font-bold text-white text-center mb-4 py-2 bg-[#99184e]/90 rounded-lg'>
@@ -89,40 +98,38 @@ export default function LobbyView({
         </div>
       </div>
 
-      {/* Game Code Card */}
-      <div className='bg-white rounded-3xl p-2  shadow-lg mb-6 md:mb-2 flex flex-col md:flex-row justify-around items-center '>
-        <div className='text-gray-600  text-sm font-medium mb-3 md:mb-1'>
-          Share this code with friends
-        </div>
-        <div className=' justify-between items-center mb-4 md:mb-1 flex flex-col md:flex-row gap-4 '>
-          <div className='text-xl font-bold text-[#99184e] tracking-widest'>
-            {game?.code}
-          </div>
-          <div className='flex-row space-x-2  my-auto'>
-            <Button
-              variant='outline'
-              className={`p-3 rounded-2xl ${
-                copied
-                  ? 'bg-green-100'
-                  : 'border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
+      <Item
+        variant='outline'
+        className='bg-white rounded-3xl p-8 md:p-4 shadow-lg'
+      >
+        <ItemContent>
+          <ItemTitle>Share this code with friends</ItemTitle>
+          <ItemDescription>{game?.code}</ItemDescription>
+        </ItemContent>
+        <ItemActions className='flex flex-col md:flex-row gap-2 '>
+          <Button
+            variant='outline'
+            className={`p-3 rounded-2xl ${
+              copied
+                ? 'bg-green-100'
+                : 'border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
+            }`}
+            onClick={handleCopyCode}
+          >
+            <CopyIcon />
+            {copied ? 'Copied!' : 'Copy Code'}
+          </Button>
+          <Button
+            variant='outline'
+            className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
               }`}
-              onClick={handleCopyCode}
-            >
-              <CopyIcon />
-              {copied ? 'Copied!' : 'Copy Code'}
-            </Button>
-            <Button
-              variant='outline'
-              className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
-              }`}
-              onClick={handleShareGame}
-            >
-              <ShareIcon />
-              Share
-            </Button>
-          </div>
-        </div>
-      </div>
+            onClick={handleShareGame}
+          >
+            <ShareIcon />
+            Share
+          </Button>
+        </ItemActions>
+      </Item>
 
       <div className='bg-white rounded-3xl p-6 shadow-lg mb-6 md:mb-2 flex-1'>
         <div className='flex-row justify-between items-center mb-2'>
@@ -190,9 +197,14 @@ export default function LobbyView({
 
       {/* Action Buttons */}
       {isHost ? (
-        <div className='bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around'>
-          <button
-            className={`
+        <Item
+          variant='outline'
+          className='bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around'
+        >
+          <ItemContent className='items-center '>
+            <ItemActions>
+              <Button
+                className={`
               py-4 rounded-2xl items-center
               ${
                 players && players.length >= 2 && !loading
@@ -200,44 +212,46 @@ export default function LobbyView({
                   : 'bg-gray-300 hover:bg-gray-200'
               }
             `}
-            onClick={handleStartGame}
-            disabled={loading || !players || players.length < 3}
-          >
-            {loading ? (
-              <div className='flex-row items-center'>
-                <div className='text-white text-lg font-bold ml-2'>
-                  Starting Game...
-                </div>
-              </div>
-            ) : (
-              <div className='flex-row items-center'>
-                <div className='text-white text-lg font-bold mx-2'>
-                  {players.length < 3
-                    ? 'Need at least 3 players'
-                    : 'Start Game'}
-                </div>
-              </div>
-            )}
-          </button>
+                onClick={handleStartGame}
+                disabled={loading || !players || players.length < 3}
+              >
+                {loading ? (
+                  <div className='flex-row items-center'>
+                    <div className='text-white text-lg font-bold ml-2'>
+                      Starting Game...
+                    </div>
+                  </div>
+                ) : (
+                  <div className='flex-row items-center'>
+                    <div className='text-white text-lg font-bold mx-2'>
+                      {players.length < 3
+                        ? 'Need at least 3 players'
+                        : 'Start Game'}
+                    </div>
+                  </div>
+                )}
+              </Button>
+            </ItemActions>
 
-          {players && players.length < 2 && (
-            <div className='text-amber-600 text-sm text-center mt-3 font-medium'>
-              Invite {3 - players.length} more player
-              {players.length === 1 ? '' : 's'} to start
-            </div>
-          )}
-        </div>
+            {players && players.length < 2 && (
+              <ItemDescription className='text-amber-600 text-sm text-center mt-3 font-medium'>
+                Invite {3 - players.length} more player
+                {players.length === 1 ? '' : 's'} to start
+              </ItemDescription>
+            )}
+          </ItemContent>
+        </Item>
       ) : (
-        <div className='bg-white rounded-3xl p-6 shadow-lg'>
-          <div className='items-center'>
-            <div className='text-gray-700 text-lg font-semibold text-center mt-2'>
+        <Item variant='outline' className='bg-white rounded-3xl p-6 shadow-lg'>
+          <ItemContent className='items-center'>
+            <ItemTitle className='text-gray-700 text-lg font-semibold text-center mt-2'>
               Waiting for host to start the game
-            </div>
-            <div className='text-gray-500 text-center mt-2'>
+            </ItemTitle>
+            <ItemDescription className='text-gray-500 text-center mt-2'>
               Invite more friends while you wait!
-            </div>
-          </div>
-        </div>
+            </ItemDescription>
+          </ItemContent>
+        </Item>
       )}
     </div>
   );

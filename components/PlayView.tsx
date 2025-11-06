@@ -6,7 +6,7 @@ import { selectWinner, submitAnswer } from '@/services/gameService';
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { GamePlayer, Round, RoundAnswer } from '@/lib/types';
-import { showToast } from '@/components/Toast';
+import { toast } from 'sonner';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
 import RoundHeader from './play/RoundHeader';
 import CardSelector from './play/CardSelector';
@@ -67,17 +67,19 @@ export default function PlayView({
 
   async function handleSubmitAnswer() {
     if (selectedCards.length === 0 || !currentRound) {
-      showToast('Por favor selecciona al menos una carta', 'warning');
+      toast.warning('Por favor selecciona al menos una carta', {
+        richColors: true,
+      });
       return;
     }
 
     const requiredCards = handleBlankCount();
     if (selectedCards.length !== requiredCards) {
-      showToast(
+      toast.warning(
         `Debes seleccionar exactamente ${requiredCards} carta${
           requiredCards > 1 ? 's' : ''
         }`,
-        'warning',
+        { richColors: true },
       );
       return;
     }
@@ -86,15 +88,15 @@ export default function PlayView({
       setSubmittingAnswer(true);
       const cardIds = selectedCards;
       if (!userId) {
-        showToast('Usuario no encontrado', 'error');
+        toast.error('Usuario no encontrado', { richColors: true });
         return;
       }
       await submitAnswer(userId, currentRound, cardIds, myCards, setMyCards);
       setSelectedCards([]);
-      showToast('Respuesta enviada exitosamente', 'success');
+      toast.success('Respuesta enviada exitosamente', { richColors: true });
     } catch (error: any) {
       logError(error, 'handleSubmitAnswer');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setSubmittingAnswer(false);
     }
@@ -102,21 +104,21 @@ export default function PlayView({
 
   async function handleSelectWinner(answerId: string) {
     if (!currentRound) {
-      showToast('Ronda no disponible', 'error');
+      toast.error('Ronda no disponible', { richColors: true });
       return;
     }
 
     setLoading(true);
     try {
       if (!userId) {
-        showToast('Usuario no encontrado', 'error');
+        toast.error('Usuario no encontrado', { richColors: true });
         return;
       }
       await selectWinner(userId, answerId, currentRound);
-      showToast('¡Ganador seleccionado!', 'success');
+      toast.success('¡Ganador seleccionado!', { richColors: true });
     } catch (error: any) {
       logError(error, 'handleSelectWinner');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setLoading(false);
     }

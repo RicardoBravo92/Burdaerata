@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRouter, useParams, redirect } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import LobbyView from '@/components/LobbyView';
 import PlayView from '@/components/PlayView';
 import RoundTransition from '@/components/RoundTransition';
@@ -10,27 +10,18 @@ import { Game, RoundAnswer } from '@/lib/types';
 import { useGame } from '@/providers/GameProvider';
 import {
   getGameByID,
-  getGamePlayerByID,
-  getGamePlayers,
   getLastRoundByGame,
   getPlayerCard,
   createUserToGame,
+  getGamePlayers,
 } from '@/services/gameService';
 import { leaveGame } from '@/services/gameService';
-import { getGamePlayer } from '@/services/gameService';
-import { useUser } from '@clerk/nextjs';
-import {
-  FaSync,
-  FaExclamationTriangle,
-  FaTrophy,
-  FaQuestion,
-} from 'react-icons/fa';
-import { showToast } from '@/components/Toast';
+import { FaExclamationTriangle, FaTrophy, FaQuestion } from 'react-icons/fa';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { useUser } from '@clerk/nextjs';
 
-// Icons replacement - you can use react-icons or similar
-const RefreshIcon = () => <FaSync className='text-4xl' />;
 const AlertIcon = () => <FaExclamationTriangle className='text-4xl' />;
 const TrophyIcon = () => <FaTrophy className='text-4xl' />;
 const HelpIcon = () => <FaQuestion className='text-4xl' />;
@@ -40,15 +31,13 @@ export default function GameScreen() {
   const id = params.id as string;
   const router = useRouter();
   const { game, setMyCards, setGame } = useGame();
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user, isSignedIn } = useUser();
   const userId = user?.id as string;
   const [players, setPlayers] = useState<any[]>([]);
   const [currentRound, setCurrentRound] = useState<any>(undefined);
   const [answers, setAnswers] = useState<RoundAnswer[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [nextRound, setNextRound] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [insufficientPlayers, setInsufficientPlayers] = useState(false);
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
 
   async function handleLeaveGame() {
@@ -58,13 +47,13 @@ export default function GameScreen() {
           ? window.confirm('¿Seguro que quieres salir de la partida?')
           : false;
       if (!confirmed) return;
-      if (!isLoaded || !isSignedIn || !user) return;
+      if (!isSignedIn || !user) return;
       await leaveGame(userId as string, id as string);
-      showToast('Saliste de la partida', 'info');
+      toast.info('Saliste de la partida', { richColors: true });
       router.replace('/game');
     } catch (error) {
       logError(error, 'handleLeaveGame');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
     }
   }
   const currentRoundRef = useRef(currentRound);
@@ -104,7 +93,7 @@ export default function GameScreen() {
       }
     } catch (error) {
       logError(error, 'fetchCurrentRound');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
       setCurrentRound(undefined);
       setAnswers([]);
     }
@@ -117,6 +106,7 @@ export default function GameScreen() {
       setMyCards(data?.cards || []);
     } catch (error) {
       logError(error, 'fetchPlayerCards');
+      toast.error(getErrorMessage(error), { richColors: true });
       setMyCards([]);
     }
   }, [id, userId]);
@@ -202,7 +192,7 @@ export default function GameScreen() {
             fetchPlayerCards();
           }
           if (newGame?.status === 'finished') {
-            showToast('¡Juego terminado!', 'info');
+            toast.info('¡Juego terminado!', { richColors: true });
             setTimeout(() => {
               router.replace('/game');
             }, 3000);
@@ -221,16 +211,13 @@ export default function GameScreen() {
           const newRound: any = payload.new;
           if (newRound) {
             if (payload.eventType === 'INSERT' && !isTransitioningRef.current) {
-              setNextRound(newRound);
-
+              setCurrentRound(newRound);
               setAnswers([]);
 
               setIsTransitioning(true);
 
               setTimeout(async () => {
-                setCurrentRound(newRound);
                 setIsTransitioning(false);
-                setNextRound(null);
               }, 3500); // Increased to 3.5 seconds for better UX
             } else if (payload.eventType === 'UPDATE') {
               // Update current round if it's the same round
@@ -310,22 +297,6 @@ export default function GameScreen() {
     fetchGameState();
   }, [id, userId]);
 
-  useEffect(() => {
-    if (
-      game?.status === 'playing' &&
-      Array.isArray(players) &&
-      players.length > 0 &&
-      players.length < 3
-    ) {
-      setInsufficientPlayers(true);
-      showToast('Partida finalizada por falta de jugadores', 'info');
-      const timeout = setTimeout(() => {
-        router.replace('/game');
-      }, 2500);
-      return () => clearTimeout(timeout);
-    }
-  }, [players.length, game?.status, router]);
-
   async function handleJoinGameFromPrompt() {
     try {
       await createUserToGame({
@@ -338,10 +309,10 @@ export default function GameScreen() {
       const updatedPlayers = await getGamePlayers(id);
       setPlayers(updatedPlayers || []);
 
-      showToast('Te uniste a la partida', 'success');
+      toast.success('Te uniste a la partida', { richColors: true });
     } catch (error) {
       logError(error, 'handleJoinGameFromPrompt');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
     }
   }
 
@@ -357,18 +328,19 @@ export default function GameScreen() {
 
       if (gameData) {
         setGame(gameData);
+
         await fetchPlayers();
         if (gameData?.status == 'playing') {
           await fetchCurrentRound();
           await fetchPlayerCards();
         }
       } else {
-        showToast('Juego no encontrado', 'error');
+        toast.error('Juego no encontrado', { richColors: true });
         router.replace('/game');
       }
     } catch (error) {
       logError(error, 'fetchGameState');
-      showToast(getErrorMessage(error), 'error');
+      toast.error(getErrorMessage(error), { richColors: true });
       router.replace('/game');
     } finally {
       setLoading(false);
@@ -378,23 +350,12 @@ export default function GameScreen() {
   async function fetchPlayers() {
     try {
       const playersData = await getGamePlayers(id as string);
-
       setPlayers(playersData || []);
     } catch (error) {
       logError(error, 'fetchPlayers');
+      toast.error(getErrorMessage(error), { richColors: true });
       setPlayers([]);
     }
-  }
-
-  if (!isLoaded) {
-    return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-4 text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white'></div>
-          <p className='text-white text-xl font-semibold'>Loading User...</p>
-        </div>
-      </div>
-    );
   }
 
   if (loading) {
@@ -403,22 +364,6 @@ export default function GameScreen() {
         <div className='items-center space-y-4 text-center'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white'></div>
           <p className='text-white text-xl font-semibold'>Loading Game...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (insufficientPlayers) {
-    return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center'>
-          <h2 className='text-lg font-bold text-[#99184e] mb-2'>
-            Partida finalizada
-          </h2>
-          <p className='text-gray-700 mb-4'>
-            Se necesitan al menos 3 jugadores para continuar.
-          </p>
-          <p className='text-gray-500 text-sm'>Redirigiendo…</p>
         </div>
       </div>
     );
@@ -453,10 +398,9 @@ export default function GameScreen() {
     );
   }
 
-  if (isTransitioning && nextRound) {
-    return <RoundTransition nextRound={nextRound} players={players} />;
+  if (isTransitioning && currentRound) {
+    return <RoundTransition round={currentRound} players={players} />;
   }
-
   if (!game) {
     return (
       <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>

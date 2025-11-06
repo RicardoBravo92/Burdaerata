@@ -5,17 +5,17 @@ import { getCardQuestion } from '@/lib/getCards';
 import { FaStar, FaUsers, FaArrowRight } from 'react-icons/fa';
 
 interface RoundTransitionProps {
-  nextRound: Round | null;
+  round: Round | null;
   players: GamePlayer[];
   onComplete?: () => void;
 }
 
 export default function RoundTransition({
-  nextRound,
+  round,
   players,
 }: RoundTransitionProps) {
-  const nextJudge = nextRound
-    ? players.find((p) => p.profile?.id === nextRound.judge_user_id)
+  const nextJudge = round
+    ? players.find((p) => p.profile?.id === round.judge_user_id)
     : null;
 
   return (
@@ -36,10 +36,10 @@ export default function RoundTransition({
           </div>
 
           {/* Next Round Info */}
-          {nextRound ? (
+          {round ? (
             <div className='text-center animate-fade-in delay-500'>
               <h3 className='text-2xl md:text-3xl font-bold text-white mb-6'>
-                Starting Round {nextRound.round_number}
+                Starting Round {round.round_number}
               </h3>
 
               {/* Next Judge */}
@@ -58,13 +58,13 @@ export default function RoundTransition({
               )}
 
               {/* Question Preview */}
-              {nextRound.question_card_id && (
+              {round.question_card_id && (
                 <div className='bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30'>
                   <p className='text-white/80 text-sm mb-3 font-semibold'>
                     New Question:
                   </p>
                   <p className='text-white text-lg font-medium'>
-                    {getCardQuestion(nextRound.question_card_id)?.text}
+                    {getCardQuestion(round.question_card_id)?.text}
                   </p>
                 </div>
               )}

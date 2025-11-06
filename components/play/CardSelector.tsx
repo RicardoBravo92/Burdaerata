@@ -1,7 +1,14 @@
-"use client";
+'use client';
 
-import { getCardAnswer } from "@/lib/getCards";
-import { useState } from "react";
+import { getCardAnswer } from '@/lib/getCards';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface CardSelectorProps {
   myCards: string[];
@@ -12,9 +19,8 @@ interface CardSelectorProps {
   submitting: boolean;
 }
 
-const RefreshIcon = () => <span className="text-2xl">🔄</span>;
-const SendIcon = () => <span className="text-2xl">📤</span>;
-const AlertIcon = () => <span className="text-2xl">⚠️</span>;
+const RefreshIcon = () => <span className='text-2xl'>🔄</span>;
+const SendIcon = () => <span className='text-2xl'>📤</span>;
 
 export default function CardSelector({
   myCards,
@@ -25,63 +31,68 @@ export default function CardSelector({
   submitting,
 }: CardSelectorProps) {
   return (
-    <div className="mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">
+    <div className='mb-6'>
+      <div className='flex justify-between items-center mb-4'>
+        <h2 className='text-xl font-bold text-gray-800'>
           Your Cards ({selectedCards.length}/{requiredCards} selected)
         </h2>
         {selectedCards.length > 0 && (
           <button
             className={`flex items-center py-3 px-6 rounded-2xl ${
-              submitting ? "bg-gray-400" : "bg-[#99184e]"
-            } text-white font-bold`}
+              submitting ? 'bg-gray-400' : 'bg-[#99184e]'
+            } text-white font-bold transition-colors duration-200`}
             onClick={onSubmit}
             disabled={submitting}
           >
             {submitting ? <RefreshIcon /> : <SendIcon />}
-            <span className="ml-2">
-              {submitting ? "Submitting..." : "Submit Answer"}
+            <span className='ml-2'>
+              {submitting ? 'Submitting...' : 'Submit Answer'}
             </span>
           </button>
         )}
       </div>
 
-      <div className="flex overflow-x-auto space-x-4 pb-4">
-        {myCards.length > 0 ? (
-          myCards.map((item: string) => (
-            <button
-              key={item}
-              className={`
-                w-64 h-32 p-4 rounded-2xl flex items-center justify-center
-                border-2 shrink-0
-                ${
-                  selectedCards.some((sc) => sc === item)
-                    ? "bg-[#99184e] border-[#99184e] text-white"
-                    : "bg-white border-gray-200 text-gray-800"
-                }
-                shadow-lg transition-all hover:scale-105
-              `}
-              onClick={() => onCardSelect(item)}
-              disabled={
-                requiredCards <= selectedCards.length &&
-                !selectedCards.some((sc) => sc === item)
-              }
-            >
-              <p className="text-base font-semibold text-center line-clamp-3">
-                {getCardAnswer(item)?.text}
-              </p>
-            </button>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center py-8 w-full">
-            <AlertIcon />
-            <p className="text-gray-500 text-lg font-medium mt-4">
-              No cards available
-            </p>
-          </div>
-        )}
-      </div>
+      <Carousel className='mx-10'>
+        <CarouselContent className='items-stretch'>
+          {myCards.map((item: string, index: number) => {
+            const isSelected = selectedCards.includes(item);
+            const isDisabled =
+              selectedCards.length >= requiredCards && !isSelected;
+
+            return (
+              <CarouselItem
+                key={index}
+                className='md:basis-1/2 lg:basis-1/3 flex'
+                onClick={() => !isDisabled && onCardSelect(item)}
+              >
+                <Card
+                  className={`
+                  flex-1 cursor-pointer transition-all duration-200
+                  ${
+                    isSelected
+                      ? 'bg-[#99184e] text-white border-[#99184e]'
+                      : 'bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50'
+                  }
+                  ${
+                    isDisabled
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:shadow-md'
+                  }
+                `}
+                >
+                  <CardContent className='flex items-center justify-center p-6 min-h-[200px] h-full'>
+                    <span className='text-xl font-semibold text-center wrap-break-word w-full leading-relaxed'>
+                      {getCardAnswer(item)?.text}
+                    </span>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
     </div>
   );
 }
-
