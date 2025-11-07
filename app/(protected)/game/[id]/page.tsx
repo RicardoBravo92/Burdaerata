@@ -1,30 +1,31 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import LobbyView from '@/components/LobbyView';
-import PlayView from '@/components/PlayView';
-import RoundTransition from '@/components/RoundTransition';
-import { supabase } from '@/lib/supabaseClient';
-import { Game, RoundAnswer } from '@/lib/types';
-import { useGame } from '@/providers/GameProvider';
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter, useParams } from "next/navigation";
+import LobbyView from "@/components/LobbyView";
+import PlayView from "@/components/PlayView";
+import RoundTransition from "@/components/RoundTransition";
+import { supabase } from "@/lib/supabaseClient";
+import { Game, RoundAnswer } from "@/lib/types";
+import { useGame } from "@/providers/GameProvider";
 import {
   getGameByID,
   getLastRoundByGame,
   getPlayerCard,
   createUserToGame,
   getGamePlayers,
-} from '@/services/gameService';
-import { leaveGame } from '@/services/gameService';
-import { FaExclamationTriangle, FaTrophy, FaQuestion } from 'react-icons/fa';
-import { getErrorMessage, logError } from '@/lib/errorHandler';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { useUser } from '@clerk/nextjs';
+} from "@/services/gameService";
+import { leaveGame } from "@/services/gameService";
+import { FaExclamationTriangle, FaTrophy, FaQuestion } from "react-icons/fa";
+import { getErrorMessage, logError } from "@/lib/errorHandler";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const AlertIcon = () => <FaExclamationTriangle className='text-4xl' />;
-const TrophyIcon = () => <FaTrophy className='text-4xl' />;
-const HelpIcon = () => <FaQuestion className='text-4xl' />;
+const AlertIcon = () => <FaExclamationTriangle className="text-4xl" />;
+const TrophyIcon = () => <FaTrophy className="text-4xl" />;
+const HelpIcon = () => <FaQuestion className="text-4xl" />;
 
 export default function GameScreen() {
   const params = useParams();
@@ -43,16 +44,16 @@ export default function GameScreen() {
   async function handleLeaveGame() {
     try {
       const confirmed =
-        typeof window !== 'undefined'
-          ? window.confirm('¿Seguro que quieres salir de la partida?')
+        typeof window !== "undefined"
+          ? window.confirm("¿Seguro que quieres salir de la partida?")
           : false;
       if (!confirmed) return;
       if (!isSignedIn || !user) return;
       await leaveGame(userId as string, id as string);
-      toast.info('Saliste de la partida', { richColors: true });
-      router.replace('/game');
+      toast.info("Saliste de la partida", { richColors: true });
+      router.replace("/game");
     } catch (error) {
-      logError(error, 'handleLeaveGame');
+      logError(error, "handleLeaveGame");
       toast.error(getErrorMessage(error), { richColors: true });
     }
   }
@@ -75,15 +76,15 @@ export default function GameScreen() {
 
       if (roundData) {
         const { data, error } = await supabase
-          .from('round_answers')
+          .from("round_answers")
           .select(
             `
             *,
             user:users(full_name)
           `,
           )
-          .eq('round_id', roundData.id)
-          .order('created_at', { ascending: true });
+          .eq("round_id", roundData.id)
+          .order("created_at", { ascending: true });
 
         if (error) throw error;
         setAnswers(data || []);
@@ -92,7 +93,7 @@ export default function GameScreen() {
         setAnswers([]);
       }
     } catch (error) {
-      logError(error, 'fetchCurrentRound');
+      logError(error, "fetchCurrentRound");
       toast.error(getErrorMessage(error), { richColors: true });
       setCurrentRound(undefined);
       setAnswers([]);
@@ -105,7 +106,7 @@ export default function GameScreen() {
       const data = await getPlayerCard(userId, id);
       setMyCards(data?.cards || []);
     } catch (error) {
-      logError(error, 'fetchPlayerCards');
+      logError(error, "fetchPlayerCards");
       toast.error(getErrorMessage(error), { richColors: true });
       setMyCards([]);
     }
@@ -114,20 +115,20 @@ export default function GameScreen() {
   const fetchAnswers = useCallback(async (roundId: string) => {
     try {
       const { data, error } = await supabase
-        .from('round_answers')
+        .from("round_answers")
         .select(
           `
           *,
           user:users(full_name)
         `,
         )
-        .eq('round_id', roundId)
-        .order('created_at', { ascending: true });
+        .eq("round_id", roundId)
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
       setAnswers(data || []);
     } catch (error) {
-      logError(error, 'fetchAnswers');
+      logError(error, "fetchAnswers");
       setAnswers([]);
     }
   }, []);
@@ -143,19 +144,19 @@ export default function GameScreen() {
     const subscription = supabase
       .channel(`game:${id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'game_players',
+          event: "*",
+          schema: "public",
+          table: "game_players",
           filter: `game_id=eq.${id}`,
         },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
+          if (payload.eventType === "INSERT") {
             // const newPlayer: any = payload.new;
             fetchPlayers();
           }
-          if (payload.eventType === 'DELETE') {
+          if (payload.eventType === "DELETE") {
             const oldPlayer: any = payload.old;
             setPlayers((prev) =>
               prev.filter(
@@ -163,7 +164,7 @@ export default function GameScreen() {
               ),
             );
           }
-          if (payload.eventType === 'UPDATE') {
+          if (payload.eventType === "UPDATE") {
             const updatedPlayer: any = payload.new;
             const { score, user_id } = updatedPlayer;
             //update score
@@ -176,41 +177,41 @@ export default function GameScreen() {
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'games',
+          event: "*",
+          schema: "public",
+          table: "games",
           filter: `id=eq.${id}`,
         },
         async (payload: any) => {
           const newGame: Game = payload.new;
           setGame(newGame);
 
-          if (newGame?.status === 'playing') {
+          if (newGame?.status === "playing") {
             fetchCurrentRound();
             fetchPlayerCards();
           }
-          if (newGame?.status === 'finished') {
-            toast.info('¡Juego terminado!', { richColors: true });
+          if (newGame?.status === "finished") {
+            toast.info("¡Juego terminado!", { richColors: true });
             setTimeout(() => {
-              router.replace('/game');
+              router.replace("/game");
             }, 3000);
           }
         },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'rounds',
+          event: "*",
+          schema: "public",
+          table: "rounds",
           filter: `game_id=eq.${id}`,
         },
         async (payload) => {
           const newRound: any = payload.new;
           if (newRound) {
-            if (payload.eventType === 'INSERT' && !isTransitioningRef.current) {
+            if (payload.eventType === "INSERT" && !isTransitioningRef.current) {
               setCurrentRound(newRound);
               setAnswers([]);
 
@@ -219,13 +220,13 @@ export default function GameScreen() {
               setTimeout(async () => {
                 setIsTransitioning(false);
               }, 3500); // Increased to 3.5 seconds for better UX
-            } else if (payload.eventType === 'UPDATE') {
+            } else if (payload.eventType === "UPDATE") {
               // Update current round if it's the same round
               if (currentRoundRef.current?.id === newRound.id) {
                 setCurrentRound(newRound);
               }
               // If it's a finished round, fetch answers to show winner
-              if (newRound.status === 'finished' && newRound.id) {
+              if (newRound.status === "finished" && newRound.id) {
                 await fetchAnswers(newRound.id);
               }
             }
@@ -247,17 +248,17 @@ export default function GameScreen() {
     const answersSubscription = supabase
       .channel(`round_answers:${currentRound.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'round_answers',
+          event: "*",
+          schema: "public",
+          table: "round_answers",
           filter: `round_id=eq.${currentRound.id}`,
         },
         (payload: any) => {
           setAnswers((prev) => {
             // Handle INSERT
-            if (payload.eventType === 'INSERT') {
+            if (payload.eventType === "INSERT") {
               const newAnswer = payload.new;
               //
               if (
@@ -269,14 +270,14 @@ export default function GameScreen() {
             }
 
             // Handle DELETE
-            if (payload.eventType === 'DELETE') {
+            if (payload.eventType === "DELETE") {
               return prev.filter(
                 (answer: RoundAnswer) => answer.id !== payload.old.id,
               );
             }
 
             // Handle UPDATE
-            if (payload.eventType === 'UPDATE') {
+            if (payload.eventType === "UPDATE") {
               return prev.map((answer: RoundAnswer) =>
                 answer.id === payload.new.id ? payload.new : answer,
               );
@@ -309,16 +310,16 @@ export default function GameScreen() {
       const updatedPlayers = await getGamePlayers(id);
       setPlayers(updatedPlayers || []);
 
-      toast.success('Te uniste a la partida', { richColors: true });
+      toast.success("Te uniste a la partida", { richColors: true });
     } catch (error) {
-      logError(error, 'handleJoinGameFromPrompt');
+      logError(error, "handleJoinGameFromPrompt");
       toast.error(getErrorMessage(error), { richColors: true });
     }
   }
 
   function handleCancelJoinPrompt() {
     setShowJoinPrompt(false);
-    router.replace('/game');
+    router.replace("/game");
   }
 
   async function fetchGameState() {
@@ -330,18 +331,18 @@ export default function GameScreen() {
         setGame(gameData);
 
         await fetchPlayers();
-        if (gameData?.status == 'playing') {
+        if (gameData?.status == "playing") {
           await fetchCurrentRound();
           await fetchPlayerCards();
         }
       } else {
-        toast.error('Juego no encontrado', { richColors: true });
-        router.replace('/game');
+        toast.error("Juego no encontrado", { richColors: true });
+        router.replace("/game");
       }
     } catch (error) {
-      logError(error, 'fetchGameState');
+      logError(error, "fetchGameState");
       toast.error(getErrorMessage(error), { richColors: true });
-      router.replace('/game');
+      router.replace("/game");
     } finally {
       setLoading(false);
     }
@@ -352,7 +353,7 @@ export default function GameScreen() {
       const playersData = await getGamePlayers(id as string);
       setPlayers(playersData || []);
     } catch (error) {
-      logError(error, 'fetchPlayers');
+      logError(error, "fetchPlayers");
       toast.error(getErrorMessage(error), { richColors: true });
       setPlayers([]);
     }
@@ -360,35 +361,34 @@ export default function GameScreen() {
 
   if (loading) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-4 text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white'></div>
-          <p className='text-white text-xl font-semibold'>Loading Game...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <Skeleton className="h-[70px] w-[340px]  md:w-[720px] rounded-xl" />
+        <Skeleton className="h-[200px] w-[340px] md:w-[720px] rounded-xl" />
+        <Skeleton className="h-[100px] w-[340px] md:w-[720px] rounded-xl" />
       </div>
     );
   }
 
-  if (showJoinPrompt && game?.status === 'waiting') {
+  if (showJoinPrompt && game?.status === "waiting") {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center'>
-          <h2 className='text-lg font-bold text-[#99184e] mb-2'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
+          <h2 className="text-lg font-bold text-[#99184e] mb-2">
             Unirte a la partida
           </h2>
-          <p className='text-gray-700 mb-4'>
+          <p className="text-gray-700 mb-4">
             No formas parte de esta partida. ¿Quieres unirte?
           </p>
-          <div className='flex justify-center gap-3'>
+          <div className="flex justify-center gap-3">
             <button
               onClick={handleCancelJoinPrompt}
-              className='px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50'
+              className="px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancelar
             </button>
             <button
               onClick={handleJoinGameFromPrompt}
-              className='px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]'
+              className="px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]"
             >
               Unirme
             </button>
@@ -403,13 +403,13 @@ export default function GameScreen() {
   }
   if (!game) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-4 p-6 text-center'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-4 p-6 text-center">
           <AlertIcon />
-          <h1 className='text-white text-xl font-semibold text-center'>
+          <h1 className="text-white text-xl font-semibold text-center">
             Game Not Found
           </h1>
-          <p className='text-white/70 text-center text-base'>
+          <p className="text-white/70 text-center text-base">
             The game you're looking for doesn't exist or you don't have access.
           </p>
         </div>
@@ -417,20 +417,20 @@ export default function GameScreen() {
     );
   }
 
-  if (game.status === 'finished') {
+  if (game.status === "finished") {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-        <div className='items-center space-y-6 p-6 text-center'>
-          <div className='bg-yellow-500 p-6 rounded-full'>
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+        <div className="items-center space-y-6 p-6 text-center">
+          <div className="bg-yellow-500 p-6 rounded-full">
             <TrophyIcon />
           </div>
-          <h1 className='text-white text-3xl font-bold text-center'>
+          <h1 className="text-white text-3xl font-bold text-center">
             Game Finished!
           </h1>
-          <p className='text-white/80 text-lg text-center'>
+          <p className="text-white/80 text-lg text-center">
             Congratulations to all players!
           </p>
-          <p className='text-white/60 text-center'>
+          <p className="text-white/60 text-center">
             Returning to home screen...
           </p>
         </div>
@@ -438,14 +438,14 @@ export default function GameScreen() {
     );
   }
 
-  if (game.status === 'waiting') {
+  if (game.status === "waiting") {
     return (
-      <div className='h-lvh'>
-        <div className='fixed top-20 right-4 z-50'>
+      <div className="h-lvh">
+        <div className="fixed top-20 right-4 md:right-12 z-50">
           <Button
-            variant='destructive'
+            variant="destructive"
             onClick={handleLeaveGame}
-            className='bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow'
+            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
           >
             Salir
           </Button>
@@ -455,14 +455,14 @@ export default function GameScreen() {
     );
   }
 
-  if (game.status === 'playing') {
+  if (game.status === "playing") {
     return (
       <>
-        <div className='fixed top-20 right-4 z-50'>
+        <div className="fixed top-20 right-4 z-50">
           <Button
-            variant='destructive'
+            variant="destructive"
             onClick={handleLeaveGame}
-            className='bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow'
+            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
           >
             Salir
           </Button>
@@ -478,10 +478,10 @@ export default function GameScreen() {
   }
 
   return (
-    <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
-      <div className='items-center space-y-4 text-center'>
+    <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
+      <div className="items-center space-y-4 text-center">
         <HelpIcon />
-        <h1 className='text-white text-xl font-semibold'>Unknown Game State</h1>
+        <h1 className="text-white text-xl font-semibold">Unknown Game State</h1>
       </div>
     </div>
   );

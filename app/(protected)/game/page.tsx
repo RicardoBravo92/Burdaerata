@@ -18,6 +18,7 @@ import {
   ItemTitle,
   ItemGroup,
 } from "@/components/ui/item";
+import { Label } from "@/components/ui/label";
 import { GAME_CONSTANTS } from "@/constants/gamesettings";
 
 // Types
@@ -45,11 +46,11 @@ const GameSettingsSection = memo(
     settings: GameSettings;
     updateSetting: (key: keyof GameSettings, value: number) => void;
   }) => (
-    <ItemFooter className="mb-6 space-y-4 p-4 bg-gray-50 rounded-2xl">
+    <ItemFooter className="mb-6  p-4 bg-gray-50 rounded-2xl ">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <Label className="block text-sm font-medium text-gray-700 mb-2">
           Max Players: {settings.maxPlayers}
-        </label>
+        </Label>
         <input
           type="range"
           min={GAME_CONSTANTS.MIN_PLAYERS}
@@ -220,30 +221,29 @@ export default function HomeTab() {
   );
 
   return (
-    <div className="h-lvh items-center justify-center p-6">
+    <div className=" items-center justify-center p-6">
       <ItemGroup className="w-full max-w-md md:max-w-2xl lg:max-w-2xl mx-auto flex flex-col gap-6">
-        {/* Create Game Card */}
         <Item
           variant="outline"
           className="bg-white rounded-3xl p-8 md:p-4 shadow-lg"
         >
           <ItemContent>
-            <ItemTitle className="text-2xl font-bold text-gray-800">
-              Create New Game
-            </ItemTitle>
+            <ItemTitle>Create New Game</ItemTitle>
             <ItemDescription>
               Start a new game session and invite your friends to join the fun!
             </ItemDescription>
-
-            {showSettings && (
-              <GameSettingsSection
-                settings={settings}
-                updateSetting={updateSetting}
-              />
-            )}
           </ItemContent>
 
           <ItemActions>
+            <Button
+              variant="outline"
+              onClick={toggleSettings}
+              className="text-gray-600 hover:text-gray-800 "
+              size="lg"
+              aria-expanded={showSettings}
+            >
+              {showSettings ? "Hide Settings" : "Game Settings"}
+            </Button>
             <Button
               size="lg"
               className={createButtonClasses}
@@ -265,41 +265,33 @@ export default function HomeTab() {
                 "Create Game"
               )}
             </Button>
-
-            <Button
-              variant="outline"
-              onClick={toggleSettings}
-              className="py-3 md:py-2 text-gray-600 hover:text-gray-800 font-medium"
-              aria-expanded={showSettings}
-              aria-controls="game-settings"
-            >
-              {showSettings ? "Hide Settings" : "Game Settings"}
-            </Button>
           </ItemActions>
-        </Item>
 
-        {/* Join Game Card */}
+          {showSettings && (
+            <GameSettingsSection
+              settings={settings}
+              updateSetting={updateSetting}
+            />
+          )}
+        </Item>
         <Item
           variant="outline"
           className="bg-white rounded-3xl p-8 md:p-4 shadow-lg"
         >
           <ItemContent>
-            <div className="text-center mb-6 md:mb-2">
-              <h2 className="text-3xl md:text-xl font-bold text-gray-800 mb-2">
-                Join Game
-              </h2>
-              <p className="text-gray-600 text-lg md:text-base leading-6">
-                Enter a game code to join an existing game
-              </p>
-            </div>
-
+            <ItemTitle>Join Game</ItemTitle>
+            <ItemDescription>
+              Enter a game code to join an existing game
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
             <JoinGameModal
               code={code}
               setCode={setCode}
               handleJoinGame={handleJoinGame}
               joinLoading={joinLoading}
             />
-          </ItemContent>
+          </ItemActions>
         </Item>
       </ItemGroup>
     </div>

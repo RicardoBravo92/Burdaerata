@@ -1,24 +1,33 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item";
 import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
 export default function Home() {
   const { isSignedIn } = useAuth();
   return (
-    <div className="w-full h-full md:h-dvh  py-2 ">
-      <div className="  max-w-sm md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-b from-[#f8f9fa] to-[#e9ecef] rounded-3xl px-6 py-4 ">
+    <div className="px-4">
+      <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-b from-[#f8f9fa] to-[#e9ecef] rounded-3xl px-6 py-4 ">
         {/* Hero Section */}
-        <div className="text-center mb-5 md:mb-8">
-          <h1 className="text-3xl md:text-5xl font-bold text-[#99184e] mb-4">
+        <Item className="text-center">
+          <ItemTitle className="text-2xl font-bold text-[#99184e]">
             ¡Bienvenido a Burdaerata!
-          </h1>
-          <p className=" text-md md:text-md text-gray-600 max-w-2xl mx-auto">
+          </ItemTitle>
+          <ItemDescription className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
             Rolitranco de juego para armar un desnalgue venezolano.
-          </p>
-        </div>
+          </ItemDescription>
+        </Item>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-8">
+        <ItemGroup className="grid md:grid-cols-3 gap-3  ">
           {[
             {
               icon: "🎴",
@@ -36,44 +45,53 @@ export default function Home() {
               desc: "Sistema de puntuación y ranking para los más creativos",
             },
           ].map((feature, i) => (
-            <div
+            <Item
               key={i}
-              className="bg-white p-3 rounded-2xl shadow-lg text-center"
+              className="bg-white rounded-2xl shadow-lg text-center"
             >
-              <div className="text-2xl mb-4">{feature.icon}</div>
-              <h3 className="text-xs font-bold mb-2 text-[#6c47ff]">
+              <ItemTitle className="text-2xl">{feature.icon}</ItemTitle>
+              <ItemTitle className="text-xs font-bold  text-[#6c47ff]">
                 {feature.title}
-              </h3>
-              <p className="text-gray-600">{feature.desc}</p>
-            </div>
+              </ItemTitle>
+              <ItemDescription className="text-gray-600">
+                {feature.desc}
+              </ItemDescription>
+            </Item>
           ))}
-        </div>
+        </ItemGroup>
 
         {/* CTA Section */}
         {!isSignedIn && (
-          <div className="bg-[#99184e] text-white rounded-3xl p-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">¿Listo para jugar?</h2>
-            <p className="text-lg mb-6 max-w-xl mx-auto">
-              Regístrate gratis y comienza a disfrutar de la experiencia
-              Burdaerata
-            </p>
+          <Item
+            variant="outline"
+            className="rounded-3xl p-6 md:p-2 text-center border-2 border-[#99184e]"
+          >
+            <ItemContent className="gap-1">
+              <ItemTitle className="text-xl md:text-xl font-bold mx-auto">
+                ¿Listo para jugar?
+              </ItemTitle>
+              <ItemDescription className=" max-w-xl mx-auto">
+                Regístrate gratis y comienza a disfrutar de la experiencia
+                Burdaerata
+              </ItemDescription>
 
-            <div className="flex justify-center gap-4">
-              <SignUpButton>
-                <button className="bg-white text-[#99184e] px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition">
-                  Crear cuenta
-                </button>
-              </SignUpButton>
-              <SignInButton>
-                <button className="border-2 border-white px-6 py-3 rounded-full font-bold hover:bg-white/10 transition">
-                  Iniciar sesión
-                </button>
-              </SignInButton>
-            </div>
-          </div>
+              <ItemGroup className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
+                <SignUpButton>
+                  <Button size="sm" variant="default">
+                    Crear cuenta
+                  </Button>
+                </SignUpButton>
+                <SignInButton>
+                  <Button size="sm" variant="secondary">
+                    Iniciar sesión
+                  </Button>
+                </SignInButton>
+              </ItemGroup>
+            </ItemContent>
+          </Item>
         )}
         {isSignedIn && redirect("/game")}
-      </div>
+      </Card>
     </div>
   );
 }
