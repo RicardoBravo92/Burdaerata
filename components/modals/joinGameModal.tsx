@@ -32,12 +32,7 @@ function joinGameModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size='lg'
-          className='block mx-auto  my-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold    md:text-sm rounded-2xl transition-all duration-200 hover:scale-105'
-        >
-          Join with Code
-        </Button>
+        <Button size='lg'>Join with Code</Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
@@ -68,20 +63,12 @@ function joinGameModal({
             </InputOTP>
           </div>
         </div>
-        <DialogFooter className='sm:justify-start'>
+        <DialogFooter className='justify-end'>
           <Button
+            size={'sm'}
             type='button'
-            variant='secondary'
             onClick={handleJoinGame}
             disabled={!code.trim() || code.length !== 6 || joinLoading}
-            className={`
-                  flex-1 py-3 text-white font-semibold rounded-2xl transition-all
-                  ${
-                    !code.trim() || code.length !== 6 || joinLoading
-                      ? 'bg-blue-400 cursor-not-allowed'
-                      : 'bg-blue-500 hover:bg-blue-600'
-                  }
-                `}
           >
             {joinLoading ? (
               <div className='flex items-center justify-center'>

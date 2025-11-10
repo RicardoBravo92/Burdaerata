@@ -1,13 +1,13 @@
-import { Game, GamePlayer } from "@/lib/types";
-import { startGame } from "@/services/gameService";
-import { FaUser, FaStar } from "react-icons/fa";
-import Image from "next/image";
-import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
-import { getErrorMessage, logError } from "@/lib/errorHandler";
-import { Button } from "./ui/button";
-import { CopyIcon, ShareIcon } from "lucide-react";
-import { toast } from "sonner";
+import { Game, GamePlayer } from '@/lib/types';
+import { startGame } from '@/services/gameService';
+import { FaUser, FaStar } from 'react-icons/fa';
+import Image from 'next/image';
+import { useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { getErrorMessage, logError } from '@/lib/errorHandler';
+import { Button } from './ui/button';
+import { CopyIcon, ShareIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 import {
   Item,
@@ -15,10 +15,9 @@ import {
   ItemContent,
   ItemDescription,
   ItemGroup,
-  ItemMedia,
   ItemTitle,
-} from "@/components/ui/item";
-import { Card, CardTitle, CardHeader, CardContent } from "./ui/card";
+} from '@/components/ui/item';
+import { Card, CardTitle, CardHeader } from './ui/card';
 
 export default function LobbyView({
   game,
@@ -45,14 +44,14 @@ export default function LobbyView({
     if (game?.code) {
       try {
         await navigator.share({
-          title: "Join my game!",
+          title: 'Join my game!',
           text: `Join my game using this code: ${game.code}`,
         });
-        toast.success("Game code shared successfully!", { richColors: true });
+        toast.success('Game code shared successfully!', { richColors: true });
       } catch (error) {
         // User cancelled sharing or error occurred
-        if (error instanceof Error && error.name !== "AbortError") {
-          logError(error, "handleShareGame");
+        if (error instanceof Error && error.name !== 'AbortError') {
+          logError(error, 'handleShareGame');
           toast.error(getErrorMessage(error), { richColors: true });
         }
       }
@@ -61,7 +60,7 @@ export default function LobbyView({
 
   async function handleStartGame() {
     if (players && players.length < 2) {
-      toast.warning("Necesitas al menos 2 jugadores para iniciar el juego", {
+      toast.warning('Necesitas al menos 2 jugadores para iniciar el juego', {
         richColors: true,
       });
       return;
@@ -70,17 +69,17 @@ export default function LobbyView({
     setLoading(true);
     try {
       if (!user) {
-        toast.error("Usuario no encontrado", { richColors: true });
+        toast.error('Usuario no encontrado', { richColors: true });
         return;
       }
       if (!game?.id) {
-        toast.error("Juego no encontrado", { richColors: true });
+        toast.error('Juego no encontrado', { richColors: true });
         return;
       }
       await startGame(user.id, game.id as string);
-      toast.success("¡Juego iniciado!", { richColors: true });
+      toast.success('¡Juego iniciado!', { richColors: true });
     } catch (error: any) {
-      logError(error, "handleStartGame");
+      logError(error, 'handleStartGame');
       toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setLoading(false);
@@ -88,39 +87,35 @@ export default function LobbyView({
   }
 
   return (
-    <div className=" md:max-w-xl mx-auto px-6 flex flex-col gap-2">
-      {/* Header */}
-      <Item>
+    <div className=' md:max-w-xl mx-auto px-6 pt-8 flex flex-col gap-4 '>
+      <Item variant={'outline'} className='rounded-3xl  shadow-lg'>
         <ItemContent>
-          <ItemTitle className="text-3xl font-bold text-white text-center">
-            Game Lobby
-          </ItemTitle>
-          <ItemDescription className="text-white/80 text-lg text-center  italic">
+          <ItemTitle>Game Lobby</ItemTitle>
+          <ItemDescription className='text-center  italic'>
             Waiting for players to join...
           </ItemDescription>
         </ItemContent>
       </Item>
-
-      <Item variant="outline" className="bg-white rounded-3xl  shadow-lg">
+      <Item variant='outline' className='rounded-3xl  shadow-lg'>
         <ItemContent>
           <ItemTitle>Share this code with friends</ItemTitle>
           <ItemDescription>{game?.code}</ItemDescription>
         </ItemContent>
-        <ItemActions className="flex flex-col md:flex-row gap-2 ">
+        <ItemActions className='flex flex-col md:flex-row gap-2 '>
           <Button
-            variant="outline"
+            variant='outline'
             className={`p-3 rounded-2xl ${
               copied
-                ? "bg-green-100"
-                : "border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40"
+                ? 'bg-green-100'
+                : 'border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
             }`}
             onClick={handleCopyCode}
           >
             <CopyIcon />
-            {copied ? "Copied!" : "Copy Code"}
+            {copied ? 'Copied!' : 'Copy Code'}
           </Button>
           <Button
-            variant="outline"
+            variant='outline'
             className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
               }`}
             onClick={handleShareGame}
@@ -130,56 +125,43 @@ export default function LobbyView({
           </Button>
         </ItemActions>
       </Item>
-
-      <Card className="bg-white rounded-3xl p-6 shadow-lg   ">
-        <CardHeader className="text-xl font-bold text-gray-800">
+      <Card className='rounded-3xl shadow-lg gap-1'>
+        <CardHeader className='text-xl font-bold text-gray-800 '>
           <CardTitle>Players ({players?.length || 0})</CardTitle>
         </CardHeader>
-        <CardContent className="flex-row justify-between items-center mb-2">
-          {players && players.length < 2 && (
-            <Item className="bg-amber-100 px-3 py-1 rounded-full">
-              <ItemTitle className="text-amber-800 text-sm font-medium">
-                Need {3 - players.length} more
-              </ItemTitle>
-            </Item>
-          )}
-        </CardContent>
 
-        <ItemGroup>
+        <ItemGroup className='px-4 flex flex-col gap-2 '>
           {players && players.length > 0 ? (
             players.map((item: GamePlayer) => (
-              <Item
-                className="flex-row justify-between items-center px-4 py-2 bg-gray-50 rounded-2xl mb-3"
-                key={item.id}
-              >
-                <ItemContent className=" items-center flex flex-row">
-                  <Item className="w-5 h-5 bg-[#99184e] rounded-full flex items-center justify-center mr-1">
+              <Item className=' bg-secondary rounded-2xl' key={item.id}>
+                <ItemContent className='flex flex-row text-center'>
+                  <Item className='w-5 h-5 bg-[#99184e] rounded-full flex items-center justify-center'>
                     {item.profile?.avatar_url &&
-                    item.profile?.avatar_url !== "" ? (
+                    item.profile?.avatar_url !== '' ? (
                       <Image
                         src={item.profile?.avatar_url}
-                        alt="Profile"
-                        className="w-5 h-5 rounded-full"
+                        alt='Profile'
+                        className='w-5 h-5 rounded-full'
                         width={20}
                         height={20}
                       />
                     ) : (
-                      <FaUser className="text-base text-white" />
+                      <FaUser className='text-base text-white' />
                     )}
                   </Item>
-                  <Item className=" font-semibold text-gray-800 text-base">
+                  <span className=' font-semibold text-gray-800 text-base '>
                     {item.profile?.full_name ||
                       item.user?.full_name ||
-                      "Unknown Player"}
+                      'Unknown Player'}
                     {item.id === user?.id && (
-                      <span className="text-[#99184e]"> (You)</span>
+                      <span className='text-[#99184e]'> (You)</span>
                     )}
-                  </Item>
+                  </span>
                 </ItemContent>
                 {item.id === game?.host_player_id && (
-                  <Item className="flex-row items-center bg-[#99184e] px-3 py-1 rounded-full">
+                  <Item className='flex-row items-center bg-[#99184e] px-3 py-1 rounded-full'>
                     <FaStar />
-                    <Item className="text-white text-sm font-bold ml-1">
+                    <Item className='text-white text-sm font-bold ml-1'>
                       Host
                     </Item>
                   </Item>
@@ -187,71 +169,58 @@ export default function LobbyView({
               </Item>
             ))
           ) : (
-            <Item className="items-center justify-center py-12">
-              <ItemTitle className="text-gray-500 text-lg font-medium mt-4">
+            <Item className='items-center justify-center py-12'>
+              <ItemTitle className='text-gray-500 text-lg font-medium mt-4'>
                 No players yet
               </ItemTitle>
-              <ItemDescription className="text-gray-400 text-center mt-2">
+              <ItemDescription className='text-gray-400 text-center mt-2'>
                 Share the game code to invite friends!
               </ItemDescription>
             </Item>
           )}
         </ItemGroup>
       </Card>
-
-      {/* Action Buttons */}
       {isHost ? (
         <Item
-          variant="outline"
-          className="bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around"
+          variant='outline'
+          className='bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around'
         >
-          <ItemContent className="items-center ">
+          <ItemContent className='items-center '>
             <ItemActions>
               <Button
+                variant='secondary'
                 className={`
               py-4 rounded-2xl items-center
-              ${
-                players && players.length >= 2 && !loading
-                  ? "bg-[#99184e]"
-                  : "bg-gray-300 hover:bg-gray-200"
-              }
+              
             `}
                 onClick={handleStartGame}
                 disabled={loading || !players || players.length < 3}
               >
                 {loading ? (
-                  <Item className="flex-row items-center">
-                    <ItemTitle className="text-white text-lg font-bold ml-2">
+                  <Item className='flex-row items-center'>
+                    <ItemTitle className='text-lg font-bold ml-2'>
                       Starting Game...
                     </ItemTitle>
                   </Item>
                 ) : (
-                  <Item className="flex-row items-center">
-                    <ItemTitle className="text-white text-lg font-bold mx-2">
-                      {players.length < 3
-                        ? "Need at least 3 players"
-                        : "Start Game"}
-                    </ItemTitle>
-                  </Item>
+                  'Start Game'
                 )}
               </Button>
             </ItemActions>
 
             {players && players.length < 2 && (
-              <ItemDescription className="text-amber-600 text-sm text-center mt-3 font-medium">
+              <ItemDescription className='text-primary text-sm text-center mt-3 font-medium'>
                 Invite {3 - players.length} more player
-                {players.length === 1 ? "" : "s"} to start
+                {players.length === 1 ? '' : 's'} to start
               </ItemDescription>
             )}
           </ItemContent>
         </Item>
       ) : (
-        <Item variant="outline" className="bg-white rounded-3xl p-6 shadow-lg">
-          <ItemContent className="items-center">
-            <ItemTitle className="text-gray-700 text-lg font-semibold text-center mt-2">
-              Waiting for host to start the game
-            </ItemTitle>
-            <ItemDescription className="text-gray-500 text-center mt-2">
+        <Item variant='outline' className='rounded-3xl shadow-lg'>
+          <ItemContent className='items-center'>
+            <ItemTitle>Waiting for host to start the game</ItemTitle>
+            <ItemDescription>
               Invite more friends while you wait!
             </ItemDescription>
           </ItemContent>
