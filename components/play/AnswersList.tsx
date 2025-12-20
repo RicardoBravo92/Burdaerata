@@ -2,7 +2,6 @@
 
 import { GamePlayer, Round, RoundAnswer } from "@/lib/types";
 import { getCardAnswer } from "@/lib/getCards";
-import { UserResource } from "@clerk/types";
 
 interface AnswersListProps {
   answers: RoundAnswer[];

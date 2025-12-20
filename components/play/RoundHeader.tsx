@@ -14,14 +14,15 @@ export default function RoundHeader({
   currentRound,
   isJudge,
 }: RoundHeaderProps) {
+  console.log("currentRound", currentRound);
   return (
-    <div className="pt-12 pb-6">
+    <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-white text-center">
+          <h1 className="text-3xl font-bold  text-center">
             Round {currentRound?.round_number}
           </h1>
-          <p className="text-white/80 text-center text-base mt-1">
+          <p className=" text-center text-base mt-1">
             {currentRound?.status === "submitting"
               ? "Submit your answers!"
               : "Waiting for judge..."}
@@ -47,4 +48,3 @@ export default function RoundHeader({
     </div>
   );
 }
-

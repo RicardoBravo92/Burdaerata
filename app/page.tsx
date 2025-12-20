@@ -8,14 +8,12 @@ import {
   ItemGroup,
   ItemTitle,
 } from "@/components/ui/item";
-import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default function Home() {
-  const { isSignedIn } = useAuth();
   return (
     <div className="px-4">
-      <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-b from-[#f8f9fa] to-[#e9ecef] rounded-3xl px-6 py-4 ">
+      <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-br from-violet-50 to-fuchsia-50 border-none shadow-xl rounded-3xl px-6 py-4 ">
         {/* Hero Section */}
         <Item className="text-center">
           <ItemTitle className="text-2xl font-bold text-[#99184e]">
@@ -61,36 +59,33 @@ export default function Home() {
         </ItemGroup>
 
         {/* CTA Section */}
-        {!isSignedIn && (
-          <Item
-            variant="outline"
-            className="rounded-3xl p-6 md:p-2 text-center border-2 border-[#99184e]"
-          >
-            <ItemContent className="gap-1">
-              <ItemTitle className="text-xl md:text-xl font-bold mx-auto">
-                ¿Listo para jugar?
-              </ItemTitle>
-              <ItemDescription className=" max-w-xl mx-auto">
-                Regístrate gratis y comienza a disfrutar de la experiencia
-                Burdaerata
-              </ItemDescription>
+        <Item
+          variant="outline"
+          className="rounded-3xl p-6 md:p-2 text-center border-2 border-[#99184e]"
+        >
+          <ItemContent className="gap-1">
+            <ItemTitle className="text-xl md:text-xl font-bold mx-auto">
+              ¿Listo para jugar?
+            </ItemTitle>
+            <ItemDescription className=" max-w-xl mx-auto">
+              Regístrate gratis y comienza a disfrutar de la experiencia
+              Burdaerata
+            </ItemDescription>
 
-              <ItemGroup className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
-                <SignUpButton>
-                  <Button size="sm" variant="default">
-                    Crear cuenta
-                  </Button>
-                </SignUpButton>
-                <SignInButton>
-                  <Button size="sm" variant="secondary">
-                    Iniciar sesión
-                  </Button>
-                </SignInButton>
-              </ItemGroup>
-            </ItemContent>
-          </Item>
-        )}
-        {isSignedIn && redirect("/game")}
+            <ItemGroup className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
+              <SignUpButton>
+                <Button size="sm" variant="default">
+                  Crear cuenta
+                </Button>
+              </SignUpButton>
+              <SignInButton>
+                <Button size="sm" variant="secondary">
+                  Iniciar sesión
+                </Button>
+              </SignInButton>
+            </ItemGroup>
+          </ItemContent>
+        </Item>
       </Card>
     </div>
   );

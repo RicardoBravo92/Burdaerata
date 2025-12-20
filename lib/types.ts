@@ -10,7 +10,7 @@ export type GameState = "waiting" | "playing" | "finished";
 export interface User {
   id: string;
   first_name: string;
-  avatar_url?: string;
+  avatar_url: string;
   last_name: string;
   full_name: string;
 }
@@ -45,7 +45,8 @@ export interface GamePlayer {
   score: number | null;
   created_at: string | null;
   user: User | null;
-  profile: User | null;
+  profile: User;
+  avatar_url: string;
 }
 
 export interface playerCards {

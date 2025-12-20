@@ -6,8 +6,9 @@ import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import RoundTransition from "@/components/RoundTransition";
 import { supabase } from "@/lib/supabaseClient";
-import { Game, RoundAnswer } from "@/lib/types";
+import { Game, RoundAnswer, GamePlayer, Round } from "@/lib/types";
 import { useGame } from "@/providers/GameProvider";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import {
   getGameByID,
   getLastRoundByGame,
@@ -34,8 +35,8 @@ export default function GameScreen() {
   const { game, setMyCards, setGame } = useGame();
   const { user, isSignedIn } = useUser();
   const userId = user?.id as string;
-  const [players, setPlayers] = useState<any[]>([]);
-  const [currentRound, setCurrentRound] = useState<any>(undefined);
+  const [players, setPlayers] = useState<GamePlayer[]>([]);
+  const [currentRound, setCurrentRound] = useState<Round | null>(null);
   const [answers, setAnswers] = useState<RoundAnswer[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,7 +60,7 @@ export default function GameScreen() {
   }
   const currentRoundRef = useRef(currentRound);
   const isTransitioningRef = useRef(isTransitioning);
-  const subscriptionRef = useRef<any>(null);
+  const subscriptionRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     currentRoundRef.current = currentRound;
@@ -95,7 +96,7 @@ export default function GameScreen() {
     } catch (error) {
       logError(error, "fetchCurrentRound");
       toast.error(getErrorMessage(error), { richColors: true });
-      setCurrentRound(undefined);
+      setCurrentRound(null);
       setAnswers([]);
     }
   }, [id]);
@@ -157,19 +158,19 @@ export default function GameScreen() {
             fetchPlayers();
           }
           if (payload.eventType === "DELETE") {
-            const oldPlayer: any = payload.old;
+            const oldPlayer = payload.old as { user_id: string };
             setPlayers((prev) =>
               prev.filter(
-                (player: any) => player.user_id !== oldPlayer.user_id,
+                (player: GamePlayer) => player.user_id !== oldPlayer.user_id,
               ),
             );
           }
           if (payload.eventType === "UPDATE") {
-            const updatedPlayer: any = payload.new;
+            const updatedPlayer = payload.new as { score: number; user_id: string };
             const { score, user_id } = updatedPlayer;
             //update score
             setPlayers((prev) =>
-              prev.map((player: any) =>
+              prev.map((player: GamePlayer) =>
                 player.user_id === user_id ? { ...player, score } : player,
               ),
             );
@@ -184,8 +185,8 @@ export default function GameScreen() {
           table: "games",
           filter: `id=eq.${id}`,
         },
-        async (payload: any) => {
-          const newGame: Game = payload.new;
+        async (payload) => {
+          const newGame = payload.new as Game;
           setGame(newGame);
 
           if (newGame?.status === "playing") {
@@ -209,7 +210,7 @@ export default function GameScreen() {
           filter: `game_id=eq.${id}`,
         },
         async (payload) => {
-          const newRound: any = payload.new;
+          const newRound = payload.new as Round;
           if (newRound) {
             if (payload.eventType === "INSERT" && !isTransitioningRef.current) {
               setCurrentRound(newRound);
@@ -240,7 +241,7 @@ export default function GameScreen() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [id, fetchCurrentRound, fetchPlayerCards, fetchAnswers, router, setGame]);
+  }, [id, fetchCurrentRound, fetchPlayerCards, fetchAnswers, router, setGame, fetchPlayers]);
 
   useEffect(() => {
     if (!currentRound?.id || !id) return;
@@ -255,7 +256,7 @@ export default function GameScreen() {
           table: "round_answers",
           filter: `round_id=eq.${currentRound.id}`,
         },
-        (payload: any) => {
+        (payload) => {
           setAnswers((prev) => {
             // Handle INSERT
             if (payload.eventType === "INSERT") {
@@ -296,6 +297,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     fetchGameState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, userId]);
 
   async function handleJoinGameFromPrompt() {
@@ -348,7 +350,7 @@ export default function GameScreen() {
     }
   }
 
-  async function fetchPlayers() {
+  const fetchPlayers = useCallback(async () => {
     try {
       const playersData = await getGamePlayers(id as string);
       setPlayers(playersData || []);
@@ -357,7 +359,7 @@ export default function GameScreen() {
       toast.error(getErrorMessage(error), { richColors: true });
       setPlayers([]);
     }
-  }
+  }, [id]);
 
   if (loading) {
     return (
@@ -410,7 +412,7 @@ export default function GameScreen() {
             Game Not Found
           </h1>
           <p className="text-white/70 text-center text-base">
-            The game you're looking for doesn't exist or you don't have access.
+            The game you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.
           </p>
         </div>
       </div>
@@ -467,12 +469,18 @@ export default function GameScreen() {
             Salir
           </Button>
         </div>
-        <PlayView
-          currentRound={currentRound}
-          players={players}
-          answers={answers}
-          isTransitioning={isTransitioning}
-        />
+        {currentRound ? (
+          <PlayView
+            currentRound={currentRound}
+            players={players}
+            answers={answers}
+            isTransitioning={isTransitioning}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-screen">
+            <Skeleton className="h-[200px] w-[340px] rounded-xl" />
+          </div>
+        )}
       </>
     );
   }
