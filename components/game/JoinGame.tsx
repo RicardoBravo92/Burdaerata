@@ -12,7 +12,7 @@ import {
   ItemTitle,
 } from '@/components/ui/item';
 import JoinGameModal from '@/components/modals/joinGameModal';
-import { joinGame } from '@/services/gameService';
+import { joinGameAction } from '@/lib/actions/game.actions';
 import { getErrorMessage, logError } from '@/lib/errorHandler';
 
 export default function JoinGame() {
@@ -31,7 +31,7 @@ export default function JoinGame() {
         return;
       }
 
-      const joinedGame = await joinGame(user.id, code);
+      const joinedGame = await joinGameAction(user.id, code);
       if (joinedGame?.id) {
         toast.success('¡Te uniste al juego exitosamente!', {
           richColors: true,

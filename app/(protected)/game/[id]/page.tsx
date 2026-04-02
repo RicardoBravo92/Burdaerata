@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
+import useSWR from "swr";
 import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import RoundTransition from "@/components/RoundTransition";
-import { supabase } from "@/lib/supabaseClient";
 import { Game, RoundAnswer, GamePlayer, Round } from "@/lib/types";
 import { useGame } from "@/providers/GameProvider";
-import { RealtimeChannel } from "@supabase/supabase-js";
 import {
-  getGameByID,
-  getLastRoundByGame,
-  getPlayerCard,
-  createUserToGame,
-  getGamePlayers,
-} from "@/services/gameService";
-import { leaveGame } from "@/services/gameService";
+  fetchGameAction,
+  fetchLastRoundAction,
+  fetchRoundAnswersAction,
+  fetchPlayerCardAction,
+  fetchGamePlayersAction,
+  leaveGameAction,
+  joinGameAction,
+} from "@/lib/actions/game.actions";
 import { FaExclamationTriangle, FaTrophy, FaQuestion } from "react-icons/fa";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
 import { Button } from "@/components/ui/button";
@@ -32,15 +32,79 @@ export default function GameScreen() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { game, setMyCards, setGame } = useGame();
+  const { setMyCards, setGame } = useGame();
   const { user, isSignedIn } = useUser();
   const userId = user?.id as string;
-  const [players, setPlayers] = useState<GamePlayer[]>([]);
-  const [currentRound, setCurrentRound] = useState<Round | null>(null);
-  const [answers, setAnswers] = useState<RoundAnswer[]>([]);
+
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [showJoinPrompt, setShowJoinPrompt] = useState(false);
+  // Derivamos el prompt de unión según el estado actual
+
+  // SWR fetching
+  const { data: players, mutate: mutatePlayers } = useSWR<GamePlayer[]>(
+    id ? `game_players:${id}` : null,
+    () => fetchGamePlayersAction(id),
+    { refreshInterval: 2000 },
+  );
+
+  const { data: gameData } = useSWR<Game>(
+    id ? `game:${id}` : null,
+    () => fetchGameAction(id),
+    {
+      refreshInterval: 2000,
+      onSuccess: (data) => {
+        if (data) setGame(data as unknown as Game);
+      },
+    },
+  );
+
+  const { data: currentRound } = useSWR<Round | null>(
+    id && gameData?.status === "playing" ? `game_round:${id}` : null,
+    () => fetchLastRoundAction(id),
+    {
+      refreshInterval: 2000,
+      onSuccess: (data) => {
+        // Handle round transition if round number changes
+        if (
+          data &&
+          previousRoundRef.current &&
+          data.id !== previousRoundRef.current.id
+        ) {
+          setIsTransitioning(true);
+          setTimeout(() => setIsTransitioning(false), 3500);
+        }
+        previousRoundRef.current = data as Round | null;
+      },
+    },
+  );
+
+  const { data: answers } = useSWR<RoundAnswer[]>(
+    currentRound?.id ? `round_answers:${currentRound.id}` : null,
+    () => fetchRoundAnswersAction(currentRound!.id),
+    { refreshInterval: 2000 },
+  );
+
+  useSWR(
+    userId && id && gameData?.status === "playing"
+      ? `player_cards:${userId}:${id}`
+      : null,
+    () => fetchPlayerCardAction(userId, id),
+    {
+      onSuccess: (data) => {
+        if (data) setMyCards(data.cards || []);
+      },
+    },
+  );
+
+  const previousRoundRef = useRef<Round | null>(null);
+
+  useEffect(() => {
+    if (gameData?.status === "finished") {
+      toast.info("¡Juego terminado!", { richColors: true });
+      setTimeout(() => {
+        router.replace("/game");
+      }, 3000);
+    }
+  }, [gameData?.status, router]);
 
   async function handleLeaveGame() {
     try {
@@ -50,7 +114,7 @@ export default function GameScreen() {
           : false;
       if (!confirmed) return;
       if (!isSignedIn || !user) return;
-      await leaveGame(userId as string, id as string);
+      await leaveGameAction(userId, id);
       toast.info("Saliste de la partida", { richColors: true });
       router.replace("/game");
     } catch (error) {
@@ -58,260 +122,11 @@ export default function GameScreen() {
       toast.error(getErrorMessage(error), { richColors: true });
     }
   }
-  const currentRoundRef = useRef(currentRound);
-  const isTransitioningRef = useRef(isTransitioning);
-  const subscriptionRef = useRef<RealtimeChannel | null>(null);
-
-  useEffect(() => {
-    currentRoundRef.current = currentRound;
-  }, [currentRound]);
-
-  useEffect(() => {
-    isTransitioningRef.current = isTransitioning;
-  }, [isTransitioning]);
-
-  const fetchCurrentRound = useCallback(async () => {
-    try {
-      const roundData = await getLastRoundByGame(id as string);
-      setCurrentRound(roundData);
-
-      if (roundData) {
-        const { data, error } = await supabase
-          .from("round_answers")
-          .select(
-            `
-            *,
-            user:users(full_name)
-          `,
-          )
-          .eq("round_id", roundData.id)
-          .order("created_at", { ascending: true });
-
-        if (error) throw error;
-        setAnswers(data || []);
-      } else {
-        // Clear answers if no round
-        setAnswers([]);
-      }
-    } catch (error) {
-      logError(error, "fetchCurrentRound");
-      toast.error(getErrorMessage(error), { richColors: true });
-      setCurrentRound(null);
-      setAnswers([]);
-    }
-  }, [id]);
-
-  const fetchPlayerCards = useCallback(async () => {
-    if (!userId || !id) return;
-    try {
-      const data = await getPlayerCard(userId, id);
-      setMyCards(data?.cards || []);
-    } catch (error) {
-      logError(error, "fetchPlayerCards");
-      toast.error(getErrorMessage(error), { richColors: true });
-      setMyCards([]);
-    }
-  }, [id, userId]);
-
-  const fetchAnswers = useCallback(async (roundId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("round_answers")
-        .select(
-          `
-          *,
-          user:users(full_name)
-        `,
-        )
-        .eq("round_id", roundId)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-      setAnswers(data || []);
-    } catch (error) {
-      logError(error, "fetchAnswers");
-      setAnswers([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!id) return;
-
-    // Cleanup previous subscription if exists
-    if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe();
-    }
-
-    const subscription = supabase
-      .channel(`game:${id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "game_players",
-          filter: `game_id=eq.${id}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            // const newPlayer: any = payload.new;
-            fetchPlayers();
-          }
-          if (payload.eventType === "DELETE") {
-            const oldPlayer = payload.old as { user_id: string };
-            setPlayers((prev) =>
-              prev.filter(
-                (player: GamePlayer) => player.user_id !== oldPlayer.user_id,
-              ),
-            );
-          }
-          if (payload.eventType === "UPDATE") {
-            const updatedPlayer = payload.new as { score: number; user_id: string };
-            const { score, user_id } = updatedPlayer;
-            //update score
-            setPlayers((prev) =>
-              prev.map((player: GamePlayer) =>
-                player.user_id === user_id ? { ...player, score } : player,
-              ),
-            );
-          }
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "games",
-          filter: `id=eq.${id}`,
-        },
-        async (payload) => {
-          const newGame = payload.new as Game;
-          setGame(newGame);
-
-          if (newGame?.status === "playing") {
-            fetchCurrentRound();
-            fetchPlayerCards();
-          }
-          if (newGame?.status === "finished") {
-            toast.info("¡Juego terminado!", { richColors: true });
-            setTimeout(() => {
-              router.replace("/game");
-            }, 3000);
-          }
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "rounds",
-          filter: `game_id=eq.${id}`,
-        },
-        async (payload) => {
-          const newRound = payload.new as Round;
-          if (newRound) {
-            if (payload.eventType === "INSERT" && !isTransitioningRef.current) {
-              setCurrentRound(newRound);
-              setAnswers([]);
-
-              setIsTransitioning(true);
-
-              setTimeout(async () => {
-                setIsTransitioning(false);
-              }, 3500); // Increased to 3.5 seconds for better UX
-            } else if (payload.eventType === "UPDATE") {
-              // Update current round if it's the same round
-              if (currentRoundRef.current?.id === newRound.id) {
-                setCurrentRound(newRound);
-              }
-              // If it's a finished round, fetch answers to show winner
-              if (newRound.status === "finished" && newRound.id) {
-                await fetchAnswers(newRound.id);
-              }
-            }
-          }
-        },
-      )
-      .subscribe();
-
-    subscriptionRef.current = subscription;
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [id, fetchCurrentRound, fetchPlayerCards, fetchAnswers, router, setGame, fetchPlayers]);
-
-  useEffect(() => {
-    if (!currentRound?.id || !id) return;
-
-    const answersSubscription = supabase
-      .channel(`round_answers:${currentRound.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "round_answers",
-          filter: `round_id=eq.${currentRound.id}`,
-        },
-        (payload) => {
-          setAnswers((prev) => {
-            // Handle INSERT
-            if (payload.eventType === "INSERT") {
-              const newAnswer = payload.new;
-              //
-              if (
-                prev.some((answer: RoundAnswer) => answer.id === newAnswer.id)
-              ) {
-                return prev;
-              }
-              return [...prev, newAnswer];
-            }
-
-            // Handle DELETE
-            if (payload.eventType === "DELETE") {
-              return prev.filter(
-                (answer: RoundAnswer) => answer.id !== payload.old.id,
-              );
-            }
-
-            // Handle UPDATE
-            if (payload.eventType === "UPDATE") {
-              return prev.map((answer: RoundAnswer) =>
-                answer.id === payload.new.id ? payload.new : answer,
-              );
-            }
-
-            return prev;
-          });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      answersSubscription.unsubscribe();
-    };
-  }, [currentRound?.id, id]);
-
-  useEffect(() => {
-    fetchGameState();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, userId]);
 
   async function handleJoinGameFromPrompt() {
     try {
-      await createUserToGame({
-        game_id: id,
-        user_id: userId,
-      });
-      setShowJoinPrompt(false);
-
-      // Actualizar lista de jugadores y estado sin redirigir
-      const updatedPlayers = await getGamePlayers(id);
-      setPlayers(updatedPlayers || []);
-
+      await joinGameAction(userId, id);
+      mutatePlayers();
       toast.success("Te uniste a la partida", { richColors: true });
     } catch (error) {
       logError(error, "handleJoinGameFromPrompt");
@@ -320,48 +135,19 @@ export default function GameScreen() {
   }
 
   function handleCancelJoinPrompt() {
-    setShowJoinPrompt(false);
     router.replace("/game");
   }
 
-  async function fetchGameState() {
-    try {
-      setLoading(true);
-      const gameData = await getGameByID(id as string);
+  // Derivar si se debe mostrar el prompt de unión
+  const shouldShowJoinPrompt = useMemo(() => {
+    if (!players || !userId) return false;
+    const isPlayerInGame = (players as GamePlayer[]).some(
+      (p) => p.user_id === userId,
+    );
+    return !isPlayerInGame && gameData?.status === "waiting";
+  }, [players, userId, gameData?.status]);
 
-      if (gameData) {
-        setGame(gameData);
-
-        await fetchPlayers();
-        if (gameData?.status == "playing") {
-          await fetchCurrentRound();
-          await fetchPlayerCards();
-        }
-      } else {
-        toast.error("Juego no encontrado", { richColors: true });
-        router.replace("/game");
-      }
-    } catch (error) {
-      logError(error, "fetchGameState");
-      toast.error(getErrorMessage(error), { richColors: true });
-      router.replace("/game");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const fetchPlayers = useCallback(async () => {
-    try {
-      const playersData = await getGamePlayers(id as string);
-      setPlayers(playersData || []);
-    } catch (error) {
-      logError(error, "fetchPlayers");
-      toast.error(getErrorMessage(error), { richColors: true });
-      setPlayers([]);
-    }
-  }, [id]);
-
-  if (loading) {
+  if (!gameData && !players) {
     return (
       <div className="flex flex-col items-center justify-center gap-2">
         <Skeleton className="h-[70px] w-[340px]  md:w-[720px] rounded-xl" />
@@ -371,7 +157,7 @@ export default function GameScreen() {
     );
   }
 
-  if (showJoinPrompt && game?.status === "waiting") {
+  if (shouldShowJoinPrompt && gameData?.status === "waiting") {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
         <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
@@ -401,9 +187,15 @@ export default function GameScreen() {
   }
 
   if (isTransitioning && currentRound) {
-    return <RoundTransition round={currentRound} players={players} />;
+    return (
+      <RoundTransition
+        round={currentRound as unknown as Round}
+        players={players as unknown as GamePlayer[]}
+      />
+    );
   }
-  if (!game) {
+
+  if (!gameData) {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
         <div className="items-center space-y-4 p-6 text-center">
@@ -412,14 +204,15 @@ export default function GameScreen() {
             Game Not Found
           </h1>
           <p className="text-white/70 text-center text-base">
-            The game you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.
+            The game you&apos;re looking for doesn&apos;t exist or you
+            don&apos;t have access.
           </p>
         </div>
       </div>
     );
   }
 
-  if (game.status === "finished") {
+  if (gameData.status === "finished") {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
         <div className="items-center space-y-6 p-6 text-center">
@@ -440,7 +233,7 @@ export default function GameScreen() {
     );
   }
 
-  if (game.status === "waiting") {
+  if (gameData.status === "waiting") {
     return (
       <div className="h-lvh">
         <div className="fixed top-20 right-4 md:right-12 z-50">
@@ -452,12 +245,15 @@ export default function GameScreen() {
             Salir
           </Button>
         </div>
-        <LobbyView game={game} players={players} />
+        <LobbyView
+          game={gameData as unknown as Game}
+          players={players as unknown as GamePlayer[]}
+        />
       </div>
     );
   }
 
-  if (game.status === "playing") {
+  if (gameData.status === "playing") {
     return (
       <>
         <div className="fixed top-20 right-4 z-50">
@@ -471,9 +267,9 @@ export default function GameScreen() {
         </div>
         {currentRound ? (
           <PlayView
-            currentRound={currentRound}
-            players={players}
-            answers={answers}
+            currentRound={currentRound as unknown as Round}
+            players={players as unknown as GamePlayer[]}
+            answers={answers as unknown as RoundAnswer[]}
             isTransitioning={isTransitioning}
           />
         ) : (

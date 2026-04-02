@@ -1,6 +1,19 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware,createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
+const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)'])
 
-export default clerkMiddleware();
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth()
+
+  // Redirect authenticated users visiting the landing page to /game
+  if (userId && req.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/game', req.url))
+  }
+
+  if (!isPublicRoute(req)) {
+    await auth.protect()
+  }
+})
 
 export const config = {
   matcher: [
@@ -9,4 +22,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-};
+}

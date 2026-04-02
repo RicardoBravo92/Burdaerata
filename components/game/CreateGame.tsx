@@ -12,7 +12,7 @@ import {
   ItemDescription,
   ItemTitle,
 } from '@/components/ui/item';
-import { createGame } from '@/services/gameService';
+import { createGameAction } from '@/lib/actions/game.actions';
 import { logError } from '@/lib/errorHandler';
 import { GAME_CONSTANTS } from '@/constants/gamesettings';
 import { GameSettingsSection, GameSettings } from './GameSettings';
@@ -66,7 +66,7 @@ export default function CreateGame() {
 
     setCreateLoading(true);
     try {
-      const newGame = await createGame(
+      const newGame = await createGameAction(
         user.id,
         settings.maxPlayers,
         settings.scoreToWin,

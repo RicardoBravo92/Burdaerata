@@ -1,5 +1,5 @@
 import cardsData from '@/constants/cardsData.json';
-import { supabase } from '@/lib/supabaseClient';
+import { prisma } from '@/lib/prisma';
 import {
   AnswerCard,
   Game,
@@ -14,13 +14,10 @@ const { questions, answers } = cardsData;
 
 export async function getGameByID(gameId: string): Promise<Game | null> {
   try {
-    const { data: game, error } = await supabase
-      .from('games')
-      .select('*')
-      .eq('id', gameId)
-      .maybeSingle(); // Cambiar a maybeSingle
-
-    return error ? null : game;
+    const game = await prisma.game.findUnique({
+      where: { id: gameId },
+    });
+    return (game as unknown as Game) || null;
   } catch (error) {
     console.error('Error in getGameByID:', error);
     return null;
@@ -28,14 +25,10 @@ export async function getGameByID(gameId: string): Promise<Game | null> {
 }
 export async function getGameByCode(gameCode: string): Promise<Game | null> {
   try {
-    const { data: game, error } = await supabase
-      .from('games')
-      .select('*')
-      .eq('code', gameCode)
-      .maybeSingle();
-
-    if (error) throw error;
-    return game;
+    const game = await prisma.game.findUnique({
+      where: { code: gameCode },
+    });
+    return (game as unknown as Game) || null;
   } catch (error) {
     console.error('Error in getGameByCode:', error);
     return null;
@@ -48,20 +41,16 @@ export async function createGames(params: {
   score_to_win?: number;
 }): Promise<Game> {
   try {
-    const { data: newGame, error } = await supabase
-      .from('games')
-      .insert({
+    const newGame = await prisma.game.create({
+      data: {
         code: params.code,
         host_player_id: params.host_player_id,
         status: 'waiting',
         max_players: params.max_players || 8,
         score_to_win: params.score_to_win,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return newGame;
+      },
+    });
+    return newGame as unknown as Game;
   } catch (error) {
     console.error('Error in newGame:', error);
     throw error;
@@ -70,20 +59,16 @@ export async function createGames(params: {
 
 export async function updateGame(params: {
   game_id: string;
-  status?: 'waiting' | 'playing' | 'ended';
+  status?: 'waiting' | 'playing' | 'ended' | 'finished';
 }): Promise<Game | null> {
   try {
-    const { data: updatedGame, error } = await supabase
-      .from('games')
-      .update({
+    const updatedGame = await prisma.game.update({
+      where: { id: params.game_id },
+      data: {
         status: params.status,
-      })
-      .eq('id', params.game_id)
-      .select('*')
-      .single();
-
-    if (error) throw error;
-    return updatedGame;
+      },
+    });
+    return updatedGame as unknown as Game;
   } catch (error) {
     console.error('Error in updateGame:', error);
     throw error;
@@ -94,18 +79,13 @@ export async function getGamePlayers(
   gameId: string,
 ): Promise<GamePlayer[] | null> {
   try {
-    const { data: players, error } = await supabase
-      .from('game_players')
-      .select(
-        `
-        *,
-        profile:users("*")
-      `,
-      )
-      .eq('game_id', gameId);
-
-    if (error) throw error;
-    return players || [];
+    const players = await prisma.gamePlayer.findMany({
+      where: { game_id: gameId },
+      include: {
+        profile: true,
+      },
+    });
+    return players as unknown as GamePlayer[];
   } catch (error) {
     console.error('Error in getGamePlayers:', error);
     throw error;
@@ -116,19 +96,13 @@ export async function getGamePlayerByID(
   gamePlayerId: string,
 ): Promise<GamePlayer | null> {
   try {
-    const { data: player, error } = await supabase
-      .from('game_players')
-      .select(
-        `
-        *,
-        profile:users("*")
-      `,
-      )
-      .eq('id', gamePlayerId)
-      .single();
-
-    if (error) throw error;
-    return player || null;
+    const player = await prisma.gamePlayer.findUnique({
+      where: { id: gamePlayerId },
+      include: {
+        profile: true,
+      },
+    });
+    return (player as unknown as GamePlayer) || null;
   } catch (error) {
     console.error('Error in getGamePlayerByID:', error);
     throw error;
@@ -141,17 +115,27 @@ export async function updateGamePlayer(params: {
   score?: number;
 }): Promise<GamePlayer | null> {
   try {
-    const { data: updatedPlayer, error } = await supabase
-      .from('game_players')
-      .update({
+    await prisma.gamePlayer.updateMany({
+      where: {
+        game_id: params.game_id,
+        user_id: params.user_id,
+      },
+      data: {
         score: params.score,
-      })
-      .eq('game_id', params.game_id)
-      .eq('user_id', params.user_id)
-      .single();
-
-    if (error) throw error;
-    return updatedPlayer;
+      },
+    });
+    
+    // Prisma updateMany returns a batch payload, we need to fetch the updated record if needed.
+    // However, the original code used single().
+    const player = await prisma.gamePlayer.findFirst({
+      where: {
+        game_id: params.game_id,
+        user_id: params.user_id,
+      },
+      include: { profile: true }
+    });
+    
+    return (player as unknown as GamePlayer) || null;
   } catch (error) {
     console.error('Error in updateGamePlayer:', error);
     throw error;
@@ -163,15 +147,13 @@ export async function getGamePlayer(
   userId: string,
 ): Promise<GamePlayer | null> {
   try {
-    const { data: player, error } = await supabase
-      .from('game_players')
-      .select('*')
-      .eq('game_id', gameId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error) throw error;
-    return player || null;
+    const player = await prisma.gamePlayer.findFirst({
+      where: {
+        game_id: gameId,
+        user_id: userId,
+      },
+    });
+    return (player as unknown as GamePlayer) || null;
   } catch (error) {
     console.error('Error in getGamePlayer:', error);
     throw error;
@@ -182,19 +164,19 @@ export async function getGamePlayerWithProfile(
   id: string,
 ): Promise<GamePlayer | null> {
   try {
-    const { data: player, error } = await supabase
-      .from('game_players')
-      .select(
-        `
-        *,
-        user:users(full_name)
-      `,
-      )
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return player || null;
+    const player = await prisma.gamePlayer.findUnique({
+      where: { id: id },
+      include: {
+        profile: {
+          select: {
+            full_name: true,
+          }
+        },
+      },
+    });
+    // Original code used user:users(full_name). I'll alias it if needed, 
+    // but the object structure will have profile { full_name }.
+    return (player as unknown as GamePlayer) || null;
   } catch (error) {
     console.error('Error in getGamePlayer:', error);
     throw error;
@@ -205,21 +187,20 @@ export async function getLastRoundByGame(
   gameId: string,
 ): Promise<Round | null> {
   try {
-    const { data: round, error } = await supabase
-      .from('rounds')
-      .select(
-        `
-        *,
-        judge:users(full_name)
-      `,
-      )
-      .eq('game_id', gameId)
-      .order('round_number', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw error;
-    return round || null;
+    const round = await prisma.round.findFirst({
+      where: { game_id: gameId },
+      include: {
+        judge: {
+          select: {
+            full_name: true,
+          }
+        },
+      },
+      orderBy: {
+        round_number: 'desc',
+      },
+    });
+    return (round as unknown as Round) || null;
   } catch (error) {
     console.error('Error in getLastRoundByGame:', error);
     throw error;
@@ -228,13 +209,10 @@ export async function getLastRoundByGame(
 
 export async function getRoundByID(roundId: string): Promise<Round | null> {
   try {
-    const { data: round, error } = await supabase
-      .from('rounds')
-      .select('*')
-      .eq('id', roundId)
-      .maybeSingle(); // Cambiar a maybeSingle
-
-    return error ? null : round;
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+    });
+    return (round as unknown as Round) || null;
   } catch (error) {
     console.error('Error in getRoundByID:', error);
     return null;
@@ -246,26 +224,26 @@ export async function createRound(params: {
   round_number: number;
   question_card_id: string;
   judge_user_id: string;
+  status?: string;
 }): Promise<Round> {
   try {
-    const { data: newRound, error } = await supabase
-      .from('rounds')
-      .insert({
+    const newRound = await prisma.round.create({
+      data: {
         game_id: params.game_id,
         round_number: params.round_number,
         question_card_id: params.question_card_id,
         judge_user_id: params.judge_user_id,
-      })
-      .select(
-        `
-        *,
-        judge:users(full_name)
-      `,
-      )
-      .single();
-
-    if (error) throw error;
-    return newRound || null;
+        status: params.status || 'submitting',
+      },
+      include: {
+        judge: {
+          select: {
+            full_name: true,
+          }
+        },
+      },
+    });
+    return newRound as unknown as Round;
   } catch (error) {
     console.error('Error in createRound:', error);
     throw error;
@@ -278,18 +256,15 @@ export async function createRoundAnswer(params: {
   cards_used: string[];
 }): Promise<RoundAnswer | null> {
   try {
-    const { data: newRoundAnswer, error } = await supabase
-      .from('round_answers')
-      .insert({
+    const newRoundAnswer = await prisma.roundAnswer.create({
+      data: {
         round_id: params.round_id,
         user_id: params.user_id,
         cards_used: params.cards_used,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return newRoundAnswer || null;
+        is_winner: false,
+      },
+    });
+    return (newRoundAnswer as unknown as RoundAnswer) || null;
   } catch (error) {
     console.error('Error in createRoundAnswer:', error);
     throw error;
@@ -320,17 +295,14 @@ export async function createUserToGame(params: {
   user_id: string;
 }): Promise<GamePlayer | null> {
   try {
-    const { data: newGamePlayer, error } = await supabase
-      .from('game_players')
-      .insert({
+    const newGamePlayer = await prisma.gamePlayer.create({
+      data: {
         game_id: params.game_id,
         user_id: params.user_id,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return newGamePlayer || null;
+        score: 0,
+      },
+    });
+    return (newGamePlayer as unknown as GamePlayer) || null;
   } catch (error) {
     console.error('Error in createUserToGame:', error);
     throw error;
@@ -342,14 +314,13 @@ export async function getPlayerCard(
   game_id: string,
 ): Promise<playerCards | null> {
   try {
-    const { data: card, error } = await supabase
-      .from('player_cards')
-      .select('*')
-      .eq('game_id', game_id)
-      .eq('user_id', user_id)
-      .maybeSingle(); // Cambiar a maybeSingle
-
-    return error ? null : card;
+    const card = await prisma.playerCard.findFirst({
+      where: {
+        game_id: game_id,
+        user_id: user_id,
+      },
+    });
+    return (card as unknown as playerCards) || null;
   } catch (error) {
     console.error('Error en getPlayerCard:', error);
     return null;
@@ -361,18 +332,31 @@ export async function updatePlayerCard(params: {
   game_id: string;
 }): Promise<playerCards | null> {
   try {
-    const { data: updatedPlayerCard, error } = await supabase
-      .from('player_cards')
-      .update({
-        cards: params.cards,
-      })
-      .eq('user_id', params.user_id)
-      .eq('game_id', params.game_id)
-      .select()
-      .single();
+    // Original code used update().eq().select().single()
+    // Need to find the record first or updateMany then fetch.
+    const existing = await prisma.playerCard.findFirst({
+      where: {
+        user_id: params.user_id,
+        game_id: params.game_id,
+      }
+    });
 
-    if (error) throw error;
-    return updatedPlayerCard || null;
+    let result;
+    if (existing) {
+      result = await prisma.playerCard.update({
+        where: { id: existing.id },
+        data: { cards: params.cards },
+      });
+    } else {
+      result = await prisma.playerCard.create({
+        data: {
+          user_id: params.user_id,
+          game_id: params.game_id,
+          cards: params.cards,
+        }
+      });
+    }
+    return (result as unknown as playerCards) || null;
   } catch (error) {
     console.error('Error in updatePlayerCard:', error);
     throw error;
@@ -383,18 +367,36 @@ export async function getUserAnwerfromRound(
   userId: string,
 ): Promise<RoundAnswer | null> {
   try {
-    const { data: roundAnswers, error } = await supabase
-      .from('round_answers')
-      .select('*')
-      .eq('round_id', roundId)
-      .eq('user_id', userId)
-      .single();
-
-    if (error) throw error;
-    return roundAnswers || null;
+    const roundAnswer = await prisma.roundAnswer.findFirst({
+      where: {
+        round_id: roundId,
+        user_id: userId,
+      },
+    });
+    return (roundAnswer as unknown as RoundAnswer) || null;
   } catch (error) {
     console.error('Error in getUserAnwerfromRound:', error);
     throw error;
+  }
+}
+
+export async function getRoundAnswers(roundId: string): Promise<RoundAnswer[]> {
+  try {
+    const answers = await prisma.roundAnswer.findMany({
+      where: { round_id: roundId },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+          },
+        },
+      },
+      orderBy: { created_at: 'asc' },
+    });
+    return answers as unknown as RoundAnswer[];
+  } catch (error) {
+    console.error('Error in getRoundAnswers:', error);
+    return [];
   }
 }
 
@@ -726,30 +728,17 @@ export async function selectWinner(
       throw new Error('This round is already finished');
     }
 
-    // VERIFICACIÓN de la respuesta - FIXED: Use .maybeSingle() or handle multiple rows
-    const { data: answer, error: answerError } = await supabase
-      .from('round_answers')
-      .select('id, round_id, user_id, final_text')
-      .eq('id', winningAnswerId)
-      .eq('round_id', round.id) // Added this filter for safety
-      .maybeSingle(); // Use maybeSingle instead of single
+    // VERIFICACIÓN de la respuesta
+    const answer = await prisma.roundAnswer.findUnique({
+      where: { id: winningAnswerId },
+    });
 
-    if (answerError) {
-      console.error('❌ Error fetching answer:', answerError);
-      throw new Error(`Failed to fetch answer: ${answerError.message}`);
-    }
-
-    if (!answer) {
+    if (!answer || answer.round_id !== round.id) {
       throw new Error("Answer not found or doesn't belong to this round");
     }
 
-    // OBTENER Y ACTUALIZAR SCORE - VERSIÓN MEJORADA
+    // OBTENER Y ACTUALIZAR SCORE
     const currentPlayer = await getGamePlayer(round.game_id!, answer.user_id);
-
-    if (!currentPlayer) {
-      console.error('❌ Error fetching player score:', currentPlayer);
-      throw new Error(`Failed to fetch player score`);
-    }
 
     if (!currentPlayer) {
       console.error('❌ Player not found in game');
@@ -767,45 +756,28 @@ export async function selectWinner(
     });
 
     // Marcar la respuesta como ganadora
-    const { error: updateAnswerError } = await supabase
-      .from('round_answers')
-      .update({ is_winner: true })
-      .eq('id', winningAnswerId);
-
-    if (updateAnswerError) {
-      console.error('❌ Error marking answer as winner:', updateAnswerError);
-      throw new Error(`Failed to mark winner: ${updateAnswerError.message}`);
-    }
+    await prisma.roundAnswer.update({
+      where: { id: winningAnswerId },
+      data: { is_winner: true },
+    });
 
     // Actualizar la ronda como finished
-    const { error: updateRoundError } = await supabase
-      .from('rounds')
-      .update({
+    await prisma.round.update({
+      where: { id: round.id },
+      data: {
         winning_answer_id: winningAnswerId,
         status: 'finished',
-      })
-      .eq('id', round.id);
+      },
+    });
 
-    if (updateRoundError) {
-      console.error('❌ Error updating round:', updateRoundError);
-      throw new Error(`Failed to update round: ${updateRoundError.message}`);
-    }
-    //if newScore is equal to game score_to_win
+    // Validar si alguien ganó el juego
     const game = await getGameByID(round.game_id!);
     if (newScore === game?.score_to_win) {
       // Mark game as finished
-      const { error: updateGameError } = await supabase
-        .from('games')
-        .update({
-          status: 'finished',
-        })
-        .eq('id', round.game_id);
-
-      if (updateGameError) {
-        console.error('❌ Error updating game:', updateGameError);
-        throw new Error(`Failed to update game: ${updateGameError.message}`);
-      }
-      return { success: true };
+      await updateGame({
+        game_id: round.game_id!,
+        status: 'finished',
+      });
     }
 
     // Iniciar siguiente ronda después de un delay
@@ -847,26 +819,21 @@ export async function dealCardsToPlayers(
     const onlyIds = answerCards.map((card) => card.id);
 
     // Assign cards to players
-    const cardAssignments = players?.map((player, index) => ({
-      user_id: player.user_id,
-      game_id: gameId,
-      cards: onlyIds.slice(
-        index * cardsPerPlayer,
-        (index + 1) * cardsPerPlayer,
-      ),
-    }));
-    if (!cardAssignments) {
-      throw new Error('No players found in the game');
-    }
-    const { error: assignmentError } = await supabase
-      .from('player_cards')
-      .insert(cardAssignments);
-
-    if (assignmentError) {
-      throw assignmentError;
+    for (let i = 0; i < (players?.length || 0); i++) {
+      const player = players![i];
+      await prisma.playerCard.create({
+        data: {
+          user_id: player.user_id,
+          game_id: gameId,
+          cards: onlyIds.slice(
+            i * cardsPerPlayer,
+            (i + 1) * cardsPerPlayer,
+          ),
+        },
+      });
     }
 
-    return cardAssignments.length;
+    return players?.length || 0;
   } catch (error) {
     console.error('Error dealing cards:', error);
     throw error;
@@ -876,19 +843,20 @@ export async function dealCardsToPlayers(
 // Leave game
 export async function leaveGame(userId: string, gameId: string) {
   try {
-    const { error } = await supabase
-      .from('game_players')
-      .delete()
-      .eq('game_id', gameId)
-      .eq('user_id', userId);
-
-    if (error) throw error;
+    await prisma.gamePlayer.deleteMany({
+      where: {
+        game_id: gameId,
+        user_id: userId,
+      },
+    });
 
     // Check if game is empty and delete it if needed
     const remainingPlayers = await getGamePlayers(gameId);
 
     if (!remainingPlayers || remainingPlayers.length === 0) {
-      await supabase.from('games').delete().eq('id', gameId);
+      await prisma.game.delete({
+        where: { id: gameId },
+      });
     }
 
     return { success: true };
@@ -897,3 +865,4 @@ export async function leaveGame(userId: string, gameId: string) {
     throw error;
   }
 }
+
