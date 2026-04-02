@@ -2,7 +2,7 @@
 
 import { getCardQuestion } from "@/lib/getCards";
 import { useGame } from "@/providers/GameProvider";
-import { selectWinner, submitAnswer } from "@/services/gameService";
+import { selectWinnerAction, submitAnswerAction } from "@/lib/actions/game.actions";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { GamePlayer, Round, RoundAnswer } from "@/lib/types";
@@ -96,7 +96,13 @@ export default function PlayView({
         toast.error("Usuario no encontrado", { richColors: true });
         return;
       }
-      await submitAnswer(userId, currentRound, cardIds, myCards, setMyCards);
+      const { newPlayerCards } = await submitAnswerAction(
+        userId,
+        currentRound,
+        cardIds,
+        myCards,
+      );
+      setMyCards(newPlayerCards);
       setSelectedCards([]);
       toast.success("Respuesta enviada exitosamente", { richColors: true });
     } catch (error: unknown) {
@@ -119,7 +125,7 @@ export default function PlayView({
         toast.error("Usuario no encontrado", { richColors: true });
         return;
       }
-      await selectWinner(userId, answerId, currentRound);
+      await selectWinnerAction(userId, answerId, currentRound);
       toast.success("¡Ganador seleccionado!", { richColors: true });
     } catch (error: unknown) {
       logError(error, "handleSelectWinner");

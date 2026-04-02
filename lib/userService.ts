@@ -1,12 +1,9 @@
 import { prisma } from './prisma';
 
 export async function getUser() {
-  // If using Clerk, this might need to be handled differently.
-  // The original code used supabase.auth.getUser().
-  // Assuming we still want to fetch the user from the database.
-  // For now, I'll keep the signature but this might require the userId from Clerk.
-  console.warn('getUser() called: Ensure Clerk userId is used if Supabase Auth is removed.');
-  return null; 
+  // TODO: Implement Clerk-based user retrieval here.
+  // This is a stub as auth is now handled by Clerk and user data by Prisma.
+  return null;
 }
 
 export async function getProfile(userId: string) {

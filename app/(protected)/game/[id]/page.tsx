@@ -40,13 +40,13 @@ export default function GameScreen() {
   // Derivamos el prompt de unión según el estado actual
 
   // SWR fetching
-  const { data: players, mutate: mutatePlayers } = useSWR<GamePlayer[]>(
+  const { data: players, mutate: mutatePlayers } = useSWR<GamePlayer[] | null>(
     id ? `game_players:${id}` : null,
     () => fetchGamePlayersAction(id),
     { refreshInterval: 2000 },
   );
 
-  const { data: gameData } = useSWR<Game>(
+  const { data: gameData } = useSWR<Game | null>(
     id ? `game:${id}` : null,
     () => fetchGameAction(id),
     {

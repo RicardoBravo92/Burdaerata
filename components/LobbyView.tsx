@@ -1,5 +1,5 @@
 import { Game, GamePlayer } from "@/lib/types";
-import { startGame } from "@/services/gameService";
+import { startGameAction } from "@/lib/actions/game.actions";
 import { FaStar } from "react-icons/fa";
 import Image from "next/image";
 import { useState } from "react";
@@ -76,7 +76,7 @@ export default function LobbyView({
         toast.error("Juego no encontrado", { richColors: true });
         return;
       }
-      await startGame(user.id, game.id as string);
+      await startGameAction(user.id, game.id as string);
       toast.success("¡Juego iniciado!", { richColors: true });
     } catch (error: unknown) {
       logError(error, "handleStartGame");
