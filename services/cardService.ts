@@ -58,8 +58,8 @@ class CardService {
     return answer;
   }
 
-  async getAnswersText(ids: string[]): Promise<Map<string, string>> {
-    const result = new Map<string, string>();
+  async getAnswersText(ids: string[]): Promise<Record<string, string>> {
+    const result: Record<string, string> = {};
     const uncached = ids.filter((id) => !this.answerTextCache.has(id));
 
     if (uncached.length > 0) {
@@ -68,7 +68,7 @@ class CardService {
 
     ids.forEach((id) => {
       const text = this.answerTextCache.get(id);
-      if (text) result.set(id, text);
+      if (text) result[id] = text;
     });
 
     return result;

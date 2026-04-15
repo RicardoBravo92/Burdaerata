@@ -20,12 +20,25 @@ export class ApiClient {
     this.token = null;
   }
 
-  private getHeaders(): HeadersInit {
+  private async getHeaders(): Promise<HeadersInit> {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     };
-    if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
+
+    let token = this.token;
+
+    // If on server and no token set, try to get it from Clerk
+    if (!token && typeof window === "undefined") {
+      try {
+        const { auth } = await import("@clerk/nextjs/server");
+        token = await (await auth()).getToken();
+      } catch (e) {
+        console.error("Error fetching token on server:", e);
+      }
+    }
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
     return headers;
   }
@@ -41,7 +54,7 @@ export class ApiClient {
   async get<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "GET",
-      headers: this.getHeaders(),
+      headers: await this.getHeaders(),
     });
     return this.handleResponse<T>(response);
   }
@@ -49,7 +62,7 @@ export class ApiClient {
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "POST",
-      headers: this.getHeaders(),
+      headers: await this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
     });
     return this.handleResponse<T>(response);
@@ -58,7 +71,7 @@ export class ApiClient {
   async put<T>(endpoint: string, body?: unknown): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "PUT",
-      headers: this.getHeaders(),
+      headers: await this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
     });
     return this.handleResponse<T>(response);
@@ -67,7 +80,7 @@ export class ApiClient {
   async delete<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "DELETE",
-      headers: this.getHeaders(),
+      headers: await this.getHeaders(),
     });
     return this.handleResponse<T>(response);
   }

@@ -31,7 +31,7 @@ export default function CardSelector({
   onSubmit,
   submitting,
 }: CardSelectorProps) {
-  const [cardTexts, setCardTexts] = useState<Map<string, string>>(new Map());
+  const [cardTexts, setCardTexts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadCardTexts() {
@@ -69,7 +69,7 @@ export default function CardSelector({
         <CarouselContent className="items-stretch">
           {myCards.map((cardId: string, index: number) => {
             const isSelected = selectedCards.includes(cardId);
-            const cardText = cardTexts.get(cardId) || "Cargando...";
+            const cardText = cardTexts[cardId] || "Cargando...";
 
             return (
               <CarouselItem
