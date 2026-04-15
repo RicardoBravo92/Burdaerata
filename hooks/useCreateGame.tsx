@@ -15,7 +15,7 @@ import {
 import { createGameAction } from "@/lib/actions/game.actions";
 import { logError } from "@/lib/errorHandler";
 import { GAME_CONSTANTS } from "@/constants/gamesettings";
-import { GameSettingsSection, GameSettings } from "./GameSettings";
+import { GameSettingsSection, GameSettings } from "@/components/game/GameSettings";
 import { useAuth } from "@clerk/nextjs";
 
 export interface UseCreateGameReturn {
