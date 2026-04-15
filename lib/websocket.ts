@@ -16,7 +16,7 @@ export interface WebSocketMessage {
 type EventHandler = (data: unknown) => void;
 
 const WS_BASE_URL =
-  (typeof window !== "undefined" && process.env.NEXT_PUBLIC_WS_URL?.replace("http", "ws")) ||
+  (typeof window !== "undefined" && process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws")) ||
   process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws") ||
   "ws://localhost:8000";
 
@@ -39,6 +39,7 @@ class WebSocketClient {
     if (!this.gameId || !this.token) return;
 
     const url = `${WS_BASE_URL}/api/v1/ws/${this.gameId}?token=${this.token}`;
+    console.log("[WS] Connecting to:", url);
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
