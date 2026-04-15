@@ -178,13 +178,14 @@ export async function startGameFlow(gameId: string) {
 
 export async function submitAnswerFlow(
   roundId: string,
+  gameId: string,
   cardsUsed: string[],
   setMyCards: (cards: string[]) => void
 ) {
-  const myCardsResponse = await submitAnswer(roundId, cardsUsed);
-  const newCardsResponse = await getMyCards(myCardsResponse.game_id);
+  const result = await submitAnswer(roundId, cardsUsed);
+  const newCardsResponse = await getMyCards(gameId);
   setMyCards(newCardsResponse.cards);
-  return myCardsResponse;
+  return result;
 }
 
 export async function selectWinnerFlow(
