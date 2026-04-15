@@ -89,14 +89,14 @@ export async function startNextRound(gameId: string): Promise<Round> {
 }
 
 export async function getRoundAnswers(roundId: string): Promise<RoundAnswer[]> {
-  return api.get<RoundAnswer[]>(`/api/v1/rounds/${roundId}/answers`);
+  return api.get<RoundAnswer[]>(`/api/v1/games/rounds/${roundId}/answers`);
 }
 
 export async function submitAnswer(
   roundId: string,
   cardsUsed: string[]
 ): Promise<RoundAnswer> {
-  return api.post<RoundAnswer>(`/api/v1/rounds/${roundId}/answers`, {
+  return api.post<RoundAnswer>(`/api/v1/games/rounds/${roundId}/answers`, {
     cards_used: cardsUsed,
   });
 }
@@ -105,7 +105,7 @@ export async function selectWinner(
   roundId: string,
   winningAnswerId: string
 ): Promise<{ success: boolean }> {
-  return api.post<{ success: boolean }>(`/api/v1/rounds/${roundId}/winner`, {
+  return api.post<{ success: boolean }>(`/api/v1/games/rounds/${roundId}/winner`, {
     winning_answer_id: winningAnswerId,
   });
 }
@@ -182,9 +182,7 @@ export async function submitAnswerFlow(
   setMyCards: (cards: string[]) => void
 ) {
   const myCardsResponse = await submitAnswer(roundId, cardsUsed);
-  const newCardsResponse = await getMyCards(
-    myCardsResponse.round_id?.replace(/^\d+-/, "") || ""
-  );
+  const newCardsResponse = await getMyCards(myCardsResponse.game_id);
   setMyCards(newCardsResponse.cards);
   return myCardsResponse;
 }
