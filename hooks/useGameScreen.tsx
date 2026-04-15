@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -45,6 +45,13 @@ export function useGameScreen(
   const [answers, setAnswers] = useState<RoundAnswer[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const currentRoundRef = useRef<Round | null>(null);
+
+  // Update ref whenever currentRound changes
+  useEffect(() => {
+    currentRoundRef.current = currentRound;
+  }, [currentRound]);
+
 
   const fetchInitialData = useCallback(async () => {
     try {
@@ -138,8 +145,8 @@ export function useGameScreen(
         };
 
         const handleAnswerSubmitted = async () => {
-          if (!isMounted || !currentRound) return;
-          const roundAnswers = await fetchRoundAnswersAction(currentRound.id);
+          if (!isMounted || !currentRoundRef.current) return;
+          const roundAnswers = await fetchRoundAnswersAction(currentRoundRef.current.id);
           setAnswers(roundAnswers);
         };
 
@@ -193,13 +200,13 @@ export function useGameScreen(
       }
     }
 
-    const cleanup = initWebSocket();
+    const cleanupPromise = initWebSocket();
 
     return () => {
       isMounted = false;
-      cleanup?.then((fn) => fn?.());
+      cleanupPromise?.then((cleanup) => cleanup?.());
     };
-  }, [gameId, userId, gameData?.status, getToken, router, currentRound, setGame, setRound, setMyCards]);
+  }, [gameId, userId, getToken, router]);
 
   const handleLeaveGame = useCallback(async () => {
     const confirmed =
