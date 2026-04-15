@@ -95,12 +95,12 @@ export default function GameScreen() {
 
         const handlePlayerJoined = () => {
           fetchGamePlayersAction(id).then(setPlayers);
-          toast.info("Un jugador se unió", { richColors: true });
+          toast.info("A player joined", { richColors: true });
         };
 
         const handlePlayerLeft = () => {
           fetchGamePlayersAction(id).then(setPlayers);
-          toast.info("Un jugador salió", { richColors: true });
+          toast.info("A player left", { richColors: true });
         };
 
         const handleGameStarted = async () => {
@@ -144,17 +144,17 @@ export default function GameScreen() {
             const roundAnswers = await fetchRoundAnswersAction(currentRound.id);
             setAnswers(roundAnswers);
           }
-          toast.success("Ronda terminada", { richColors: true });
+          toast.success("Round ended", { richColors: true });
         };
 
         const handleGameFinished = () => {
-          toast.info("¡Juego terminado!", { richColors: true });
+          toast.info("Game finished!", { richColors: true });
           setGameData((prev) => prev ? { ...prev, status: "finished" } : null);
           setTimeout(() => router.replace("/game"), 3000);
         };
 
         const handleGameDeleted = () => {
-          toast.error("El juego fue eliminado", { richColors: true });
+          toast.error("Game was deleted", { richColors: true });
           router.replace("/game");
         };
 
@@ -291,13 +291,13 @@ export default function GameScreen() {
             <TrophyIcon />
           </div>
           <h1 className="text-white text-3xl font-bold text-center">
-            ¡Juego Terminado!
+            Game Over!
           </h1>
           <p className="text-white/80 text-lg text-center">
-            ¡Felicidades a todos los jugadores!
+            Congratulations to all players!
           </p>
           <p className="text-white/60 text-center">
-            Volviendo al inicio...
+            Returning to home...
           </p>
         </div>
       </div>
@@ -313,7 +313,7 @@ export default function GameScreen() {
             onClick={handleLeaveGame}
             className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
           >
-            Salir
+            Leave
           </Button>
         </div>
         <LobbyView game={gameData} players={players || []} />
@@ -330,7 +330,7 @@ export default function GameScreen() {
             onClick={handleLeaveGame}
             className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
           >
-            Salir
+            Leave
           </Button>
         </div>
         {currentRound ? (

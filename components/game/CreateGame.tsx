@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Item,
@@ -68,11 +69,10 @@ export default function CreateGame() {
         throw new Error('Failed to create game: No game ID returned');
       }
 
-      toast.success('¡Juego creado exitosamente!', { richColors: true });
       router.push(`/game/${newGame.id}`);
     } catch (error) {
       logError(error, 'handleCreateGame');
-      toast.error('Error al crear el juego. Por favor, intenta de nuevo.', {
+      toast.error('Failed to create game. Please try again.', {
         richColors: true,
       });
     } finally {
@@ -103,7 +103,8 @@ export default function CreateGame() {
           onClick={handleCreateGame}
           disabled={createLoading}
         >
-          {createLoading ? 'Creating Game...' : 'Create Game'}
+          {createLoading ? <Loader2 className="animate-spin" /> : null}
+          {createLoading ? 'Creating...' : 'Create Game'}
         </Button>
       </ItemActions>
 

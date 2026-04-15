@@ -82,16 +82,16 @@ export default function RoundTransition({
               <div className='mt-6 flex items-center justify-center gap-2 text-white/70'>
                 <FaUsers className='text-lg' />
                 <span className='text-sm'>
-                  {players.length} jugador{players.length !== 1 ? 'es' : ''} en el juego
+                  {players.length} player{players.length !== 1 ? 's' : ''} in game
                 </span>
               </div>
             </div>
           ) : (
             <div className='text-center animate-fade-in delay-500'>
               <h3 className='text-2xl md:text-3xl font-bold text-white mb-6'>
-                Preparando siguiente ronda...
+                Preparing next round...
               </h3>
-              <p className='text-white/80 text-lg'>Cargando información</p>
+              <p className='text-white/80 text-lg'>Loading information</p>
             </div>
           )}
 

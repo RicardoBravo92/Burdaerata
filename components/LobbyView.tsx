@@ -60,7 +60,7 @@ export default function LobbyView({
 
   async function handleStartGame() {
     if (players && players.length < 2) {
-      toast.warning("Necesitas al menos 2 jugadores para iniciar el juego", {
+      toast.warning("You need at least 2 players to start the game", {
         richColors: true,
       });
       return;
@@ -69,11 +69,11 @@ export default function LobbyView({
     setLoading(true);
     try {
       if (!game?.id) {
-        toast.error("Juego no encontrado", { richColors: true });
+        toast.error("Game not found", { richColors: true });
         return;
       }
       await startGameAction(game.id);
-      toast.success("¡Juego iniciado!", { richColors: true });
+      toast.success("Game started!", { richColors: true });
     } catch (error: unknown) {
       logError(error, "handleStartGame");
       toast.error(getErrorMessage(error), { richColors: true });

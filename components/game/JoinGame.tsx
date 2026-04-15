@@ -24,12 +24,12 @@ export default function JoinGame() {
     try {
       const joinedGame = await joinGameAction(code);
       if (joinedGame?.id) {
-        toast.success('¡Te uniste al juego exitosamente!', {
+        toast.success('Joined game successfully!', {
           richColors: true,
         });
         router.push(`/game/${joinedGame.id}`);
       } else {
-        toast.error('No se pudo unir al juego. Verifica el código.', {
+        toast.error('Failed to join game. Check the code.', {
           richColors: true,
         });
         setCode('');

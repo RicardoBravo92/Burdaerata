@@ -117,14 +117,14 @@ export default function PlayView({
 
   async function handleSelectWinner(answerId: string) {
     if (!currentRound) {
-      toast.error("Ronda no disponible", { richColors: true });
+      toast.error("Round not available", { richColors: true });
       return;
     }
 
     setLoading(true);
     try {
       await selectWinnerAction(currentRound.id, answerId);
-      toast.success("¡Ganador seleccionado!", { richColors: true });
+      toast.success("Winner selected!", { richColors: true });
     } catch (error: unknown) {
       logError(error, "handleSelectWinner");
       toast.error(getErrorMessage(error), { richColors: true });
@@ -141,10 +141,10 @@ export default function PlayView({
             <span className="text-2xl">🔄</span>
           </div>
           <h1 className="text-white text-3xl font-bold text-center">
-            Iniciando siguiente ronda
+            Starting next round
           </h1>
           <p className="text-white/80 text-lg text-center">
-            ¡Prepárate para el siguiente desafío!
+            Get ready for the next challenge!
           </p>
         </div>
       </div>
