@@ -157,7 +157,7 @@ export async function getQuestionText(questionCardId: string): Promise<string> {
 
 export async function getAnswerTexts(
   cardIds: string[]
-): Promise<Map<string, string>> {
+): Promise<Record<string, string>> {
   return cardService.getAnswersText(cardIds);
 }
 
