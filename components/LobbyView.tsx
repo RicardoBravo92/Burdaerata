@@ -1,13 +1,11 @@
+"use client";
+
 import { Game, GamePlayer } from "@/lib/types";
-import { startGameAction } from "@/lib/actions/game.actions";
+import { useLobby, useLobbyValidation } from "@/hooks/useLobby";
 import { FaStar } from "react-icons/fa";
 import Image from "next/image";
-import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
-import { getErrorMessage, logError } from "@/lib/errorHandler";
 import { Button } from "./ui/button";
 import { CopyIcon, ShareIcon } from "lucide-react";
-import { toast } from "sonner";
 
 import {
   Item,
@@ -19,69 +17,16 @@ import {
 } from "@/components/ui/item";
 import { Card, CardTitle, CardHeader } from "./ui/card";
 
-export default function LobbyView({
-  game,
-  players,
-}: {
+interface LobbyViewProps {
   game: Game;
   players: GamePlayer[];
-}) {
-  const { user } = useUser();
-  const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
+}
 
-  const isHost = game?.host_player_id === user?.id;
+export default function LobbyView({ game, players }: LobbyViewProps) {
+  const { isHost, copied, loading, handleCopyCode, handleShareGame, handleStartGame } =
+    useLobby(game, players);
+  const { canStart, missingPlayers } = useLobbyValidation(players);
 
-  async function handleCopyCode() {
-    if (game?.code) {
-      await navigator.clipboard.writeText(game.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }
-
-  async function handleShareGame() {
-    if (game?.code) {
-      try {
-        await navigator.share({
-          title: "Join my game!",
-          text: `Join my game using this code: ${game.code}`,
-        });
-        toast.success("Game code shared successfully!", { richColors: true });
-      } catch (error) {
-        // User cancelled sharing or error occurred
-        if (error instanceof Error && error.name !== "AbortError") {
-          logError(error, "handleShareGame");
-          toast.error(getErrorMessage(error), { richColors: true });
-        }
-      }
-    }
-  }
-
-  async function handleStartGame() {
-    if (players && players.length < 2) {
-      toast.warning("You need at least 2 players to start the game", {
-        richColors: true,
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      if (!game?.id) {
-        toast.error("Game not found", { richColors: true });
-        return;
-      }
-      await startGameAction(game.id);
-      toast.success("Game started!", { richColors: true });
-    } catch (error: unknown) {
-      logError(error, "handleStartGame");
-      toast.error(getErrorMessage(error), { richColors: true });
-    } finally {
-      setLoading(false);
-    }
-  }
-  console.log("players", players);
   return (
     <div className=" md:max-w-xl mx-auto px-6 pt-8 flex flex-col gap-4 ">
       <Item variant={"outline"} className="rounded-3xl  shadow-lg">
@@ -112,8 +57,7 @@ export default function LobbyView({
           </Button>
           <Button
             variant="outline"
-            className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'
-              }`}
+            className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'`}
             onClick={handleShareGame}
           >
             <ShareIcon />
@@ -145,9 +89,6 @@ export default function LobbyView({
                     {item.profile?.full_name ||
                       item.user?.full_name ||
                       "Unknown Player"}
-                    {item.user_id === user?.id && (
-                      <span className="text-[#99184e]"> (You)</span>
-                    )}
                   </span>
                 </ItemContent>
                 {item.user_id === game?.host_player_id && (
@@ -181,10 +122,7 @@ export default function LobbyView({
             <ItemActions>
               <Button
                 variant="secondary"
-                className={`
-              py-4 rounded-2xl items-center
-              
-            `}
+                className="py-4 rounded-2xl items-center"
                 onClick={handleStartGame}
                 disabled={loading || !players || players.length < 3}
               >
@@ -200,10 +138,10 @@ export default function LobbyView({
               </Button>
             </ItemActions>
 
-            {players && players.length < 2 && (
+            {players && !canStart && (
               <ItemDescription className="text-primary text-sm text-center mt-3 font-medium">
-                Invite {3 - players.length} more player
-                {players.length === 1 ? "" : "s"} to start
+                Invite {missingPlayers} more player
+                {missingPlayers === 1 ? "" : "s"} to start
               </ItemDescription>
             )}
           </ItemContent>
