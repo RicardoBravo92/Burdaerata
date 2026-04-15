@@ -154,11 +154,15 @@ export function useGameScreen(
           }, 3500);
         };
 
-        const handleAnswerSubmitted = async (data: any) => {
+        const handleAnswerSubmitted = (data: any) => {
           console.log("[WS] Handle Answer Submitted", data);
-          if (!isMounted || !currentRoundRef.current) return;
-          const roundAnswers = await fetchRoundAnswersAction(currentRoundRef.current.id);
-          setAnswers(roundAnswers);
+          if (!isMounted) return;
+          const newAnswer = data as RoundAnswer;
+          setAnswers((prev) => {
+            const exists = prev.some((a) => a.id === newAnswer.id);
+            if (exists) return prev;
+            return [...prev, newAnswer];
+          });
         };
 
         const handleRoundFinished = async (data: unknown) => {

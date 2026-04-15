@@ -70,7 +70,7 @@ export function usePlay({
   const isJudge = currentRound?.judge_user_id === userId;
   const isHost = game?.host_player_id === userId;
   const hasSubmitted = answers.some((answer: RoundAnswer) => answer.user_id === userId);
-  const canSubmit = !isJudge && !hasSubmitted && currentRound?.status === "submitting";
+  const canSubmit = !isJudge && !hasSubmitted && currentRound?.status === "submitting" && !submittingAnswer;
 
   const onCardSelect = useCallback(
     (card: string) => {
