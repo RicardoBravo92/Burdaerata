@@ -31,7 +31,8 @@ export class ApiClient {
     if (!token && typeof window === "undefined") {
       try {
         const { auth } = await import("@clerk/nextjs/server");
-        token = await (await auth()).getToken();
+        const authObj = await auth();
+        token = await authObj.getToken();
       } catch (e) {
         console.error("Error fetching token on server:", e);
       }

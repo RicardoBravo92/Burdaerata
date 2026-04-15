@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useGame } from "@/providers/GameProvider";
 import { useUser } from "@clerk/clerk-react";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
-import { submitAnswerAction, selectWinnerAction, fetchQuestionTextAction } from "@/lib/actions/game.actions";
+import { submitAnswerAction, selectWinnerAction, fetchQuestionAction } from "@/lib/actions/game.actions";
 import type { Round, RoundAnswer, GamePlayer } from "@/lib/types";
 
 export interface UsePlayProps {
@@ -53,12 +53,9 @@ export function usePlay({
     async function loadQuestion() {
       if (currentRound?.question_card_id) {
         try {
-          const question = await fetchQuestionTextAction(currentRound.question_card_id);
-          setQuestionText(question);
-          
-          const questions = await fetch("/api/v1/cards/questions").then(r => r.json());
-          const q = questions.find((q: { id: string; blank_count: number }) => q.id === currentRound.question_card_id);
-          setBlankCount(q?.blank_count || 1);
+          const question = await fetchQuestionAction(currentRound.question_card_id);
+          setQuestionText(question.text);
+          setBlankCount(question.blank_count || 1);
         } catch (error) {
           logError(error, "loadQuestion");
         }

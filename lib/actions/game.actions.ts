@@ -79,6 +79,10 @@ export async function leaveGameAction(gameId: string) {
   return leaveGame(gameId);
 }
 
+export async function fetchQuestionAction(questionId: string) {
+  return cardService.getQuestion(questionId);
+}
+
 export async function fetchQuestionTextAction(questionId: string) {
   return cardService.getQuestionText(questionId);
 }
