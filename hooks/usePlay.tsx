@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useGame } from "@/providers/GameProvider";
 import { useUser } from "@clerk/clerk-react";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
-import { submitAnswerAction, selectWinnerAction, fetchQuestionAction } from "@/lib/actions/game.actions";
+import { submitAnswerAction, selectWinnerAction, fetchQuestionAction, startNextRoundAction } from "@/lib/actions/game.actions";
 import type { Round, RoundAnswer, GamePlayer } from "@/lib/types";
 
 export interface UsePlayProps {
@@ -28,6 +28,8 @@ export interface UsePlayReturn {
   onCardSelect: (card: string) => void;
   handleSubmitAnswer: () => Promise<void>;
   handleSelectWinner: (answerId: string) => Promise<void>;
+  handleStartNextRound: () => Promise<void>;
+  isHost: boolean;
 }
 
 export function usePlay({
@@ -38,6 +40,7 @@ export function usePlay({
   const { myCards, setMyCards } = useGame();
   const { user } = useUser();
   const userId = user?.id;
+  const { game } = useGame();
 
   const [loading, setLoading] = useState(false);
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
@@ -65,6 +68,7 @@ export function usePlay({
   }, [currentRound?.question_card_id]);
 
   const isJudge = currentRound?.judge_user_id === userId;
+  const isHost = game?.host_player_id === players.find(p => p.user_id === userId)?.id;
   const hasSubmitted = answers.some((answer: RoundAnswer) => answer.user_id === userId);
   const canSubmit = !isJudge && !hasSubmitted && currentRound?.status === "submitting";
 
@@ -141,6 +145,20 @@ export function usePlay({
     },
     [currentRound]
   );
+  
+  const handleStartNextRound = useCallback(async () => {
+    if (!currentRound?.game_id) return;
+    setLoading(true);
+    try {
+      await startNextRoundAction(currentRound.game_id);
+      toast.success("Round started!", { richColors: true });
+    } catch (error) {
+      logError(error, "handleStartNextRound");
+      toast.error(getErrorMessage(error), { richColors: true });
+    } finally {
+      setLoading(false);
+    }
+  }, [currentRound?.game_id]);
 
   return {
     loading,
@@ -155,5 +173,7 @@ export function usePlay({
     onCardSelect,
     handleSubmitAnswer,
     handleSelectWinner,
+    handleStartNextRound,
+    isHost,
   };
 }

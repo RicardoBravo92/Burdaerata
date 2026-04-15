@@ -24,6 +24,8 @@ export default function PlayView(props: UsePlayProps) {
     onCardSelect,
     handleSubmitAnswer,
     handleSelectWinner,
+    handleStartNextRound,
+    isHost,
   } = usePlay(props);
 
   const { currentRound, players, answers, isTransitioning } = props;
@@ -48,7 +50,12 @@ export default function PlayView(props: UsePlayProps) {
 
   return (
     <div className="flex-1 md:max-w-4xl mx-auto px-6 md:h-full py-4">
-      <RoundHeader currentRound={currentRound} isJudge={isJudge} questionText={questionText} />
+      <RoundHeader 
+        currentRound={currentRound} 
+        isJudge={isJudge} 
+        questionText={questionText} 
+        players={players} 
+      />
 
       <div className="flex-1 bg-white rounded-3xl">
         {canSubmit && (
@@ -89,7 +96,12 @@ export default function PlayView(props: UsePlayProps) {
           currentUserId={userId || ""}
         />
 
-        <RoundStatusBar currentRound={currentRound} />
+        <RoundStatusBar 
+          currentRound={currentRound} 
+          isHost={isHost}
+          onNextRound={handleStartNextRound}
+          loading={loading}
+        />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ interface RoundHeaderProps {
   currentRound: Round;
   isJudge: boolean;
   questionText?: string;
+  players?: any[];
 }
 
 const StarIcon = () => <span className="text-2xl">⭐</span>;
@@ -14,7 +15,12 @@ export default function RoundHeader({
   currentRound,
   isJudge,
   questionText,
+  players,
 }: RoundHeaderProps) {
+  const judge = currentRound.judge?.full_name 
+    ? currentRound.judge.full_name 
+    : players?.find(p => p.user_id === currentRound.judge_user_id)?.profile?.full_name || "Desconocido";
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -38,7 +44,7 @@ export default function RoundHeader({
           <div className="flex items-center justify-center bg-blue-700 px-4 py-2 rounded-full self-center">
             <StarIcon />
             <span className="text-white font-semibold ml-2">
-              Juez: {currentRound.judge?.full_name || "Desconocido"}
+              Juez: {judge}
               {isJudge && " (Tú)"}
             </span>
           </div>
