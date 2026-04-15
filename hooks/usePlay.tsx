@@ -68,7 +68,7 @@ export function usePlay({
   }, [currentRound?.question_card_id]);
 
   const isJudge = currentRound?.judge_user_id === userId;
-  const isHost = game?.host_player_id === players.find(p => p.user_id === userId)?.id;
+  const isHost = game?.host_player_id === userId;
   const hasSubmitted = answers.some((answer: RoundAnswer) => answer.user_id === userId);
   const canSubmit = !isJudge && !hasSubmitted && currentRound?.status === "submitting";
 

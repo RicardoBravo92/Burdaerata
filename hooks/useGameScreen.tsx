@@ -143,9 +143,12 @@ export function useGameScreen(
           setAnswers(roundAnswers);
         };
 
-        const handleRoundFinished = async () => {
-          if (!isMounted || !currentRound) return;
-          const roundAnswers = await fetchRoundAnswersAction(currentRound.id);
+        const handleRoundFinished = async (data: unknown) => {
+          if (!isMounted) return;
+          const round = data as Round;
+          setCurrentRound(round);
+          if (round) setRound?.(round);
+          const roundAnswers = await fetchRoundAnswersAction(round.id);
           setAnswers(roundAnswers);
           toast.success("Round ended", { richColors: true });
         };
