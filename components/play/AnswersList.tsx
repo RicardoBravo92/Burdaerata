@@ -28,7 +28,7 @@ export default function AnswersList({
   currentUserId,
   players,
 }: AnswersListProps) {
-  const [cardTexts, setCardTexts] = useState<Map<string, string>>(new Map());
+  const [cardTexts, setCardTexts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadCardTexts() {
@@ -76,7 +76,7 @@ export default function AnswersList({
                       {item.cards_used &&
                         item.cards_used.map((cardId: string, idx: number) => (
                           <li key={`${item.id}-${idx}`}>
-                            {cardTexts.get(cardId) || "Cargando..."}
+                            {cardTexts[cardId] || "Cargando..."}
                           </li>
                         ))}
                     </ul>
