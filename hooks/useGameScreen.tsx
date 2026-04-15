@@ -136,8 +136,18 @@ export function useGameScreen(
           const round = data as Round;
           setCurrentRound(round);
           if (round) setRound?.(round);
-          const roundAnswers = await fetchRoundAnswersAction(round.id);
+          
+          // Refresh data for the new round
+          const [roundAnswers, cards, playerList] = await Promise.all([
+            fetchRoundAnswersAction(round.id),
+            fetchMyCardsAction(gameId),
+            fetchGamePlayersAction(gameId)
+          ]);
+          
           setAnswers(roundAnswers);
+          setMyCards(cards.cards);
+          setPlayers(playerList);
+          
           setIsTransitioning(true);
           setTimeout(() => {
             if (isMounted) setIsTransitioning(false);
@@ -156,8 +166,12 @@ export function useGameScreen(
           const round = data as Round;
           setCurrentRound(round);
           if (round) setRound?.(round);
-          const roundAnswers = await fetchRoundAnswersAction(round.id);
+          const [roundAnswers, playerList] = await Promise.all([
+            fetchRoundAnswersAction(round.id),
+            fetchGamePlayersAction(gameId)
+          ]);
           setAnswers(roundAnswers);
+          setPlayers(playerList);
           toast.success("Round ended", { richColors: true });
         };
 
