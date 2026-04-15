@@ -56,6 +56,7 @@ export class ApiClient {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "GET",
       headers: await this.getHeaders(),
+      cache: "no-store",
     });
     return this.handleResponse<T>(response);
   }
@@ -65,6 +66,7 @@ export class ApiClient {
       method: "POST",
       headers: await this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store",
     });
     return this.handleResponse<T>(response);
   }
@@ -74,6 +76,7 @@ export class ApiClient {
       method: "PUT",
       headers: await this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store",
     });
     return this.handleResponse<T>(response);
   }
@@ -82,6 +85,7 @@ export class ApiClient {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: "DELETE",
       headers: await this.getHeaders(),
+      cache: "no-store",
     });
     return this.handleResponse<T>(response);
   }

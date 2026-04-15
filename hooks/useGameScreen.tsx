@@ -144,7 +144,8 @@ export function useGameScreen(
           }, 3500);
         };
 
-        const handleAnswerSubmitted = async () => {
+        const handleAnswerSubmitted = async (data: any) => {
+          console.log("[WS] Handle Answer Submitted", data);
           if (!isMounted || !currentRoundRef.current) return;
           const roundAnswers = await fetchRoundAnswersAction(currentRoundRef.current.id);
           setAnswers(roundAnswers);
