@@ -44,6 +44,7 @@ export function usePlay({
 
   const [loading, setLoading] = useState(false);
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
+  const [startingNextRound, setStartingNextRound] = useState(false);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [questionText, setQuestionText] = useState<string>("");
   const [blankCount, setBlankCount] = useState<number>(1);
@@ -148,7 +149,8 @@ export function usePlay({
   
   const handleStartNextRound = useCallback(async () => {
     if (!currentRound?.game_id) return;
-    setLoading(true);
+    if (startingNextRound) return;
+    setStartingNextRound(true);
     try {
       await startNextRoundAction(currentRound.game_id);
       toast.success("Round started!", { richColors: true });
@@ -156,12 +158,12 @@ export function usePlay({
       logError(error, "handleStartNextRound");
       toast.error(getErrorMessage(error), { richColors: true });
     } finally {
-      setLoading(false);
+      setStartingNextRound(false);
     }
-  }, [currentRound?.game_id]);
+  }, [currentRound?.game_id, startingNextRound]);
 
   return {
-    loading,
+    loading: loading || startingNextRound || submittingAnswer,
     submittingAnswer,
     selectedCards,
     questionText,

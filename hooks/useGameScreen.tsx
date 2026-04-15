@@ -132,19 +132,23 @@ export function useGameScreen(
         };
 
         const handleNewRound = async (data: unknown) => {
+          console.log("[WS] Handle New Round", data);
           if (!isMounted) return;
           const round = data as Round;
+          
+          // Force state updates
           setCurrentRound(round);
           if (round) setRound?.(round);
           
-          // Refresh data for the new round
-          const [roundAnswers, cards, playerList] = await Promise.all([
-            fetchRoundAnswersAction(round.id),
+          // Reset answers list for the new round
+          setAnswers([]);
+          
+          // Refresh other data in parallel
+          const [cards, playerList] = await Promise.all([
             fetchMyCardsAction(gameId),
             fetchGamePlayersAction(gameId)
           ]);
           
-          setAnswers(roundAnswers);
           setMyCards(cards.cards);
           setPlayers(playerList);
           
