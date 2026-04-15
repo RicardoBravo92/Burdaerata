@@ -16,10 +16,6 @@ import {
   selectWinner,
   leaveGame,
   getPlayerCards,
-  connectToGame,
-  disconnectFromGame,
-  onGameEvent,
-  offGameEvent,
 } from "@/services/gameService";
 import { cardService } from "@/services/cardService";
 import type { Game, Round, RoundAnswer } from "@/lib/types";
@@ -90,13 +86,3 @@ export async function fetchQuestionTextAction(questionId: string) {
 export async function fetchAnswerTextsAction(cardIds: string[]) {
   return cardService.getAnswersText(cardIds);
 }
-
-export function connectToGameWS(gameId: string, token: string) {
-  connectToGame(gameId, token);
-}
-
-export function disconnectFromGameWS() {
-  disconnectFromGame();
-}
-
-export { onGameEvent, offGameEvent };

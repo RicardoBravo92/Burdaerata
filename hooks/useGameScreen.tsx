@@ -10,11 +10,13 @@ import {
   fetchMyCardsAction,
   fetchGamePlayersAction,
   leaveGameAction,
-  connectToGameWS,
-  disconnectFromGameWS,
+} from "@/lib/actions/game.actions";
+import {
+  connectToGame as connectToGameWS,
+  disconnectFromGame as disconnectFromGameWS,
   onGameEvent,
   offGameEvent,
-} from "@/lib/actions/game.actions";
+} from "@/services/gameService";
 import { useGame } from "@/providers/GameProvider";
 import { logError, getErrorMessage } from "@/lib/errorHandler";
 import type { Game, GamePlayer, Round, RoundAnswer } from "@/lib/types";
