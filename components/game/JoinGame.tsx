@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import {
   Item,
@@ -17,21 +16,13 @@ import { getErrorMessage, logError } from '@/lib/errorHandler';
 
 export default function JoinGame() {
   const router = useRouter();
-  const { user } = useUser();
   const [code, setCode] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
 
   const handleJoinGame = useCallback(async () => {
     setJoinLoading(true);
     try {
-      if (!user) {
-        toast.error('Usuario no encontrado. Por favor, inicia sesión.', {
-          richColors: true,
-        });
-        return;
-      }
-
-      const joinedGame = await joinGameAction(user.id, code);
+      const joinedGame = await joinGameAction(code);
       if (joinedGame?.id) {
         toast.success('¡Te uniste al juego exitosamente!', {
           richColors: true,
@@ -49,7 +40,7 @@ export default function JoinGame() {
     } finally {
       setJoinLoading(false);
     }
-  }, [code, user, router]);
+  }, [code, router]);
 
   return (
     <Item

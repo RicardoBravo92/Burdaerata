@@ -8,7 +8,7 @@ type GameData = {
   round: Round | null;
   setGame: (game: Game | null) => void;
   setMyCards: (cards: string[]) => void;
-  setRound?: (round: Round | null) => void;
+  setRound: (round: Round | null) => void;
 };
 
 const GameContext = createContext<GameData>({
@@ -17,6 +17,7 @@ const GameContext = createContext<GameData>({
   round: null,
   setGame: () => {},
   setMyCards: () => {},
+  setRound: () => {},
 });
 
 export default function GameProvider({ children }: PropsWithChildren) {

@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import GameProvider from '@/providers/GameProvider';
+import ClerkApiProvider from '@/providers/ClerkApiProvider';
 import { Toaster } from '@/components/ui/sonner';
 import Header from '@/components/header';
 
@@ -28,21 +29,23 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <GameProvider>
-        <html lang='en' className='h-full'>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased bg-linear-to-br from-indigo-50/20 to-violet-100/20 h-full flex flex-col`}
-          >
-            <Header />
-            <main className='flex-1 flex flex-col  overflow-auto'>
-              <div className='container max-w-full mx-auto pt-8 md:pt-2 flex-1'>
-                {children}
-              </div>
-            </main>
-            <Toaster />
-          </body>
-        </html>
-      </GameProvider>
+      <ClerkApiProvider>
+        <GameProvider>
+          <html lang='en' className='h-full'>
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased bg-linear-to-br from-indigo-50/20 to-violet-100/20 h-full flex flex-col`}
+            >
+              <Header />
+              <main className='flex-1 flex flex-col  overflow-auto'>
+                <div className='container max-w-full mx-auto pt-8 md:pt-2 flex-1'>
+                  {children}
+                </div>
+              </main>
+              <Toaster />
+            </body>
+          </html>
+        </GameProvider>
+      </ClerkApiProvider>
     </ClerkProvider>
   );
 }

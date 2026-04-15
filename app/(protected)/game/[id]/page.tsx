@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
-import useSWR from "swr";
 import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import RoundTransition from "@/components/RoundTransition";
@@ -12,16 +11,20 @@ import {
   fetchGameAction,
   fetchLastRoundAction,
   fetchRoundAnswersAction,
-  fetchPlayerCardAction,
+  fetchMyCardsAction,
   fetchGamePlayersAction,
   leaveGameAction,
-  joinGameAction,
+  connectToGameWS,
+  disconnectFromGameWS,
+  onGameEvent,
+  offGameEvent,
 } from "@/lib/actions/game.actions";
 import { FaExclamationTriangle, FaTrophy, FaQuestion } from "react-icons/fa";
-import { getErrorMessage, logError } from "@/lib/errorHandler";
+import { logError, getErrorMessage } from "@/lib/errorHandler";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const AlertIcon = () => <FaExclamationTriangle className="text-4xl" />;
@@ -32,74 +35,159 @@ export default function GameScreen() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { setMyCards, setGame } = useGame();
+  const { setMyCards, setGame, setRound } = useGame();
   const { user, isSignedIn } = useUser();
+  const { getToken } = useAuth();
   const userId = user?.id as string;
 
   const [isTransitioning, setIsTransitioning] = useState(false);
-  // Derivamos el prompt de unión según el estado actual
-
-  // SWR fetching
-  const { data: players, mutate: mutatePlayers } = useSWR<GamePlayer[] | null>(
-    id ? `game_players:${id}` : null,
-    () => fetchGamePlayersAction(id),
-    { refreshInterval: 2000 },
-  );
-
-  const { data: gameData } = useSWR<Game | null>(
-    id ? `game:${id}` : null,
-    () => fetchGameAction(id),
-    {
-      refreshInterval: 2000,
-      onSuccess: (data) => {
-        if (data) setGame(data as unknown as Game);
-      },
-    },
-  );
-
-  const { data: currentRound } = useSWR<Round | null>(
-    id && gameData?.status === "playing" ? `game_round:${id}` : null,
-    () => fetchLastRoundAction(id),
-    {
-      refreshInterval: 2000,
-      onSuccess: (data) => {
-        // Handle round transition if round number changes
-        if (
-          data &&
-          previousRoundRef.current &&
-          data.id !== previousRoundRef.current.id
-        ) {
-          setIsTransitioning(true);
-          setTimeout(() => setIsTransitioning(false), 3500);
-        }
-        previousRoundRef.current = data as Round | null;
-      },
-    },
-  );
-
-  const { data: answers } = useSWR<RoundAnswer[]>(
-    currentRound?.id ? `round_answers:${currentRound.id}` : null,
-    () => fetchRoundAnswersAction(currentRound!.id),
-    { refreshInterval: 2000 },
-  );
-
-  useSWR(
-    userId && id && gameData?.status === "playing"
-      ? `player_cards:${userId}:${id}`
-      : null,
-    () => fetchPlayerCardAction(userId, id),
-    {
-      onSuccess: (data) => {
-        if (data) setMyCards(data.cards || []);
-      },
-    },
-  );
+  const [players, setPlayers] = useState<GamePlayer[] | null>(null);
+  const [gameData, setGameData] = useState<Game | null>(null);
+  const [currentRound, setCurrentRound] = useState<Round | null>(null);
+  const [answers, setAnswers] = useState<RoundAnswer[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const previousRoundRef = useRef<Round | null>(null);
 
   useEffect(() => {
+    if (!id || !userId) return;
+
+    async function fetchData() {
+      try {
+        const [game, rounds, playerList] = await Promise.all([
+          fetchGameAction(id),
+          fetchLastRoundAction(id),
+          fetchGamePlayersAction(id),
+        ]);
+
+        setGameData(game);
+        setGame(game);
+        setPlayers(playerList);
+
+        if (game?.status === "playing" && rounds) {
+          setCurrentRound(rounds);
+          setRound(rounds);
+          const roundAnswers = await fetchRoundAnswersAction(rounds.id);
+          setAnswers(roundAnswers);
+          const cards = await fetchMyCardsAction(id);
+          setMyCards(cards.cards);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        logError(error, "fetchData");
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [id, userId]);
+
+  useEffect(() => {
+    if (!id || !userId || !gameData) return;
+
+    async function initWebSocket() {
+      try {
+        const token = await getToken();
+        if (!token) return;
+
+        connectToGameWS(id, token);
+
+        const handlePlayerJoined = () => {
+          fetchGamePlayersAction(id).then(setPlayers);
+          toast.info("Un jugador se unió", { richColors: true });
+        };
+
+        const handlePlayerLeft = () => {
+          fetchGamePlayersAction(id).then(setPlayers);
+          toast.info("Un jugador salió", { richColors: true });
+        };
+
+        const handleGameStarted = async () => {
+          const [newGame, newRound, playersData] = await Promise.all([
+            fetchGameAction(id),
+            fetchLastRoundAction(id),
+            fetchGamePlayersAction(id),
+          ]);
+          setGameData(newGame);
+          setGame(newGame);
+          setCurrentRound(newRound);
+          if (newRound) setRound?.(newRound);
+          setPlayers(playersData);
+          if (newRound) {
+            const roundAnswers = await fetchRoundAnswersAction(newRound.id);
+            setAnswers(roundAnswers);
+          }
+          const cards = await fetchMyCardsAction(id);
+          setMyCards(cards.cards);
+        };
+
+        const handleNewRound = async (data: unknown) => {
+          const round = data as Round;
+          setCurrentRound(round);
+          if (round) setRound?.(round);
+          const roundAnswers = await fetchRoundAnswersAction(round.id);
+          setAnswers(roundAnswers);
+          setIsTransitioning(true);
+          setTimeout(() => setIsTransitioning(false), 3500);
+        };
+
+        const handleAnswerSubmitted = async () => {
+          if (currentRound) {
+            const roundAnswers = await fetchRoundAnswersAction(currentRound.id);
+            setAnswers(roundAnswers);
+          }
+        };
+
+        const handleRoundFinished = async () => {
+          if (currentRound) {
+            const roundAnswers = await fetchRoundAnswersAction(currentRound.id);
+            setAnswers(roundAnswers);
+          }
+          toast.success("Ronda terminada", { richColors: true });
+        };
+
+        const handleGameFinished = () => {
+          toast.info("¡Juego terminado!", { richColors: true });
+          setGameData((prev) => prev ? { ...prev, status: "finished" } : null);
+          setTimeout(() => router.replace("/game"), 3000);
+        };
+
+        const handleGameDeleted = () => {
+          toast.error("El juego fue eliminado", { richColors: true });
+          router.replace("/game");
+        };
+
+        onGameEvent("player_joined", handlePlayerJoined);
+        onGameEvent("player_left", handlePlayerLeft);
+        onGameEvent("game_started", handleGameStarted);
+        onGameEvent("new_round", handleNewRound);
+        onGameEvent("answer_submitted", handleAnswerSubmitted);
+        onGameEvent("round_finished", handleRoundFinished);
+        onGameEvent("game_finished", handleGameFinished);
+        onGameEvent("game_deleted", handleGameDeleted);
+
+        return () => {
+          disconnectFromGameWS();
+          offGameEvent("player_joined", handlePlayerJoined);
+          offGameEvent("player_left", handlePlayerLeft);
+          offGameEvent("game_started", handleGameStarted);
+          offGameEvent("new_round", handleNewRound);
+          offGameEvent("answer_submitted", handleAnswerSubmitted);
+          offGameEvent("round_finished", handleRoundFinished);
+          offGameEvent("game_finished", handleGameFinished);
+          offGameEvent("game_deleted", handleGameDeleted);
+        };
+      } catch (error) {
+        logError(error, "initWebSocket");
+      }
+    }
+
+    initWebSocket();
+  }, [id, userId, gameData?.status, getToken]);
+
+  useEffect(() => {
     if (gameData?.status === "finished") {
-      toast.info("¡Juego terminado!", { richColors: true });
       setTimeout(() => {
         router.replace("/game");
       }, 3000);
@@ -114,7 +202,7 @@ export default function GameScreen() {
           : false;
       if (!confirmed) return;
       if (!isSignedIn || !user) return;
-      await leaveGameAction(userId, id);
+      await leaveGameAction(id);
       toast.info("Saliste de la partida", { richColors: true });
       router.replace("/game");
     } catch (error) {
@@ -123,34 +211,18 @@ export default function GameScreen() {
     }
   }
 
-  async function handleJoinGameFromPrompt() {
-    try {
-      await joinGameAction(userId, id);
-      mutatePlayers();
-      toast.success("Te uniste a la partida", { richColors: true });
-    } catch (error) {
-      logError(error, "handleJoinGameFromPrompt");
-      toast.error(getErrorMessage(error), { richColors: true });
-    }
-  }
-
-  function handleCancelJoinPrompt() {
-    router.replace("/game");
-  }
-
-  // Derivar si se debe mostrar el prompt de unión
   const shouldShowJoinPrompt = useMemo(() => {
     if (!players || !userId) return false;
     const isPlayerInGame = (players as GamePlayer[]).some(
-      (p) => p.user_id === userId,
+      (p) => p.user_id === userId
     );
     return !isPlayerInGame && gameData?.status === "waiting";
   }, [players, userId, gameData?.status]);
 
-  if (!gameData && !players) {
+  if (loading || (!gameData && !players)) {
     return (
       <div className="flex flex-col items-center justify-center gap-2">
-        <Skeleton className="h-[70px] w-[340px]  md:w-[720px] rounded-xl" />
+        <Skeleton className="h-[70px] w-[340px] md:w-[720px] rounded-xl" />
         <Skeleton className="h-[200px] w-[340px] md:w-[720px] rounded-xl" />
         <Skeleton className="h-[100px] w-[340px] md:w-[720px] rounded-xl" />
       </div>
@@ -169,13 +241,13 @@ export default function GameScreen() {
           </p>
           <div className="flex justify-center gap-3">
             <button
-              onClick={handleCancelJoinPrompt}
+              onClick={() => router.replace("/game")}
               className="px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancelar
             </button>
             <button
-              onClick={handleJoinGameFromPrompt}
+              onClick={() => router.replace("/game")}
               className="px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]"
             >
               Unirme
@@ -189,8 +261,8 @@ export default function GameScreen() {
   if (isTransitioning && currentRound) {
     return (
       <RoundTransition
-        round={currentRound as unknown as Round}
-        players={players as unknown as GamePlayer[]}
+        round={currentRound}
+        players={players || []}
       />
     );
   }
@@ -204,8 +276,7 @@ export default function GameScreen() {
             Game Not Found
           </h1>
           <p className="text-white/70 text-center text-base">
-            The game you&apos;re looking for doesn&apos;t exist or you
-            don&apos;t have access.
+            The game you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.
           </p>
         </div>
       </div>
@@ -220,13 +291,13 @@ export default function GameScreen() {
             <TrophyIcon />
           </div>
           <h1 className="text-white text-3xl font-bold text-center">
-            Game Finished!
+            ¡Juego Terminado!
           </h1>
           <p className="text-white/80 text-lg text-center">
-            Congratulations to all players!
+            ¡Felicidades a todos los jugadores!
           </p>
           <p className="text-white/60 text-center">
-            Returning to home screen...
+            Volviendo al inicio...
           </p>
         </div>
       </div>
@@ -245,10 +316,7 @@ export default function GameScreen() {
             Salir
           </Button>
         </div>
-        <LobbyView
-          game={gameData as unknown as Game}
-          players={players as unknown as GamePlayer[]}
-        />
+        <LobbyView game={gameData} players={players || []} />
       </div>
     );
   }
@@ -267,9 +335,9 @@ export default function GameScreen() {
         </div>
         {currentRound ? (
           <PlayView
-            currentRound={currentRound as unknown as Round}
-            players={players as unknown as GamePlayer[]}
-            answers={answers as unknown as RoundAnswer[]}
+            currentRound={currentRound}
+            players={players || []}
+            answers={answers}
             isTransitioning={isTransitioning}
           />
         ) : (

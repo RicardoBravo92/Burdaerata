@@ -1,13 +1,9 @@
-// Supabase types removed. Using Prisma models and local interfaces.
-
 export type GameState = "waiting" | "playing" | "finished";
 
 export interface User {
   id: string;
-  first_name: string;
-  avatar_url: string;
-  last_name: string;
-  full_name: string;
+  full_name?: string;
+  avatar_url?: string;
 }
 
 export interface QuestionCard {
@@ -24,32 +20,29 @@ export interface AnswerCard {
 export interface Game {
   id: string;
   code: string;
-  status: string | null;
+  status: string;
   host_player_id: string;
-  max_players: number | null;
-  score_to_win: number | null;
-  public: boolean | null;
-  created_at: string | null;
-  updated_at: string | null;
+  max_players: number;
+  score_to_win: number;
+  public: boolean;
 }
 
 export interface GamePlayer {
   id: string;
-  game_id: string | null;
-  user_id: string | null;
-  score: number | null;
-  created_at: string | null;
-  user: User | null;
-  profile: User;
-  avatar_url: string;
+  game_id: string;
+  user_id: string;
+  score: number;
+  is_host?: boolean;
+  is_ready?: boolean;
+  avatar_url?: string;
+  profile?: { full_name?: string; avatar_url?: string };
+  user?: { full_name?: string };
 }
 
 export interface playerCards {
   cards: string[];
-  created_at: string | null;
-  game_id: string | null;
-  id: string;
-  user_id: string | null;
+  game_id: string;
+  user_id: string;
 }
 
 export interface Profile {
@@ -60,25 +53,23 @@ export interface Profile {
 }
 
 export interface Round {
-  created_at: string | null;
-  game_id: string | null;
   id: string;
+  game_id: string;
   judge_user_id: string;
-  question_card_id: string | null;
-  round_number: number | null;
-  status: string | null;
-  updated_at: string | null;
+  question_card_id: string;
+  round_number: number;
+  status: string;
   winning_answer_id: string | null;
-  judge: User | null;
+  judge?: User;
 }
 
 export interface RoundAnswer {
-  cards_used: string[] | null;
-  created_at: string | null;
-  final_text: string | null;
   id: string;
-  is_winner: boolean | null;
-  round_id: string | null;
+  round_id: string;
   user_id: string;
-  user: User | null;
+  cards_used: string[];
+  final_text: string;
+  is_winner: boolean;
+  created_at?: string;
+  user?: { full_name?: string };
 }

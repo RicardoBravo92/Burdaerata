@@ -3,7 +3,7 @@ import { startGameAction } from "@/lib/actions/game.actions";
 import { FaStar } from "react-icons/fa";
 import Image from "next/image";
 import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/nextjs";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
 import { Button } from "./ui/button";
 import { CopyIcon, ShareIcon } from "lucide-react";
@@ -14,8 +14,8 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemGroup,
   ItemTitle,
+  ItemGroup,
 } from "@/components/ui/item";
 import { Card, CardTitle, CardHeader } from "./ui/card";
 
@@ -68,15 +68,11 @@ export default function LobbyView({
 
     setLoading(true);
     try {
-      if (!user) {
-        toast.error("Usuario no encontrado", { richColors: true });
-        return;
-      }
       if (!game?.id) {
         toast.error("Juego no encontrado", { richColors: true });
         return;
       }
-      await startGameAction(user.id, game.id as string);
+      await startGameAction(game.id);
       toast.success("¡Juego iniciado!", { richColors: true });
     } catch (error: unknown) {
       logError(error, "handleStartGame");
@@ -137,7 +133,7 @@ export default function LobbyView({
                 <ItemContent className="flex flex-row text-center">
                   <Item className="w-5 h-5  rounded-full flex items-center justify-center">
                     <Image
-                      src={item.profile.avatar_url}
+                      src={item.profile?.avatar_url || item.avatar_url || ""}
                       alt="Profile"
                       className="w-5 h-5 rounded-full"
                       width={20}
@@ -149,12 +145,12 @@ export default function LobbyView({
                     {item.profile?.full_name ||
                       item.user?.full_name ||
                       "Unknown Player"}
-                    {item.id === user?.id && (
+                    {item.user_id === user?.id && (
                       <span className="text-[#99184e]"> (You)</span>
                     )}
                   </span>
                 </ItemContent>
-                {item.id === game?.host_player_id && (
+                {item.user_id === game?.host_player_id && (
                   <Item className="flex-row items-center bg-[#99184e] px-3 py-1 rounded-full">
                     <FaStar />
                     <Item className="text-white text-sm font-bold ml-1">

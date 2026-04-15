@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { GamePlayer, Round, RoundAnswer } from "@/lib/types";
-import { getCardAnswer } from "@/lib/getCards";
+import { fetchAnswerTextsAction } from "@/lib/actions/game.actions";
 
 interface AnswersListProps {
   answers: RoundAnswer[];
@@ -27,15 +28,28 @@ export default function AnswersList({
   currentUserId,
   players,
 }: AnswersListProps) {
+  const [cardTexts, setCardTexts] = useState<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    async function loadCardTexts() {
+      const allCardIds = answers.flatMap((a) => a.cards_used || []);
+      if (allCardIds.length > 0) {
+        const texts = await fetchAnswerTextsAction(allCardIds);
+        setCardTexts(texts);
+      }
+    }
+    loadCardTexts();
+  }, [answers]);
+
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">
-          {isJudge ? "Select Winner" : "Submitted Answers"}
+          {isJudge ? "Seleccionar Ganador" : "Respuestas Enviadas"}
         </h2>
         <div className="bg-gray-100 px-3 py-1 rounded-full">
           <span className="text-gray-700 font-semibold">
-            {answers.length} {answers.length === 1 ? "answer" : "answers"}
+            {answers.length} {answers.length === 1 ? "respuesta" : "respuestas"}
           </span>
         </div>
       </div>
@@ -62,16 +76,16 @@ export default function AnswersList({
                       {item.cards_used &&
                         item.cards_used.map((cardId: string, idx: number) => (
                           <li key={`${item.id}-${idx}`}>
-                            {getCardAnswer(cardId)?.text}
+                            {cardTexts.get(cardId) || "Cargando..."}
                           </li>
                         ))}
                     </ul>
                   </p>
                   <span className="text-gray-600 text-sm mt-2 block">
-                    by{" "}
+                    por{" "}
                     {players.find((p) => p.user_id === item.user_id)?.profile
-                      ?.full_name || "Unknown"}
-                    {item.user_id === currentUserId && " (You)"}
+                      ?.full_name || "Desconocido"}
+                    {item.user_id === currentUserId && " (Tú)"}
                   </span>
                 </div>
 
@@ -80,7 +94,7 @@ export default function AnswersList({
                     <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                       <TrophyIcon />
                       <span className="text-yellow-800 font-bold ml-1 text-sm">
-                        Winner!
+                        ¡Ganador!
                       </span>
                     </div>
                   ) : (
@@ -96,7 +110,7 @@ export default function AnswersList({
                         disabled={loading || answers.length < playersCount - 1}
                       >
                         <TrophyIcon />
-                        <span className="ml-1">Select Winner</span>
+                        <span className="ml-1">Seleccionar</span>
                       </button>
                     )
                   )}
@@ -109,8 +123,8 @@ export default function AnswersList({
             <TimeIcon />
             <p className="text-gray-500 text-lg font-medium mt-4">
               {currentRound?.status === "submitting"
-                ? "No answers yet..."
-                : "Waiting for next round..."}
+                ? "Aún no hay respuestas..."
+                : "Esperando siguiente ronda..."}
             </p>
           </div>
         )}

@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,10 +15,11 @@ import { createGameAction } from '@/lib/actions/game.actions';
 import { logError } from '@/lib/errorHandler';
 import { GAME_CONSTANTS } from '@/constants/gamesettings';
 import { GameSettingsSection, GameSettings } from './GameSettings';
+import { useAuth } from '@clerk/nextjs';
 
 export default function CreateGame() {
   const router = useRouter();
-  const { user } = useUser();
+  useAuth(); // ensures Clerk context is available
   const [createLoading, setCreateLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<GameSettings>({
@@ -51,13 +51,6 @@ export default function CreateGame() {
   }, [settings]);
 
   const handleCreateGame = useCallback(async () => {
-    if (!user) {
-      toast.error('Usuario no encontrado. Por favor, inicia sesión.', {
-        richColors: true,
-      });
-      return;
-    }
-
     const validationError = validateGameSettings();
     if (validationError) {
       toast.error(validationError, { richColors: true });
@@ -67,7 +60,6 @@ export default function CreateGame() {
     setCreateLoading(true);
     try {
       const newGame = await createGameAction(
-        user.id,
         settings.maxPlayers,
         settings.scoreToWin,
       );
@@ -86,7 +78,7 @@ export default function CreateGame() {
     } finally {
       setCreateLoading(false);
     }
-  }, [user, settings, router, validateGameSettings]);
+  }, [settings, router, validateGameSettings]);
 
   return (
     <Item variant='outline' className='rounded-3xl p-8 md:p-4 shadow-lg'>

@@ -1,6 +1,7 @@
 "use client";
 
-import { getCardAnswer } from "@/lib/getCards";
+import { useEffect, useState } from "react";
+import { fetchAnswerTextsAction } from "@/lib/actions/game.actions";
 import {
   Carousel,
   CarouselContent,
@@ -30,11 +31,23 @@ export default function CardSelector({
   onSubmit,
   submitting,
 }: CardSelectorProps) {
+  const [cardTexts, setCardTexts] = useState<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    async function loadCardTexts() {
+      if (myCards.length > 0) {
+        const texts = await fetchAnswerTextsAction(myCards);
+        setCardTexts(texts);
+      }
+    }
+    loadCardTexts();
+  }, [myCards]);
+
   return (
     <div className="mb-6">
-      <div className="flex justify-between items-center mb-4 min-h-18">
+      <div className="flex justify-between items-center mb-4 min-h-[72px]">
         <h2 className="text-xl font-bold text-gray-800">
-          Your Cards ({selectedCards.length}/{requiredCards} selected)
+          Tus Cartas ({selectedCards.length}/{requiredCards} seleccionadas)
         </h2>
         {selectedCards.length > 0 && (
           <button
@@ -46,7 +59,7 @@ export default function CardSelector({
           >
             {submitting ? <RefreshIcon /> : <SendIcon />}
             <span className="ml-2">
-              {submitting ? "Submitting..." : "Submit Answer"}
+              {submitting ? "Enviando..." : "Enviar Respuesta"}
             </span>
           </button>
         )}
@@ -54,31 +67,29 @@ export default function CardSelector({
 
       <Carousel className="mx-10">
         <CarouselContent className="items-stretch">
-          {myCards.map((item: string, index: number) => {
-            const isSelected = selectedCards.includes(item);
-            // const isDisabled =
-            //   selectedCards.length >= requiredCards && !isSelected;
+          {myCards.map((cardId: string, index: number) => {
+            const isSelected = selectedCards.includes(cardId);
+            const cardText = cardTexts.get(cardId) || "Cargando...";
 
             return (
               <CarouselItem
                 key={index}
                 className="md:basis-1/2 lg:basis-1/3 flex"
-                onClick={() => onCardSelect(item)}
+                onClick={() => onCardSelect(cardId)}
               >
                 <Card
                   className={`
-                  flex-1 cursor-pointer transition-all duration-200
-                  ${
-                    isSelected
-                      ? "bg-[#99184e] text-white border-[#99184e]"
-                      : "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50"
-                  }
-                
-                `}
+                    flex-1 cursor-pointer transition-all duration-200
+                    ${
+                      isSelected
+                        ? "bg-[#99184e] text-white border-[#99184e]"
+                        : "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50"
+                    }
+                  `}
                 >
                   <CardContent className="flex items-center justify-center p-6 min-h-[200px] h-full">
                     <span className="text-xl font-semibold text-center wrap-break-word w-full leading-relaxed">
-                      {getCardAnswer(item)?.text}
+                      {cardText}
                     </span>
                   </CardContent>
                 </Card>
