@@ -6,6 +6,7 @@ import { FaStar } from "react-icons/fa";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { CopyIcon, ShareIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import {
   Item,
@@ -73,17 +74,17 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
         <ItemGroup className="px-4 flex flex-col gap-2 ">
           {players && players.length > 0 ? (
             players.map((item: GamePlayer) => (
-              <Item className=" bg-secondary rounded-2xl" key={item.id}>
-                <ItemContent className="flex flex-row text-center">
-                  <Item className="w-5 h-5  rounded-full flex items-center justify-center">
-                    <Image
-                      src={item.profile?.avatar_url || item.avatar_url || ""}
-                      alt="Profile"
-                      className="w-5 h-5 rounded-full"
-                      width={20}
-                      height={20}
-                      priority={true}
-                    />
+              <Item className=" bg-secondary rounded-2xl flex flex-row items-center justify-between p-3" key={item.id}>
+                <ItemContent className="flex flex-row items-center gap-3">
+                  <Item className="rounded-full flex items-center justify-center">
+                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                      <AvatarImage src={item?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {item.profile?.full_name ||
+                          item.user?.full_name ||
+                          "Unknown Player"}
+                      </AvatarFallback>
+                    </Avatar>
                   </Item>
                   <span className=" font-semibold text-gray-800 text-base ">
                     {item.profile?.full_name ||
@@ -92,11 +93,11 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
                   </span>
                 </ItemContent>
                 {item.user_id === game?.host_player_id && (
-                  <Item className="flex-row items-center bg-[#99184e] px-3 py-1 rounded-full">
-                    <FaStar />
-                    <Item className="text-white text-sm font-bold ml-1">
+                  <Item className="flex-row items-center bg-[#99184e] px-3 py-3 rounded-full">
+                    <FaStar size={10} className="text-black" />
+                    <div className="text-white text-xs font-bold ml-1">
                       Host
-                    </Item>
+                    </div>
                   </Item>
                 )}
               </Item>

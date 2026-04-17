@@ -38,11 +38,9 @@ class WebSocketClient {
     if (!this.gameId || !this.token) return;
 
     const url = `${WS_BASE_URL}/api/v1/ws/${this.gameId}?token=${this.token}`;
-    console.log("[WS] Connecting to:", url);
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
-      console.log("WebSocket connected");
       this.reconnectAttempts = 0;
     };
 
@@ -56,7 +54,6 @@ class WebSocketClient {
     };
 
     this.ws.onclose = () => {
-      console.log("WebSocket disconnected");
       this.attemptReconnect();
     };
 

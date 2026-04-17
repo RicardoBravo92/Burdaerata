@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
+import { Users } from 'lucide-react';
+
 interface PlayersListProps {
   players: GamePlayer[];
   currentRound: Round;
@@ -29,15 +31,13 @@ export default function PlayersListModal({
     <Dialog>
       <DialogTrigger asChild>
         <Button variant='outline' className='mx-auto my-2 bg-blue-400'>
-          See players
+          <Users />
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle> Players ({players.length})</DialogTitle>
-          <DialogDescription>
-            Anyone who has this link will be able to view this.
-          </DialogDescription>
+          <DialogDescription>Current scores</DialogDescription>
         </DialogHeader>
         <div className='flex flex-col space-y-3 pb-4'>
           {players.map((item) => (

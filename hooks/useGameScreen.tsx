@@ -132,7 +132,6 @@ export function useGameScreen(
         };
 
         const handleNewRound = async (data: unknown) => {
-          console.log("[WS] Handle New Round", data);
           if (!isMounted) return;
           
           setIsTransitioning(true);
@@ -156,7 +155,6 @@ export function useGameScreen(
         };
 
         const handleAnswerSubmitted = (data: any) => {
-          console.log("[WS] Handle Answer Submitted", data);
           if (!isMounted) return;
           const newAnswer = data as RoundAnswer;
           setAnswers((prev) => {

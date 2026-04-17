@@ -12,15 +12,15 @@ import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default function Home() {
   return (
-    <div className="px-4">
-      <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-br from-violet-50 to-fuchsia-50 border-none shadow-xl rounded-3xl px-6 py-4 ">
+    <div className="px-4 md:py-10">
+      <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-br from-violet-50 to-fuchsia-50 border-none shadow-xl rounded-3xl px-6 md:py-4 ">
         {/* Hero Section */}
         <Item className="text-center">
           <ItemTitle className="text-2xl font-bold text-[#99184e]">
-            ¡Bienvenido a Burdaerata!
+            ¡Welcome to Burdaerata!
           </ItemTitle>
           <ItemDescription className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
-            Rolitranco de juego para armar un desnalgue venezolano.
+            Game of cards to create a Venezuelan mess.
           </ItemDescription>
         </Item>
 
@@ -29,18 +29,18 @@ export default function Home() {
           {[
             {
               icon: "🎴",
-              title: "Cartas Creativas",
-              desc: "Más de 200 combinaciones únicas para crear las frases más divertidas",
+              title: "Creative Cards",
+              desc: "More than 200 unique combinations to create the funniest phrases",
             },
             {
               icon: "👥",
-              title: "Multijugador",
-              desc: "Juega con amigos en tiempo real desde cualquier dispositivo",
+              title: "Multiplayer",
+              desc: " Play with friends in real time from any device",
             },
             {
               icon: "🏆",
-              title: "Competitivo",
-              desc: "Sistema de puntuación y ranking para los más creativos",
+              title: "Competitive",
+              desc: "Scoring system and ranking for the most creative",
             },
           ].map((feature, i) => (
             <Item
@@ -65,22 +65,21 @@ export default function Home() {
         >
           <ItemContent className="gap-1">
             <ItemTitle className="text-xl md:text-xl font-bold mx-auto">
-              ¿Listo para jugar?
+              Ready to play?
             </ItemTitle>
             <ItemDescription className=" max-w-xl mx-auto">
-              Regístrate gratis y comienza a disfrutar de la experiencia
-              Burdaerata
+              Sign up for free and start enjoying the Burdaerata experience
             </ItemDescription>
 
             <ItemGroup className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
               <SignUpButton>
                 <Button size="sm" variant="default">
-                  Crear cuenta
+                  Create account
                 </Button>
               </SignUpButton>
               <SignInButton>
                 <Button size="sm" variant="secondary">
-                  Iniciar sesión
+                  Sign in
                 </Button>
               </SignInButton>
             </ItemGroup>
