@@ -45,11 +45,11 @@ export default function AnswersList({
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">
-          {isJudge ? "Seleccionar Ganador" : "Respuestas Enviadas"}
+          {isJudge ? "Select Winner" : "Submitted Answers"}
         </h2>
         <div className="bg-gray-100 px-3 py-1 rounded-full">
           <span className="text-gray-700 font-semibold">
-            {answers.length} {answers.length === 1 ? "respuesta" : "respuestas"}
+            {answers.length} {answers.length === 1 ? "answer" : "answers"}
           </span>
         </div>
       </div>
@@ -76,16 +76,16 @@ export default function AnswersList({
                       {item.cards_used &&
                         item.cards_used.map((cardId: string, idx: number) => (
                           <li key={`${item.id}-${idx}`}>
-                            {cardTexts[cardId] || "Cargando..."}
+                            {cardTexts[cardId] || "Loading..."}
                           </li>
                         ))}
                     </ul>
                   </div>
                   <span className="text-gray-600 text-sm mt-2 block">
-                    por{" "}
+                    by{" "}
                     {players.find((p) => p.user_id === item.user_id)?.profile
-                      ?.full_name || "Desconocido"}
-                    {item.user_id === currentUserId && " (Tú)"}
+                      ?.full_name || "Unknown"}
+                    {item.user_id === currentUserId && " (You)"}
                   </span>
                 </div>
 
@@ -94,7 +94,7 @@ export default function AnswersList({
                     <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                       <TrophyIcon />
                       <span className="text-yellow-800 font-bold ml-1 text-sm">
-                        ¡Ganador!
+                        Winner!
                       </span>
                     </div>
                   ) : (
@@ -110,7 +110,7 @@ export default function AnswersList({
                         disabled={loading || answers.length < playersCount - 1}
                       >
                         <TrophyIcon />
-                        <span className="ml-1">Seleccionar</span>
+                        <span className="ml-1">Select</span>
                       </button>
                     )
                   )}
@@ -123,8 +123,8 @@ export default function AnswersList({
             <TimeIcon />
             <p className="text-gray-500 text-lg font-medium mt-4">
               {currentRound?.status === "submitting"
-                ? "Aún no hay respuestas..."
-                : "Esperando siguiente ronda..."}
+                ? "No answers yet..."
+                : "Waiting for next round..."}
             </p>
           </div>
         )}

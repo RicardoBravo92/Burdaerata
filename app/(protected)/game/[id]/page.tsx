@@ -117,7 +117,7 @@ export default function GameScreen() {
             <TrophyIcon />
           </div>
           <h1 className="text-[#99184e] text-3xl font-bold text-center mb-6">
-            ¡Juego Terminado!
+            Game Over!
           </h1>
           
           <div className="w-full space-y-3 mb-8">
@@ -133,7 +133,7 @@ export default function GameScreen() {
                     #{index + 1}
                   </span>
                   <span className="font-semibold text-gray-800">
-                    {p.profile?.full_name || p.user?.full_name || "Jugador"}
+                    {p.profile?.full_name || p.user?.full_name || "Player"}
                   </span>
                 </div>
                 <div className="bg-[#99184e] text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -147,7 +147,7 @@ export default function GameScreen() {
             onClick={() => router.replace("/game")}
             className="w-full bg-[#99184e] hover:bg-[#7a1340] text-white font-bold h-12 rounded-full text-lg"
           >
-            Salir al Lobby
+            Exit to Lobby
           </Button>
         </div>
       </div>

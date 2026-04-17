@@ -47,7 +47,7 @@ export default function CardSelector({
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4 min-h-[72px]">
         <h2 className="text-xl font-bold text-gray-800">
-          Tus Cartas ({selectedCards.length}/{requiredCards} seleccionadas)
+          Your Cards ({selectedCards.length}/{requiredCards} selected)
         </h2>
         {selectedCards.length > 0 && (
           <button
@@ -59,7 +59,7 @@ export default function CardSelector({
           >
             {submitting ? <RefreshIcon /> : <SendIcon />}
             <span className="ml-2">
-              {submitting ? "Enviando..." : "Enviar Respuesta"}
+              {submitting ? "Submitting..." : "Submit Answer"}
             </span>
           </button>
         )}
@@ -69,7 +69,7 @@ export default function CardSelector({
         <CarouselContent className="items-stretch">
           {myCards.map((cardId: string, index: number) => {
             const isSelected = selectedCards.includes(cardId);
-            const cardText = cardTexts[cardId] || "Cargando...";
+            const cardText = cardTexts[cardId] || "Loading...";
 
             return (
               <CarouselItem

@@ -26,12 +26,12 @@ export default function RoundHeader({
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-center">
-            Ronda {currentRound?.round_number}
+            Round {currentRound?.round_number}
           </h1>
           <p className="text-center text-base mt-1">
             {currentRound?.status === "submitting"
-              ? "¡Envía tus respuestas!"
-              : "Esperando al juez..."}
+              ? "Submit your answers!"
+              : "Waiting for judge..."}
           </p>
         </div>
       </div>
@@ -39,13 +39,13 @@ export default function RoundHeader({
       {currentRound?.question_card_id && (
         <div className="bg-blue-600 rounded-3xl p-6 shadow-lg mb-6">
           <p className="text-white text-xl font-bold text-center mb-4 leading-7">
-            {questionText || "Cargando pregunta..."}
+            {questionText || "Loading question..."}
           </p>
           <div className="flex items-center justify-center bg-blue-700 px-4 py-2 rounded-full self-center">
             <StarIcon />
             <span className="text-white font-semibold ml-2">
-              Juez: {judge}
-              {isJudge && " (Tú)"}
+              Judge: {judge}
+              {isJudge && " (You)"}
             </span>
           </div>
         </div>

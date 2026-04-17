@@ -30,7 +30,7 @@ export default function RoundStatusBar({
             disabled={loading}
             className="bg-[#99184e] text-white px-6 py-2 rounded-full font-bold hover:bg-[#871444] transition-colors shadow-lg disabled:opacity-50"
           >
-            {loading ? "Iniciando..." : "Siguiente Ronda"}
+            {loading ? "Starting..." : "Next Round"}
           </button>
         )}
 
@@ -45,7 +45,7 @@ export default function RoundStatusBar({
         
         {currentRound?.status === "finished" && !isHost && (
           <div className="bg-amber-100 px-4 py-2 rounded-full text-amber-800 font-semibold text-sm">
-            Esperando al host...
+            Waiting for host...
           </div>
         )}
       </div>

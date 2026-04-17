@@ -51,7 +51,7 @@ export default function RoundTransition({
           {round ? (
             <div className='text-center animate-fade-in delay-500'>
               <h3 className='text-2xl md:text-3xl font-bold text-white mb-6'>
-                Iniciando Ronda {round.round_number}
+                Starting Round {round.round_number}
               </h3>
 
               {nextJudge && (
@@ -59,11 +59,11 @@ export default function RoundTransition({
                   <div className='flex items-center justify-center gap-3 mb-4'>
                     <FaStar className='text-yellow-400 text-2xl' />
                     <p className='text-white/80 text-sm font-semibold'>
-                      Próximo Juez
+                      Next Judge
                     </p>
                   </div>
                   <p className='text-white text-xl font-bold'>
-                    {nextJudge.profile?.full_name || 'Desconocido'}
+                    {nextJudge.profile?.full_name || 'Unknown'}
                   </p>
                 </div>
               )}
@@ -71,10 +71,10 @@ export default function RoundTransition({
               {round.question_card_id && (
                 <div className='bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30'>
                   <p className='text-white/80 text-sm mb-3 font-semibold'>
-                    Nueva Pregunta:
+                    New Question:
                   </p>
                   <p className='text-white text-lg font-medium'>
-                    {questionText || 'Cargando...'}
+                    {questionText || 'Loading...'}
                   </p>
                 </div>
               )}
