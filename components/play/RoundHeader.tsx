@@ -22,7 +22,7 @@ export default function RoundHeader({
     : players?.find(p => p.user_id === currentRound.judge_user_id)?.profile?.full_name || "Desconocido";
 
   return (
-    <div>
+    <div className="px-6 md:max-w-xl w-full md:w-8/10 mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
           <h1 className="text-3xl font-bold text-center text-white">

@@ -29,7 +29,59 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
   const { canStart, missingPlayers } = useLobbyValidation(players);
 
   return (
-    <div className=" md:max-w-xl mx-auto px-6 pt-8 flex flex-col gap-4  ">
+    <div className="flex flex-row">
+      <div className=" md:w-3/10 px-2 pt-8 hidden md:block items-center justify-center ">
+        <Card className="rounded-3xl shadow-lg gap-1 w-full max-w-xs mx-auto">
+        <CardHeader className="text-xl font-bold text-gray-800 ">
+          <CardTitle>Players ({players?.length || 0})</CardTitle>
+        </CardHeader>
+
+        <ItemGroup className="px-1 flex flex-col gap-2  ">
+          {players && players.length > 0 ? (
+            players.map((item: GamePlayer) => (
+              <Item className=" bg-secondary max-w-xs rounded-2xl flex flex-row items-center justify-between p-1" key={item.id}>
+                <ItemContent className="flex flex-row items-center gap-1 max-w-xs max-h-xs">
+                  <Item className="rounded-full flex items-center justify-center">
+                    <Avatar className="h-8 w-8 md:h-8 md:w-8">
+                      <AvatarImage src={item?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {item.profile?.full_name ||
+                          item.user?.full_name ||
+                          "Unknown Player"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Item>
+                  <span className=" font-semibold text-gray-800 text-sm ">
+                    {item.profile?.full_name ||
+                      item.user?.full_name ||
+                      "Unknown Player"}
+                  </span>
+                </ItemContent>
+                {item.user_id === game?.host_player_id && (
+                  <Item className="flex-row items-center bg-[#99184e] px-2 py-2 rounded-full">
+                    <FaStar size={10} className="text-black" />
+                    <div className="text-white text-[8px] font-bold ml-1">
+                      Host
+                    </div>
+                  </Item>
+                )}
+              </Item>
+            ))
+          ) : (
+            <Item className="items-center justify-center py-12">
+              <ItemTitle className="text-gray-500 text-lg font-medium mt-4">
+                No players yet
+              </ItemTitle>
+              <ItemDescription className="text-gray-400 text-center mt-2">
+                Share the game code to invite friends!
+              </ItemDescription>
+            </Item>
+          )}
+        </ItemGroup>
+      </Card>
+      </div>
+
+    <div className=" md:max-w-xl  w-full md:w-8/10 mx-auto px-6 pt-8 flex flex-col gap-4  ">
       <Item variant={"outline"} className="rounded-3xl  shadow-lg bg-white">
         <ItemContent>
           <ItemTitle>Game Lobby</ItemTitle>
@@ -66,7 +118,7 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
           </Button>
         </ItemActions>
       </Item>
-      <Card className="rounded-3xl shadow-lg gap-1">
+      <Card className="rounded-3xl shadow-lg gap-1  md:hidden">
         <CardHeader className="text-xl font-bold text-gray-800 ">
           <CardTitle>Players ({players?.length || 0})</CardTitle>
         </CardHeader>
@@ -148,7 +200,7 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
           </ItemContent>
         </Item>
       ) : (
-        <Item variant="outline" className="rounded-3xl shadow-lg">
+        <Item variant="outline" className="rounded-3xl shadow-lg bg-white">
           <ItemContent className="items-center">
             <ItemTitle>Waiting for host to start the game</ItemTitle>
             <ItemDescription>
@@ -157,6 +209,14 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
           </ItemContent>
         </Item>
       )}
+    </div>
+    <div className="md:w-3/10 px-2 pt-8 hidden md:block items-center justify-center  ">
+        {/* mock chat*/}
+        
+      </div>
+
+    
+    
     </div>
   );
 }

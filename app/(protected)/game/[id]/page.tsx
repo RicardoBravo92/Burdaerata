@@ -45,7 +45,7 @@ export default function GameScreen() {
 
   if (loading || (!gameData && !players)) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2">
+      <div className="flex flex-col items-center justify-center gap-2 bg-[#99184e] min-h-screen">
         <Skeleton className="h-[70px] w-[340px] md:w-[720px] rounded-xl" />
         <Skeleton className="h-[200px] w-[340px] md:w-[720px] rounded-xl" />
         <Skeleton className="h-[100px] w-[340px] md:w-[720px] rounded-xl" />

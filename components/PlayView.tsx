@@ -8,6 +8,7 @@ import RoundStatusMessages from "./play/RoundStatusMessages";
 import AnswersList from "./play/AnswersList";
 import PlayersListModal from "./play/PlayersList";
 import RoundStatusBar from "./play/RoundStatusBar";
+import { StarIcon } from "lucide-react";
 
 export default function PlayView(props: UsePlayProps) {
   const { myCards } = useGame();
@@ -49,7 +50,12 @@ export default function PlayView(props: UsePlayProps) {
   }
 
   return (
-    <div className="flex-1 md:max-w-4xl mx-auto px-6 md:h-full py-4">
+    <div className="flex flex-col">
+        <PlayersListModal
+          players={players}
+          currentRound={currentRound}
+          currentUserId={userId || ""}
+        />
       <RoundHeader 
         currentRound={currentRound} 
         isJudge={isJudge} 
@@ -57,7 +63,48 @@ export default function PlayView(props: UsePlayProps) {
         players={players} 
       />
 
-      <div className="flex-1 bg-white rounded-3xl">
+      <div className="flex flex-row">
+        <div className='md:w-3/10 hidden md:block px-2 pt-4'>
+        <div className=" flex flex-col space-y-3">
+
+          {players.map((item) => (
+            <div
+              key={item.id}
+              className={`
+                flex items-center px-4 py-3 rounded-2xl 
+                ${
+                  item.user_id === currentRound?.judge_user_id
+                    ? 'bg-yellow-100 border border-yellow-400'
+                    : item.user_id === userId
+                    ? 'bg-blue-100 border border-blue-400'
+                    : 'bg-gray-100 border border-gray-300'
+                }
+                flex-shrink-0 transition-all hover:shadow-md
+              `}
+            >
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold text-gray-800'>
+                  {item.user?.full_name || item.profile?.full_name || 'Unknown'}
+                </span>
+                {item.user_id === userId && (
+                  <span className='text-blue-600 font-bold'>(You)</span>
+                )}
+                {item.user_id === currentRound?.judge_user_id && <StarIcon />}
+                <div className='bg-white px-2 py-1 rounded-full ml-2'>
+                  <span className='text-gray-700 font-bold text-xs'>
+                    {item.score || 0} Pts
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        </div>
+
+    <div className="w-full md:w-7/10 mx-auto px-6 md:h-full py-4 max-w-xl">
+      
+
+      <div className=" bg-white rounded-3xl">
         {canSubmit && (
           <CardSelector
             myCards={myCards}
@@ -90,11 +137,6 @@ export default function PlayView(props: UsePlayProps) {
           />
         )}
 
-        <PlayersListModal
-          players={players}
-          currentRound={currentRound}
-          currentUserId={userId || ""}
-        />
 
         <RoundStatusBar 
           currentRound={currentRound} 
@@ -103,6 +145,15 @@ export default function PlayView(props: UsePlayProps) {
           loading={loading}
         />
       </div>
+    </div>
+    <div className="md:w-3/10 px-2 pt-8 hidden md:block items-center justify-center   ">
+        {/* mock chat*/}
+        
+      </div>
+      </div>
+
+   
+
     </div>
   );
 }

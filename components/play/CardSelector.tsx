@@ -74,7 +74,7 @@ export default function CardSelector({
             return (
               <CarouselItem
                 key={index}
-                className="md:basis-1/2 lg:basis-1/3 flex"
+                className="md:basis-1/2 flex"
                 onClick={() => onCardSelect(cardId)}
               >
                 <Card

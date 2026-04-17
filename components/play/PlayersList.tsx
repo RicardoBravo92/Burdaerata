@@ -30,7 +30,7 @@ export default function PlayersListModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='outline' className='mx-auto my-2 bg-blue-400'>
+        <Button variant='outline' className='mr-2 my-2 w-10 h-10 bg-blue-400 md:hidden'>
           <Users />
         </Button>
       </DialogTrigger>
