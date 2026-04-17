@@ -44,7 +44,7 @@ export default function AnswersList({
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">
+        <h2 className="text-xl font-bold text-gray-800 px-6">
           {isJudge ? "Select Winner" : "Submitted Answers"}
         </h2>
         <div className="bg-gray-100 px-3 py-1 rounded-full">
@@ -54,7 +54,7 @@ export default function AnswersList({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 px-4">
         {answers.length > 0 ? (
           answers.map((item) => (
             <div

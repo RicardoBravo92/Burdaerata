@@ -29,8 +29,8 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
   const { canStart, missingPlayers } = useLobbyValidation(players);
 
   return (
-    <div className=" md:max-w-xl mx-auto px-6 pt-8 flex flex-col gap-4 ">
-      <Item variant={"outline"} className="rounded-3xl  shadow-lg">
+    <div className=" md:max-w-xl mx-auto px-6 pt-8 flex flex-col gap-4  ">
+      <Item variant={"outline"} className="rounded-3xl  shadow-lg bg-white">
         <ItemContent>
           <ItemTitle>Game Lobby</ItemTitle>
           <ItemDescription className="text-center  italic">
@@ -38,7 +38,7 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
           </ItemDescription>
         </ItemContent>
       </Item>
-      <Item variant="outline" className="rounded-3xl  shadow-lg">
+      <Item variant="outline" className="rounded-3xl  shadow-lg bg-white">
         <ItemContent>
           <ItemTitle>Share this code with friends</ItemTitle>
           <ItemDescription>{game?.code}</ItemDescription>

@@ -102,6 +102,12 @@ export default function GameScreen() {
           <p className="text-white/70 text-center text-base">
             The game you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.
           </p>
+          <Button
+            onClick={() => router.replace("/game")}
+            className="w-full hover:bg-white/90 font-bold h-12 rounded-full text-lg border-none mt-4 bg-white text-[#99184e]"
+          >
+            Exit to Lobby
+          </Button>
         </div>
       </div>
     );
@@ -156,7 +162,7 @@ export default function GameScreen() {
 
   if (gameData.status === "waiting") {
     return (
-      <div className="h-lvh">
+      <div className="min-h-screen bg-[#99184e]">
         <div className="fixed top-20 right-4 md:right-12 z-50">
           <Button
             variant="destructive"
@@ -173,7 +179,7 @@ export default function GameScreen() {
 
   if (gameData.status === "playing") {
     return (
-      <>
+      <div className="min-h-screen bg-[#99184e]">
         <div className="fixed top-20 right-4 z-50">
           <Button
             variant="destructive"
@@ -195,7 +201,7 @@ export default function GameScreen() {
             <Skeleton className="h-[200px] w-[340px] rounded-xl" />
           </div>
         )}
-      </>
+      </div>
     );
   }
 

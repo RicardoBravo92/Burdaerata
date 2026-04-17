@@ -37,7 +37,7 @@ export default function RootLayout({
             >
               <Header />
               <main className='flex-1 flex flex-col  overflow-auto'>
-                <div className='container max-w-full mx-auto pt-8 md:pt-2 flex-1'>
+                <div className='container max-w-full mx-auto flex-1'>
                   {children}
                 </div>
               </main>

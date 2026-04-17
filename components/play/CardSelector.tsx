@@ -45,20 +45,20 @@ export default function CardSelector({
 
   return (
     <div className="mb-6">
-      <div className="flex justify-between items-center mb-4 min-h-[72px]">
-        <h2 className="text-xl font-bold text-gray-800">
+      <div className="flex justify-between items-center mb-4 min-h-[72px] px-2 md:px-6">
+        <h2 className="text-xl font-bold text-gray-800 pl-4 md:pl-0">
           Your Cards ({selectedCards.length}/{requiredCards} selected)
         </h2>
         {selectedCards.length > 0 && (
           <button
-            className={`flex items-center py-3 px-6 rounded-2xl ${
-              submitting ? "bg-gray-400" : "bg-[#99184e]"
+            className={`flex items-center md:py-3 py-1 md:px-6 px-2 rounded-2xl ${
+              submitting ? "bg-gray-400" : "bg-blue-600"
             } text-white font-bold transition-colors duration-200`}
             onClick={onSubmit}
             disabled={submitting}
           >
             {submitting ? <RefreshIcon /> : <SendIcon />}
-            <span className="ml-2">
+            <span className="ml-2 text-sm md:text-base">
               {submitting ? "Submitting..." : "Submit Answer"}
             </span>
           </button>
@@ -82,7 +82,7 @@ export default function CardSelector({
                     flex-1 cursor-pointer transition-all duration-200
                     ${
                       isSelected
-                        ? "bg-[#99184e] text-white border-[#99184e]"
+                        ? "bg-blue-500 text-white border-blue-500"
                         : "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50"
                     }
                   `}

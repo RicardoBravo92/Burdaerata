@@ -102,13 +102,17 @@ export function useGameScreen(
         const handlePlayerJoined = () => {
           if (!isMounted) return;
           fetchGamePlayersAction(gameId).then(setPlayers);
-          toast.info("A player joined", { richColors: true });
+          if (players?.some((player) => player.user_id !== userId)) {
+            toast.info("A player joined", { richColors: true });
+          }
         };
 
         const handlePlayerLeft = () => {
           if (!isMounted) return;
           fetchGamePlayersAction(gameId).then(setPlayers);
-          toast.info("A player left", { richColors: true });
+          if (players?.some((player) => player.user_id !== userId)) {
+            toast.info("A player left", { richColors: true });
+          }
         };
 
         const handleGameStarted = async () => {
@@ -194,7 +198,7 @@ export function useGameScreen(
 
         const handleGameDeleted = () => {
           if (!isMounted) return;
-          toast.error("Game was deleted", { richColors: true });
+          toast.error("Game was deleted not enough players", { richColors: true });
           router.replace("/game");
         };
 

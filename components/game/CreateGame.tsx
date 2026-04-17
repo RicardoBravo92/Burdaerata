@@ -19,7 +19,7 @@ export default function CreateGame() {
   } = useCreateGame();
 
   return (
-    <Item variant="outline" className="rounded-3xl p-8 md:p-4 shadow-lg">
+    <Item variant="outline" className="rounded-3xl p-8 md:p-4 shadow-lg bg-white">
       <ItemContent>
         <ItemTitle>Create New Game</ItemTitle>
         <ItemDescription>
