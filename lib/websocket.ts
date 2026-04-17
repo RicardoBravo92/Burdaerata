@@ -17,7 +17,6 @@ type EventHandler = (data: unknown) => void;
 
 const WS_BASE_URL =
   (typeof window !== "undefined" && process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws")) ||
-  process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws") ||
   "ws://localhost:8000";
 
 class WebSocketClient {

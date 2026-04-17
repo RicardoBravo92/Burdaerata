@@ -71,7 +71,7 @@ export default function AnswersList({
             >
               <div className="flex justify-between items-center gap-4">
                 <div className="flex-1">
-                  <p className="text-gray-800 text-base font-medium">
+                  <div className="text-gray-800 text-base font-medium">
                     <ul className="list-disc list-inside space-y-1">
                       {item.cards_used &&
                         item.cards_used.map((cardId: string, idx: number) => (
@@ -80,7 +80,7 @@ export default function AnswersList({
                           </li>
                         ))}
                     </ul>
-                  </p>
+                  </div>
                   <span className="text-gray-600 text-sm mt-2 block">
                     por{" "}
                     {players.find((p) => p.user_id === item.user_id)?.profile
@@ -102,8 +102,8 @@ export default function AnswersList({
                     currentRound?.status === "submitting" && (
                       <button
                         className={`flex items-center px-4 py-2 rounded-full ${
-                          loading
-                            ? "bg-gray-400"
+                          loading || answers.length < playersCount - 1
+                            ? "bg-gray-400 cursor-not-allowed opacity-50"
                             : "bg-[#99184e] hover:bg-[#7a1340]"
                         } text-white font-bold text-sm transition-colors`}
                         onClick={() => onSelectWinner(item.id)}

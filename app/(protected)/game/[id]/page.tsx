@@ -108,21 +108,47 @@ export default function GameScreen() {
   }
 
   if (gameData.status === "finished") {
+    const sortedPlayers = [...(players || [])].sort((a, b) => (b.score || 0) - (a.score || 0));
+
     return (
-      <div className="flex items-center justify-center bg-[#99184e] min-h-screen">
-        <div className="items-center space-y-6 p-6 text-center">
-          <div className="bg-yellow-500 p-6 rounded-full">
+      <div className="flex items-center justify-center bg-[#99184e] min-h-screen p-6">
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center">
+          <div className="bg-yellow-100 p-4 rounded-full mb-4">
             <TrophyIcon />
           </div>
-          <h1 className="text-white text-3xl font-bold text-center">
-            Game Over!
+          <h1 className="text-[#99184e] text-3xl font-bold text-center mb-6">
+            ¡Juego Terminado!
           </h1>
-          <p className="text-white/80 text-lg text-center">
-            Congratulations to all players!
-          </p>
-          <p className="text-white/60 text-center">
-            Returning to home...
-          </p>
+          
+          <div className="w-full space-y-3 mb-8">
+            {sortedPlayers.map((p, index) => (
+              <div 
+                key={p.id} 
+                className={`flex justify-between items-center p-3 rounded-xl border ${
+                  index === 0 ? "bg-yellow-50 border-yellow-300" : "bg-gray-50 border-gray-100"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`font-bold ${index === 0 ? 'text-yellow-600' : 'text-gray-400'}`}>
+                    #{index + 1}
+                  </span>
+                  <span className="font-semibold text-gray-800">
+                    {p.profile?.full_name || p.user?.full_name || "Jugador"}
+                  </span>
+                </div>
+                <div className="bg-[#99184e] text-white px-3 py-1 rounded-full text-sm font-bold">
+                  {p.score || 0} pts
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            onClick={() => router.replace("/game")}
+            className="w-full bg-[#99184e] hover:bg-[#7a1340] text-white font-bold h-12 rounded-full text-lg"
+          >
+            Salir al Lobby
+          </Button>
         </div>
       </div>
     );

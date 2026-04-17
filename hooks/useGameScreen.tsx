@@ -88,7 +88,7 @@ export function useGameScreen(
   }, [gameId, userId, fetchInitialData]);
 
   useEffect(() => {
-    if (!gameId || !userId || !gameData) return;
+    if (!gameId || !userId) return;
 
     let isMounted = true;
 
@@ -134,16 +134,14 @@ export function useGameScreen(
         const handleNewRound = async (data: unknown) => {
           console.log("[WS] Handle New Round", data);
           if (!isMounted) return;
-          const round = data as Round;
           
-          // Force state updates
+          setIsTransitioning(true);
+          
+          const round = data as Round;
           setCurrentRound(round);
           if (round) setRound?.(round);
-          
-          // Reset answers list for the new round
           setAnswers([]);
           
-          // Refresh other data in parallel
           const [cards, playerList] = await Promise.all([
             fetchMyCardsAction(gameId),
             fetchGamePlayersAction(gameId)
@@ -152,7 +150,6 @@ export function useGameScreen(
           setMyCards(cards.cards);
           setPlayers(playerList);
           
-          setIsTransitioning(true);
           setTimeout(() => {
             if (isMounted) setIsTransitioning(false);
           }, 3500);
@@ -171,25 +168,30 @@ export function useGameScreen(
 
         const handleRoundFinished = async (data: unknown) => {
           if (!isMounted) return;
-          const round = data as Round;
-          setCurrentRound(round);
-          if (round) setRound?.(round);
-          const [roundAnswers, playerList] = await Promise.all([
-            fetchRoundAnswersAction(round.id),
-            fetchGamePlayersAction(gameId)
+          const payload = data as { round_id: string; winning_answer_id: string };
+          const [roundAnswers, playerList, lastRound] = await Promise.all([
+            fetchRoundAnswersAction(payload.round_id),
+            fetchGamePlayersAction(gameId),
+            fetchLastRoundAction(gameId)
           ]);
+          if (lastRound) {
+            setCurrentRound(lastRound);
+            setRound?.(lastRound);
+          }
           setAnswers(roundAnswers);
           setPlayers(playerList);
           toast.success("Round ended", { richColors: true });
         };
 
-        const handleGameFinished = () => {
+
+        const handleGameFinished = async () => {
           if (!isMounted) return;
+          
+          const playerList = await fetchGamePlayersAction(gameId);
+          setPlayers(playerList);
+          
           toast.info("Game finished!", { richColors: true });
           setGameData((prev) => (prev ? { ...prev, status: "finished" } : null));
-          setTimeout(() => {
-            if (isMounted) router.replace("/game");
-          }, 3000);
         };
 
         const handleGameDeleted = () => {
