@@ -2,6 +2,7 @@
 
 import { usePlay, UsePlayProps } from "@/hooks/usePlay";
 import { useGame } from "@/providers/GameProvider";
+import { useState } from "react";
 import RoundHeader from "./play/RoundHeader";
 import CardSelector from "./play/CardSelector";
 import RoundStatusMessages from "./play/RoundStatusMessages";
@@ -13,10 +14,18 @@ import ChatGame from "./play/ChatGame";
 import ChatModal from "./play/ChatModal";
 import { User } from "@/lib/types";
 
-
+interface ChatMessage {
+  id: string;
+  text: string;
+  user: {
+    id: string;
+    full_name: string;
+  };
+}
 
 export default function PlayView(props: UsePlayProps) {
   const { myCards } = useGame();
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const {
     loading,
     submittingAnswer,
@@ -63,6 +72,8 @@ export default function PlayView(props: UsePlayProps) {
           currentUserId={userId || ""}
         />
         <ChatModal 
+          messages={chatMessages}
+          setMessages={setChatMessages}
           currentUserId={userId || ""}
         />
       </div>
@@ -162,6 +173,8 @@ export default function PlayView(props: UsePlayProps) {
         {/* Right Container - Chat */}
         <div className="hidden lg:flex lg:col-span-3 flex-col bg-white rounded-[2rem] shadow-2xl shadow-black/10 overflow-hidden h-[450px] w-full">
           <ChatGame
+            messages={chatMessages}
+            setMessages={setChatMessages}
             currentUserId={userId || ""}
           />
         </div>

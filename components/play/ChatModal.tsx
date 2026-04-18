@@ -10,11 +10,22 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, X } from 'lucide-react';
 import ChatGame from './ChatGame';
 
+interface ChatMessage {
+  id: string;
+  text: string;
+  user: {
+    id: string;
+    full_name: string;
+  };
+}
+
 interface ChatModalProps {
+  messages: ChatMessage[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   currentUserId?: string;
 }
 
-export default function ChatModal({ currentUserId }: ChatModalProps) {
+export default function ChatModal({ messages, setMessages, currentUserId }: ChatModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -23,7 +34,7 @@ export default function ChatModal({ currentUserId }: ChatModalProps) {
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md p-0 h-[70vh] w-[95vw] sm:w-[90vw] rounded-3xl overflow-hidden flex flex-col border-none'>
-        <ChatGame currentUserId={currentUserId} />
+        <ChatGame messages={messages} setMessages={setMessages} currentUserId={currentUserId} />
         <DialogClose asChild>
           <Button variant="ghost" size="icon" className="absolute top-3.5 right-4 z-[60] rounded-full w-8 h-8 bg-slate-100 hover:bg-slate-200 shadow-sm border border-slate-200">
             <X className="w-4 h-4 text-slate-500" />

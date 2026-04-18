@@ -20,20 +20,24 @@ interface ChatMessage {
 interface ChatGameProps {
   players?: GamePlayer[];
   messages?: ChatMessage[];
+  setMessages?: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   currentUserId?: string;
 }
 
-export default function ChatGame({ messages: propMessages, currentUserId: propUserId }: ChatGameProps) {
+export default function ChatGame({ messages: propMessages, setMessages: propSetMessages, currentUserId: propUserId }: ChatGameProps) {
   const { user } = useUser();
   const userId = propUserId || user?.id;
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messages = propMessages || [];
+  const setMessages = propSetMessages;
   const [newMessage, setNewMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleNewMessage = (data: unknown) => {
       const msg = data as ChatMessage;
-      setMessages((prev) => [...prev, msg]);
+      if (setMessages) {
+        setMessages((prev) => [...prev, msg]);
+      }
     };
 
     wsClient.on("new_chat_message", handleNewMessage as any);
@@ -41,7 +45,7 @@ export default function ChatGame({ messages: propMessages, currentUserId: propUs
     return () => {
       wsClient.off("new_chat_message", handleNewMessage as any);
     };
-  }, [propMessages]);
+  }, [propMessages, setMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
