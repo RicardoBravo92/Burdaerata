@@ -71,7 +71,6 @@ export function useGameScreen(
         const roundAnswers = await fetchRoundAnswersAction(rounds.id);
         setAnswers(roundAnswers);
         const cards = await fetchMyCardsAction(gameId);
-        console.log("Initial cards fetched:", cards);
         setMyCards(cards.cards);
       }
 

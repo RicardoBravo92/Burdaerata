@@ -34,24 +34,28 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
   const scrollRef = useRef<HTMLDivElement>(null);
   const isActiveRef = useRef(true);
 
+  const setMessagesRef = useRef(propSetMessages);
+  setMessagesRef.current = propSetMessages;
+
   useEffect(() => {
     if (!listenWS) return;
     
     const handleNewMessage = (data: unknown) => {
-      if (!isActiveRef.current) return;
+      console.log("ChatGame received message:", data);
       const msg = data as ChatMessage;
-      if (setMessages) {
-        setMessages((prev) => [...prev, msg]);
+      if (setMessagesRef.current) {
+        setMessagesRef.current((prev: ChatMessage[]) => {
+          return [...prev, msg];
+        });
       }
     };
 
     wsClient.on("new_chat_message", handleNewMessage as any);
 
     return () => {
-      isActiveRef.current = false;
       wsClient.off("new_chat_message", handleNewMessage as any);
     };
-  }, [propMessages, setMessages, listenWS]);
+  }, [listenWS]);
 
   useEffect(() => {
     if (scrollRef.current) {
