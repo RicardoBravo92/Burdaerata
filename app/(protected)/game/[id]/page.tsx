@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import RoundTransition from "@/components/RoundTransition";
-import Chat from "@/components/Chat";
+import ChatGame from "@/components/play/ChatGame";
 import { GamePlayer } from "@/lib/types";
 import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
@@ -177,7 +177,7 @@ export default function GameScreen() {
           <LobbyView game={gameData} players={players || []} />
         </div>
         <div className="w-80 p-4 hidden md:block">
-          <Chat players={players || []} />
+          <ChatGame players={players || []} />
         </div>
       </div>
     );
@@ -210,7 +210,7 @@ export default function GameScreen() {
           )}
         </div>
         <div className="w-80 p-4 hidden lg:block">
-          <Chat players={players || []} />
+          <ChatGame players={players || []} />
         </div>
       </div>
     );

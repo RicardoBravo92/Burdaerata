@@ -13,94 +13,7 @@ import ChatGame from "./play/ChatGame";
 import ChatModal from "./play/ChatModal";
 import { User } from "@/lib/types";
 
-interface Message {
-  id: string;
-  text: string;
-  user: User;
-}
-const messages: Message[] = [
-  {
-    id: "1",
-    user: {
-      id: "1",
-      full_name: "John Doe",
-    },
-    text: "Hello",
-  },
-  {
-    id: "2",
-    user: {
-      id: "2",
-      full_name: "Jane Doe",
-    },
-    text: "Hi",
-  },
 
-  {
-    id: "3",
-    user: {
-      id: "3",
-      full_name: "John Doe",
-    },
-    text: "Hello",
-  },
-  {
-    id: "4",
-    user: {
-      id: "4",
-      full_name: "Jane Doe",
-    },
-    text: "Hi",
-  },
-  {
-    id: "5",
-    user: {
-      id: "5",
-      full_name: "John Doe",
-    },
-    text: "Hello",
-  },
-  {
-    id: "6",
-    user: {
-      id: "6",
-      full_name: "Jane Doe",
-    },
-    text: "Hi",
-  },
-  {
-    id: "7",
-    user: {
-      id: "7",
-      full_name: "John Doe",
-    },
-    text: "Hello",
-  },
-  {
-    id: "8",
-    user: {
-      id: "8",
-      full_name: "Jane Doe",
-    },
-    text: "Hi",
-  },
-  {
-    id: "9",
-    user: {
-      id: "9",
-      full_name: "John Doe",
-    },
-    text: "Hello",
-  },
-  {
-    id: "10",
-    user: {
-      id: "10",
-      full_name: "Jane Doe",
-    },
-    text: "Hi",
-  },
-];
 
 export default function PlayView(props: UsePlayProps) {
   const { myCards } = useGame();
@@ -150,7 +63,6 @@ export default function PlayView(props: UsePlayProps) {
           currentUserId={userId || ""}
         />
         <ChatModal 
-          messages={messages}
           currentUserId={userId || ""}
         />
       </div>
@@ -250,7 +162,6 @@ export default function PlayView(props: UsePlayProps) {
         {/* Right Container - Chat */}
         <div className="hidden lg:flex lg:col-span-3 flex-col bg-white rounded-[2rem] shadow-2xl shadow-black/10 overflow-hidden h-[450px] w-full">
           <ChatGame
-            messages={messages}
             currentUserId={userId || ""}
           />
         </div>

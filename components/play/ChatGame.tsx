@@ -1,45 +1,77 @@
-import { Game, GamePlayer, User } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { useState, useRef, useEffect } from "react";
-import { SendIcon, MessageCircleIcon } from "lucide-react";
+"use client";
 
-interface Message {
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useUser } from "@clerk/nextjs";
+import { wsClient } from "@/lib/websocket";
+import { Button } from "@/components/ui/button";
+import { SendIcon, MessageCircleIcon } from "lucide-react";
+import type { GamePlayer } from "@/lib/types";
+
+interface ChatMessage {
   id: string;
   text: string;
-  user: User;
+  user: {
+    id: string;
+    full_name: string;
+  };
+  created_at?: string;
 }
 
 interface ChatGameProps {
-  messages: Message[];
-  currentUserId: string;
+  players?: GamePlayer[];
+  messages?: ChatMessage[];
+  currentUserId?: string;
 }
 
-export default function ChatGame({messages, currentUserId}: ChatGameProps) {    
-  const [message, setMessage] = useState("");
+export default function ChatGame({ messages: propMessages, currentUserId: propUserId }: ChatGameProps) {
+  const { user } = useUser();
+  const userId = propUserId || user?.id;
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom of chat when new messages arrive
+  useEffect(() => {
+    const handleNewMessage = (data: unknown) => {
+      const msg = data as ChatMessage;
+      setMessages((prev) => [...prev, msg]);
+    };
+
+    wsClient.on("new_chat_message", handleNewMessage as any);
+
+    return () => {
+      wsClient.off("new_chat_message", handleNewMessage as any);
+    };
+  }, [propMessages]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const sendMessage = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (message.trim()) {
-      // Add your logic to send the message here
-      console.log("Sending message:", message);
-      setMessage("");
+  const sendMessage = useCallback(() => {
+    if (!newMessage.trim()) return;
+
+    wsClient.send({
+      event: "send_chat_message",
+      data: { text: newMessage.trim() },
+    });
+    setNewMessage("");
+  }, [newMessage]);
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
+    <div className="flex flex-col h-full w-full bg-white rounded-3xl">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3 bg-white z-10 shadow-sm relative">
-        <div className="bg-indigo-100 p-2 text-indigo-600 rounded-full">
-          <MessageCircleIcon className="w-5 h-5 fill-current opacity-20" />
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3 bg-white z-10 shadow-sm rounded-t-3xl">
+        <div className="bg-[#99184e]/10 p-2 text-[#99184e] rounded-full">
+          <MessageCircleIcon className="w-5 h-5" />
         </div>
         <div>
           <h3 className="font-bold text-gray-800 leading-tight">Game Chat</h3>
@@ -53,27 +85,32 @@ export default function ChatGame({messages, currentUserId}: ChatGameProps) {
       {/* Messages List */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 relative custom-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50"
       >
-        {messages && messages.length > 0 ? (
-          messages.map((msg: Message) => {
-            const isMe = msg.user.id === currentUserId;
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-3 opacity-60">
+            <MessageCircleIcon className="w-10 h-10" />
+            <p className="text-sm">No messages yet. Say hi!</p>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isMe = msg.user.id === userId;
             return (
               <div 
                 key={msg.id} 
-                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
               >
                 {!isMe && (
-                  <span className="text-[11px] text-gray-500 font-medium mb-1 ml-1 px-1">
-                    {msg.user.full_name || "Unknown"}
+                  <span className="text-[11px] text-gray-500 font-medium mb-1 ml-1">
+                    {msg.user.full_name}
                   </span>
                 )}
                 <div 
                   className={`
-                    px-4 py-2.5 rounded-2xl max-w-[85%] text-sm shadow-sm
+                    px-4 py-2.5 rounded-2xl max-w-[85%] text-sm
                     ${isMe 
-                      ? 'bg-indigo-600 text-white rounded-br-sm shadow-indigo-200' 
-                      : 'bg-white text-gray-800 rounded-tl-sm border border-slate-200 shadow-slate-200'}
+                      ? 'bg-[#99184e] text-white' 
+                      : 'bg-white text-gray-800 border border-gray-200'}
                   `}
                 >
                   <p className="leading-relaxed">{msg.text}</p>
@@ -81,34 +118,30 @@ export default function ChatGame({messages, currentUserId}: ChatGameProps) {
               </div>
             );
           })
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-3 opacity-60">
-            <MessageCircleIcon className="w-10 h-10" />
-            <p className="text-sm">No messages yet. Say hi!</p>
-          </div>
         )}
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-white border-t border-slate-100">
+      <div className="p-4 bg-white border-t border-gray-100 rounded-b-3xl">
         <form 
-          onSubmit={sendMessage}
-          className="flex items-center gap-2 bg-slate-100 w-full rounded-full pr-2 pl-4 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:bg-indigo-50 transition-all shadow-inner overflow-hidden"
+          onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
+          className="flex items-center gap-2 bg-gray-100 w-full rounded-full pr-2 pl-4 py-1.5 focus-within:ring-2 focus-within:ring-[#99184e]/20 focus-within:bg-gray-50"
         >
           <input
             type="text"
-            className="flex-1 min-w-0 bg-transparent border-none focus:outline-none text-sm px-2 py-2 placeholder:text-slate-500 text-slate-800"
+            className="flex-1 min-w-0 bg-transparent border-none focus:outline-none text-sm px-2 py-2 placeholder:text-gray-500 text-gray-800"
             placeholder="Type a message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <Button 
             type="submit" 
             size="icon"
-            className="rounded-full bg-indigo-600 hover:bg-indigo-700 h-9 w-9 flex-shrink-0 shadow-md shadow-indigo-200 transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
-            disabled={!message.trim()}
+            className="rounded-full bg-[#99184e] hover:bg-[#871444] h-9 w-9 flex-shrink-0"
+            disabled={!newMessage.trim()}
           >
-            <SendIcon className="w-4 h-4 text-white ml-0.5" />
+            <SendIcon className="w-4 h-4 text-white" />
           </Button>
         </form>
       </div>
