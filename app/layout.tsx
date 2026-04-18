@@ -5,7 +5,6 @@ import './globals.css';
 import GameProvider from '@/providers/GameProvider';
 import ClerkApiProvider from '@/providers/ClerkApiProvider';
 import { Toaster } from '@/components/ui/sonner';
-import Header from '@/components/header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,8 +33,7 @@ export default function RootLayout({
           <html lang='en' className='h-full'>
             <body
               className={`${geistSans.variable} ${geistMono.variable} antialiased bg-linear-to-br from-indigo-50/20 to-violet-100/20 h-full flex flex-col`}
-            >
-              <Header />
+            >            
               <main className='flex-1 flex flex-col overflow-auto'>
                 <div className='container max-w-full mx-auto flex-1'>
                   {children}
