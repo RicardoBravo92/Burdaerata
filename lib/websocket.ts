@@ -6,7 +6,9 @@ export type WebSocketEvent =
   | "answer_submitted"
   | "round_finished"
   | "game_finished"
-  | "game_deleted";
+  | "game_deleted"
+  | "new_chat_message"
+  | "send_chat_message";
 
 export interface WebSocketMessage {
   event: WebSocketEvent;

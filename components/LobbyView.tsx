@@ -3,20 +3,9 @@
 import { Game, GamePlayer } from "@/lib/types";
 import { useLobby, useLobbyValidation } from "@/hooks/useLobby";
 import { FaStar } from "react-icons/fa";
-import Image from "next/image";
-import { Button } from "./ui/button";
-import { CopyIcon, ShareIcon } from "lucide-react";
+import { Button } from "@/components/ui/button"
+import { CopyIcon, ShareIcon, UsersIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-  ItemGroup,
-} from "@/components/ui/item";
-import { Card, CardTitle, CardHeader } from "./ui/card";
 
 interface LobbyViewProps {
   game: Game;
@@ -29,194 +18,138 @@ export default function LobbyView({ game, players }: LobbyViewProps) {
   const { canStart, missingPlayers } = useLobbyValidation(players);
 
   return (
-    <div className="flex flex-row">
-      <div className=" md:w-3/10 px-2 pt-8 hidden md:block items-center justify-center ">
-        <Card className="rounded-3xl shadow-lg gap-1 w-full max-w-xs mx-auto">
-        <CardHeader className="text-xl font-bold text-gray-800 ">
-          <CardTitle>Players ({players?.length || 0})</CardTitle>
-        </CardHeader>
-
-        <ItemGroup className="px-1 flex flex-col gap-2  ">
-          {players && players.length > 0 ? (
-            players.map((item: GamePlayer) => (
-              <Item className=" bg-secondary max-w-xs rounded-2xl flex flex-row items-center justify-between p-1" key={item.id}>
-                <ItemContent className="flex flex-row items-center gap-1 max-w-xs max-h-xs">
-                  <Item className="rounded-full flex items-center justify-center">
-                    <Avatar className="h-8 w-8 md:h-8 md:w-8">
-                      <AvatarImage src={item?.avatar_url || ""} />
-                      <AvatarFallback>
-                        {item.profile?.full_name ||
-                          item.user?.full_name ||
-                          "Unknown Player"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Item>
-                  <span className=" font-semibold text-gray-800 text-sm ">
-                    {item.profile?.full_name ||
-                      item.user?.full_name ||
-                      "Unknown Player"}
-                  </span>
-                </ItemContent>
-                {item.user_id === game?.host_player_id && (
-                  <Item className="flex-row items-center bg-[#99184e] px-2 py-2 rounded-full">
-                    <FaStar size={10} className="text-black" />
-                    <div className="text-white text-[8px] font-bold ml-1">
-                      Host
-                    </div>
-                  </Item>
-                )}
-              </Item>
-            ))
-          ) : (
-            <Item className="items-center justify-center py-12">
-              <ItemTitle className="text-gray-500 text-lg font-medium mt-4">
-                No players yet
-              </ItemTitle>
-              <ItemDescription className="text-gray-400 text-center mt-2">
-                Share the game code to invite friends!
-              </ItemDescription>
-            </Item>
-          )}
-        </ItemGroup>
-      </Card>
+    <div className="w-full mx-auto px-4 py-8 md:py-12 animate-in fade-in duration-500 max-w-6xl" style={{ zoom: 0.9 }}>
+      
+      {/* Header */}
+      <div className="text-center mb-10 w-full flex flex-col items-center">
+        <h1 className="text-4xl md:text-5xl font-black text-white drop-shadow-sm mb-3">Game Lobby</h1>
+        <p className="text-white/90 text-lg md:text-xl font-medium">Waiting for players to join...</p>
       </div>
 
-    <div className=" md:max-w-xl  w-full md:w-8/10 mx-auto px-6 pt-8 flex flex-col gap-4  ">
-      <Item variant={"outline"} className="rounded-3xl  shadow-lg bg-white">
-        <ItemContent>
-          <ItemTitle>Game Lobby</ItemTitle>
-          <ItemDescription className="text-center  italic">
-            Waiting for players to join...
-          </ItemDescription>
-        </ItemContent>
-      </Item>
-      <Item variant="outline" className="rounded-3xl  shadow-lg bg-white">
-        <ItemContent>
-          <ItemTitle>Share this code with friends</ItemTitle>
-          <ItemDescription>{game?.code}</ItemDescription>
-        </ItemContent>
-        <ItemActions className="flex flex-col md:flex-row gap-2 ">
-          <Button
-            variant="outline"
-            className={`p-3 rounded-2xl ${
-              copied
-                ? "bg-green-100"
-                : "border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40"
-            }`}
-            onClick={handleCopyCode}
-          >
-            <CopyIcon />
-            {copied ? "Copied!" : "Copy Code"}
-          </Button>
-          <Button
-            variant="outline"
-            className={`p-3 rounded-2xl border-sky-600 text-sky-600 hover:bg-sky-600/10 focus-visible:border-sky-600 focus-visible:ring-sky-600/20 dark:border-sky-400 dark:text-sky-400 dark:hover:bg-sky-400/10 dark:focus-visible:border-sky-400 dark:focus-visible:ring-sky-400/40'`}
-            onClick={handleShareGame}
-          >
-            <ShareIcon />
-            Share
-          </Button>
-        </ItemActions>
-      </Item>
-      <Card className="rounded-3xl shadow-lg gap-1  md:hidden">
-        <CardHeader className="text-xl font-bold text-gray-800 ">
-          <CardTitle>Players ({players?.length || 0})</CardTitle>
-        </CardHeader>
-
-        <ItemGroup className="px-4 flex flex-col gap-2 ">
-          {players && players.length > 0 ? (
-            players.map((item: GamePlayer) => (
-              <Item className=" bg-secondary rounded-2xl flex flex-row items-center justify-between p-3" key={item.id}>
-                <ItemContent className="flex flex-row items-center gap-3">
-                  <Item className="rounded-full flex items-center justify-center">
-                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                      <AvatarImage src={item?.avatar_url || ""} />
-                      <AvatarFallback>
-                        {item.profile?.full_name ||
-                          item.user?.full_name ||
-                          "Unknown Player"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Item>
-                  <span className=" font-semibold text-gray-800 text-base ">
-                    {item.profile?.full_name ||
-                      item.user?.full_name ||
-                      "Unknown Player"}
-                  </span>
-                </ItemContent>
-                {item.user_id === game?.host_player_id && (
-                  <Item className="flex-row items-center bg-[#99184e] px-3 py-3 rounded-full">
-                    <FaStar size={10} className="text-black" />
-                    <div className="text-white text-xs font-bold ml-1">
-                      Host
-                    </div>
-                  </Item>
-                )}
-              </Item>
-            ))
-          ) : (
-            <Item className="items-center justify-center py-12">
-              <ItemTitle className="text-gray-500 text-lg font-medium mt-4">
-                No players yet
-              </ItemTitle>
-              <ItemDescription className="text-gray-400 text-center mt-2">
-                Share the game code to invite friends!
-              </ItemDescription>
-            </Item>
-          )}
-        </ItemGroup>
-      </Card>
-      {isHost ? (
-        <Item
-          variant="outline"
-          className="bg-white rounded-3xl p-6 shadow-lg flex flex-col md:flex-row justify-around"
-        >
-          <ItemContent className="items-center ">
-            <ItemActions>
-              <Button
-                variant="secondary"
-                className="py-4 rounded-2xl items-center"
-                onClick={handleStartGame}
-                disabled={loading || !players || players.length < 3}
-              >
-                {loading ? (
-                  <Item className="flex-row items-center">
-                    <ItemTitle className="text-lg font-bold ml-2">
-                      Starting Game...
-                    </ItemTitle>
-                  </Item>
-                ) : (
-                  "Start Game"
-                )}
-              </Button>
-            </ItemActions>
-
-            {players && !canStart && (
-              <ItemDescription className="text-primary text-sm text-center mt-3 font-medium">
-                Invite {missingPlayers} more player
-                {missingPlayers === 1 ? "" : "s"} to start
-              </ItemDescription>
-            )}
-          </ItemContent>
-        </Item>
-      ) : (
-        <Item variant="outline" className="rounded-3xl shadow-lg bg-white">
-          <ItemContent className="items-center">
-            <ItemTitle>Waiting for host to start the game</ItemTitle>
-            <ItemDescription>
-              Invite more friends while you wait!
-            </ItemDescription>
-          </ItemContent>
-        </Item>
-      )}
-    </div>
-    <div className="md:w-3/10 px-2 pt-8 hidden md:block items-center justify-center  ">
-        {/* mock chat*/}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto">
         
-      </div>
+        {/* Left Column: Players */}
+        <div className="lg:col-span-4 block flex-col">
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-6 h-full flex flex-col min-h-[400px]">
+            <div className="flex items-center gap-3 mb-6 px-2">
+              <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl">
+                <UsersIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-800">Players</h2>
+                <p className="text-sm text-slate-500 font-medium">{players?.length || 0} joined</p>
+              </div>
+            </div>
 
-    
-    
+            <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              {players && players.length > 0 ? (
+                players.map((item: GamePlayer) => (
+                  <div 
+                    key={item.id}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:shadow-md hover:border-slate-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                        <AvatarImage src={item?.avatar_url || ""} />
+                        <AvatarFallback className="bg-indigo-100 text-indigo-700 font-bold">
+                          {(item.profile?.full_name || item.user?.full_name || "U")[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-semibold text-slate-700 text-base max-w-[120px] truncate">
+                        {item.profile?.full_name || item.user?.full_name || "Unknown"}
+                      </span>
+                    </div>
+                    {item.user_id === game?.host_player_id && (
+                      <div className="flex items-center gap-1.5 bg-yellow-100 px-3 py-1.5 rounded-full border border-yellow-200 shadow-sm ml-auto">
+                        <FaStar size={12} className="text-yellow-600" />
+                        <span className="text-yellow-700 text-xs font-bold uppercase tracking-wider">Host</span>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center h-full opacity-60">
+                  <UsersIcon className="w-12 h-12 text-slate-300 mb-3" />
+                  <h3 className="text-slate-500 text-lg font-medium">No players yet</h3>
+                  <p className="text-slate-400 text-sm mt-1">Share the code to invite friends!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Actions */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          
+          {/* Share Code Card */}
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-8 flex flex-col items-center text-center relative overflow-hidden">
+            <div className="absolute top-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+            
+            <h2 className="text-xl font-bold text-slate-800 mb-1 mt-2">Invite Friends</h2>
+            <p className="text-slate-500 mb-6 font-medium">Share this room code with others</p>
+            
+            <div className="bg-slate-50 w-full py-6 rounded-3xl border border-slate-100 mb-6 shadow-inner">
+              <span className="text-5xl md:text-6xl font-black text-indigo-600 tracking-[0.2em] font-mono drop-shadow-sm ml-4 select-all">
+                {game?.code || "------"}
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+              <Button
+                variant={copied ? "default" : "outline"}
+                className={`flex-1 h-12 rounded-xl text-base font-bold transition-all ${
+                  copied 
+                    ? "bg-green-500 hover:bg-green-600 text-white border-green-500" 
+                    : "border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-indigo-600 shadow-sm"
+                }`}
+                onClick={handleCopyCode}
+              >
+                <CopyIcon className="w-5 h-5 mr-2" />
+                {copied ? "Copied!" : "Copy Code"}
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-indigo-600 text-base font-bold transition-all shadow-sm"
+                onClick={handleShareGame}
+              >
+                <ShareIcon className="w-5 h-5 mr-2" />
+                Share Link
+              </Button>
+            </div>
+          </div>
+
+          {/* Start Game Card */}
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-black/10 p-8 text-center flex flex-col items-center justify-center flex-1">
+            {isHost ? (
+              <>
+                <Button
+                  className="w-full max-w-sm h-16 rounded-2xl text-xl font-black shadow-lg shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:bg-slate-300 disabled:shadow-none transition-all hover:-translate-y-1"
+                  onClick={handleStartGame}
+                  disabled={loading || !players || players.length < 3}
+                >
+                  {loading ? "STARTING..." : "START GAME 🔥"}
+                </Button>
+                
+                {players && !canStart && (
+                  <div className="mt-6 flex flex-col items-center">
+                    <div className="bg-amber-50 text-amber-700 px-4 py-2.5 rounded-xl border border-amber-200 text-sm font-bold flex items-center gap-2 shadow-sm">
+                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                       Invite {missingPlayers} more player{missingPlayers === 1 ? "" : "s"} to start
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-4">
+                <div className="w-16 h-16 border-4 border-slate-100 border-t-indigo-500 rounded-full animate-spin mb-6"></div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Waiting for Host</h3>
+                <p className="text-slate-500 font-medium">Sit tight! The host will start the game soon.</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }

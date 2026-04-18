@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import LobbyView from "@/components/LobbyView";
 import PlayView from "@/components/PlayView";
 import RoundTransition from "@/components/RoundTransition";
+import Chat from "@/components/Chat";
 import { GamePlayer } from "@/lib/types";
 import { useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
@@ -162,45 +163,55 @@ export default function GameScreen() {
 
   if (gameData.status === "waiting") {
     return (
-      <div className="min-h-screen bg-[#99184e]">
-        <div className="fixed top-20 right-4 md:right-12 z-50">
-          <Button
-            variant="destructive"
-            onClick={handleLeaveGame}
-            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
-          >
-            Leave
-          </Button>
+      <div className="min-h-screen bg-[#99184e] flex">
+        <div className="flex-1">
+          <div className="fixed top-20 right-4 md:right-12 z-50">
+            <Button
+              variant="destructive"
+              onClick={handleLeaveGame}
+              className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
+            >
+              Leave
+            </Button>
+          </div>
+          <LobbyView game={gameData} players={players || []} />
         </div>
-        <LobbyView game={gameData} players={players || []} />
+        <div className="w-80 p-4 hidden md:block">
+          <Chat players={players || []} />
+        </div>
       </div>
     );
   }
 
   if (gameData.status === "playing") {
     return (
-      <div className="min-h-screen bg-[#99184e]">
-        <div className="fixed top-20 right-4 z-50">
-          <Button
-            variant="destructive"
-            onClick={handleLeaveGame}
-            className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
-          >
-            Leave
-          </Button>
-        </div>
-        {currentRound ? (
-          <PlayView
-            currentRound={currentRound}
-            players={players || []}
-            answers={answers}
-            isTransitioning={isTransitioning}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-screen">
-            <Skeleton className="h-[200px] w-[340px] rounded-xl" />
+      <div className="min-h-screen bg-[#99184e] flex">
+        <div className="flex-1">
+          <div className="fixed top-20 right-4 z-50">
+            <Button
+              variant="destructive"
+              onClick={handleLeaveGame}
+              className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
+            >
+              Leave
+            </Button>
           </div>
-        )}
+          {currentRound ? (
+            <PlayView
+              currentRound={currentRound}
+              players={players || []}
+              answers={answers}
+              isTransitioning={isTransitioning}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-screen">
+              <Skeleton className="h-[200px] w-[340px] rounded-xl" />
+            </div>
+          )}
+        </div>
+        <div className="w-80 p-4 hidden lg:block">
+          <Chat players={players || []} />
+        </div>
       </div>
     );
   }
