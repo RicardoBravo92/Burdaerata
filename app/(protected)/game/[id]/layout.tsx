@@ -10,7 +10,7 @@ export default function GameLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#99184e]">
+    <div className="min-h-screen bg-[#99184e] flex flex-col">
       {children}
     </div>
   );
