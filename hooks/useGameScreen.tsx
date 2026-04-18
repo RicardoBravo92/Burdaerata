@@ -132,16 +132,14 @@ export function useGameScreen(
           setAnswers([]);
           setIsTransitioning(true);
           
-          const [cards, playerList] = await Promise.all([
-            fetchMyCardsAction(gameId),
-            fetchGamePlayersAction(gameId)
-          ]);
-          setMyCards(cards.cards);
-          setPlayers(playerList || []);
+          // Fetch parallel pero sin esperar para mostrar transición más rápido
+          fetchMyCardsAction(gameId).then(c => setMyCards(c.cards));
+          fetchGamePlayersAction(gameId).then(p => setPlayers(p || []));
           
+          // Reducir tiempo de transición
           setTimeout(() => {
             if (isMounted) setIsTransitioning(false);
-          }, 3500);
+          }, 2000);
         };
 
         const handleAnswerSubmitted = (data: unknown) => {
