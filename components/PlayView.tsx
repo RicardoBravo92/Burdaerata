@@ -2,7 +2,6 @@
 
 import { usePlay, UsePlayProps } from "@/hooks/usePlay";
 import { useGame } from "@/providers/GameProvider";
-import { useState } from "react";
 import RoundHeader from "./play/RoundHeader";
 import CardSelector from "./play/CardSelector";
 import RoundStatusMessages from "./play/RoundStatusMessages";
@@ -12,21 +11,9 @@ import RoundStatusBar from "./play/RoundStatusBar";
 import { StarIcon } from "lucide-react";
 import ChatGame from "./play/ChatGame";
 import ChatModal from "./play/ChatModal";
-import { User } from "@/lib/types";
-
-interface ChatMessage {
-  id: string;
-  text: string;
-  user: {
-    id: string;
-    full_name: string;
-  };
-}
 
 export default function PlayView(props: UsePlayProps) {
-  const { myCards } = useGame();
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [unreadMessages, setUnreadMessages] = useState(0);
+  const { myCards, chatMessages, setChatMessages } = useGame();
   const {
     loading,
     submittingAnswer,
@@ -75,7 +62,6 @@ export default function PlayView(props: UsePlayProps) {
         <ChatModal 
           messages={chatMessages}
           setMessages={setChatMessages}
-          setUnread={setUnreadMessages}
           currentUserId={userId || ""}
         />
       </div>

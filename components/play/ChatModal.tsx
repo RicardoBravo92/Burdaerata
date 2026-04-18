@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { MessageCircle, X } from 'lucide-react';
 import ChatGame from './ChatGame';
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ChatMessage {
   id: string;
@@ -23,11 +23,10 @@ interface ChatMessage {
 interface ChatModalProps {
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
-  setUnread?: React.Dispatch<React.SetStateAction<number>>;
   currentUserId?: string;
 }
 
-export default function ChatModal({ messages, setMessages, setUnread, currentUserId }: ChatModalProps) {
+export default function ChatModal({ messages, setMessages, currentUserId }: ChatModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const prevMsgCountRef = useRef(messages.length);
@@ -35,17 +34,15 @@ export default function ChatModal({ messages, setMessages, setUnread, currentUse
   useEffect(() => {
     if (!isOpen && messages.length > prevMsgCountRef.current) {
       setUnreadCount((prev) => prev + 1);
-      if (setUnread) setUnread((p) => p + 1);
     }
     prevMsgCountRef.current = messages.length;
-  }, [messages.length, isOpen, setUnread]);
+  }, [messages.length, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
       setUnreadCount(0);
-      if (setUnread) setUnread(0);
     }
-  }, [isOpen, setUnread]);
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

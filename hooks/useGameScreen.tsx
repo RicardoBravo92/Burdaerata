@@ -37,7 +37,7 @@ export function useGameScreen(
   getToken: () => Promise<string | null>
 ): UseGameScreenReturn {
   const router = useRouter();
-  const { setMyCards, setGame, setRound } = useGame();
+  const { setMyCards, setGame, setRound, setChatMessages } = useGame();
 
   const [players, setPlayers] = useState<GamePlayer[] | null>(null);
   const [gameData, setGameData] = useState<Game | null>(null);
@@ -193,11 +193,13 @@ export function useGameScreen(
           
           toast.info("Game finished!", { richColors: true });
           setGameData((prev) => (prev ? { ...prev, status: "finished" } : null));
+          if (setChatMessages) setChatMessages([]);
         };
 
         const handleGameDeleted = () => {
           if (!isMounted) return;
           toast.error("Game was deleted not enough players", { richColors: true });
+          if (setChatMessages) setChatMessages([]);
           router.replace("/game");
         };
 
@@ -244,12 +246,13 @@ export function useGameScreen(
     try {
       await leaveGameAction(gameId);
       toast.info("You left the game", { richColors: true });
+      if (setChatMessages) setChatMessages([]);
       router.replace("/game");
     } catch (error) {
       logError(error, "handleLeaveGame");
       toast.error(getErrorMessage(error), { richColors: true });
     }
-  }, [gameId, router]);
+  }, [gameId, router, setChatMessages]);
 
   return {
     gameData,

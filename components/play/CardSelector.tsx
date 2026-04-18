@@ -32,6 +32,7 @@ export default function CardSelector({
   submitting,
 }: CardSelectorProps) {
   const [cardTexts, setCardTexts] = useState<Record<string, string>>({});
+  const isComplete = selectedCards.length === requiredCards;
 
   useEffect(() => {
     async function loadCardTexts() {
@@ -49,21 +50,57 @@ export default function CardSelector({
         <h2 className="text-xl font-bold text-gray-800 pl-4 md:pl-0">
           Your Cards ({selectedCards.length}/{requiredCards} selected)
         </h2>
-        {selectedCards.length > 0 && (
-          <button
-            className={`flex items-center md:py-3 py-1 md:px-6 px-2 rounded-2xl ${
-              submitting ? "bg-gray-400" : "bg-blue-600"
-            } text-white font-bold transition-colors duration-200`}
-            onClick={onSubmit}
-            disabled={submitting}
-          >
-            {submitting ? <RefreshIcon /> : <SendIcon />}
-            <span className="ml-2 text-sm md:text-base">
-              {submitting ? "Submitting..." : "Submit Answer"}
-            </span>
-          </button>
-        )}
+        <button
+          className={`flex items-center md:py-3 py-1 md:px-6 px-2 rounded-2xl ${
+            isComplete && !submitting
+              ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              : "bg-gray-400 cursor-not-allowed"
+          } text-white font-bold transition-colors duration-200`}
+          onClick={isComplete ? onSubmit : undefined}
+          disabled={!isComplete || submitting}
+        >
+          {submitting ? <RefreshIcon /> : <SendIcon />}
+          <span className="ml-2 text-sm md:text-base">
+            {submitting ? "Submitting..." : "Submit Answer"}
+          </span>
+        </button>
       </div>
+
+      {selectedCards.length > 0 && !isComplete && (
+        <div className="px-4 md:px-6 mb-3">
+          <p className="text-sm text-gray-500 mb-1">
+            Select {requiredCards - selectedCards.length} more:
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {selectedCards.map((cardId, i) => (
+              <li 
+                key={i} 
+                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
+              >
+                {cardTexts[cardId] || "..."}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {isComplete && (
+        <div className="px-4 md:px-6 mb-3">
+          <p className="text-sm text-green-600 mb-1">
+            Your answer:
+          </p>
+          <ul className="flex flex-wrap gap-2">
+            {selectedCards.map((cardId, i) => (
+              <li 
+                key={i} 
+                className="text-sm bg-green-100 text-green-700 px-3 py-1.5 rounded-full"
+              >
+                {cardTexts[cardId] || "..."}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <Carousel className="mx-10">
         <CarouselContent className="items-stretch">

@@ -41,7 +41,6 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
     if (!listenWS) return;
     
     const handleNewMessage = (data: unknown) => {
-      console.log("ChatGame received message:", data);
       const msg = data as ChatMessage;
       if (setMessagesRef.current) {
         setMessagesRef.current((prev: ChatMessage[]) => {
