@@ -26,6 +26,7 @@ interface ChatMessage {
 export default function PlayView(props: UsePlayProps) {
   const { myCards } = useGame();
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const {
     loading,
     submittingAnswer,
@@ -74,6 +75,7 @@ export default function PlayView(props: UsePlayProps) {
         <ChatModal 
           messages={chatMessages}
           setMessages={setChatMessages}
+          setUnread={setUnreadMessages}
           currentUserId={userId || ""}
         />
       </div>

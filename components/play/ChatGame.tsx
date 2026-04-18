@@ -22,18 +22,23 @@ interface ChatGameProps {
   messages?: ChatMessage[];
   setMessages?: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   currentUserId?: string;
+  listenWS?: boolean;
 }
 
-export default function ChatGame({ messages: propMessages, setMessages: propSetMessages, currentUserId: propUserId }: ChatGameProps) {
+export default function ChatGame({ messages: propMessages, setMessages: propSetMessages, currentUserId: propUserId, listenWS = true }: ChatGameProps) {
   const { user } = useUser();
   const userId = propUserId || user?.id;
   const messages = propMessages || [];
   const setMessages = propSetMessages;
   const [newMessage, setNewMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isActiveRef = useRef(true);
 
   useEffect(() => {
+    if (!listenWS) return;
+    
     const handleNewMessage = (data: unknown) => {
+      if (!isActiveRef.current) return;
       const msg = data as ChatMessage;
       if (setMessages) {
         setMessages((prev) => [...prev, msg]);
@@ -43,9 +48,10 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
     wsClient.on("new_chat_message", handleNewMessage as any);
 
     return () => {
+      isActiveRef.current = false;
       wsClient.off("new_chat_message", handleNewMessage as any);
     };
-  }, [propMessages, setMessages]);
+  }, [propMessages, setMessages, listenWS]);
 
   useEffect(() => {
     if (scrollRef.current) {
