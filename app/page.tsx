@@ -9,10 +9,12 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import Header from "@/components/header";
 
 export default function Home() {
   return (
     <div className="px-4 py-4 md:py-10 bg-[#99184e] min-h-screen">
+       <Header />
       <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-br from-violet-50 to-fuchsia-50 border-none shadow-xl rounded-3xl px-6 md:py-4 ">
         {/* Hero Section */}
         <Item className="text-center">

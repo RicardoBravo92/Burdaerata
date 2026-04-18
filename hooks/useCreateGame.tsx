@@ -101,8 +101,14 @@ export function useCreateGame(): UseCreateGameReturn {
 
   const ButtonComponent = (
     <Button size="lg" onClick={handleCreateGame} disabled={createLoading}>
-      {createLoading ? <Loader2 className="animate-spin" /> : null}
-      {createLoading ? "Creating..." : "Create Game"}
+      {createLoading ? (
+        <>
+          <Loader2 className="animate-spin mr-2" />
+          Creating...
+        </>
+      ) : (
+        "Create Game"
+      )}
     </Button>
   );
 

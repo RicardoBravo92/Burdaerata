@@ -163,15 +163,15 @@ export default function GameScreen() {
 if (gameData.status === "waiting") {
     return (
       <div className="flex flex-col flex-1">
-        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
+        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-white">
           <Button
             variant="ghost"
             onClick={handleLeaveGame}
-            className="text-white hover:bg-white/20"
+            className="text-[#99184e] hover:bg-white/20"
           >
             ← Leave
           </Button>
-          <div className="text-white font-bold">
+          <div className="text-[#99184e] font-bold">
             Waiting for players...
           </div>
           <div className="w-16" />
@@ -187,15 +187,15 @@ if (gameData.status === "waiting") {
   if (gameData.status === "playing") {
     return (
       <div className="flex flex-col flex-1">
-        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
+        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-white">
           <Button
             variant="ghost"
             onClick={handleLeaveGame}
-            className="text-white hover:bg-white/20"
+            className="text-[#99184e] hover:bg-white/20"
           >
             ← Leave
           </Button>
-          <div className="text-white font-bold">
+            <div className="text-[#99184e] font-bold">
             Round {currentRound?.round_number || 1}
           </div>
           <div className="w-16" />
