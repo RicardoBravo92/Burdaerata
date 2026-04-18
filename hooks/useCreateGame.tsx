@@ -17,6 +17,7 @@ import { logError } from "@/lib/errorHandler";
 import { GAME_CONSTANTS } from "@/constants/gamesettings";
 import { GameSettingsSection, GameSettings } from "@/components/game/GameSettings";
 import { useAuth } from "@clerk/nextjs";
+import { useGame } from "@/providers/GameProvider";
 
 export interface UseCreateGameReturn {
   settings: GameSettings;
@@ -32,6 +33,7 @@ export interface UseCreateGameReturn {
 export function useCreateGame(): UseCreateGameReturn {
   const router = useRouter();
   useAuth();
+  const { setGame, setPlayers } = useGame();
   const [createLoading, setCreateLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<GameSettings>({
@@ -84,6 +86,8 @@ export function useCreateGame(): UseCreateGameReturn {
         throw new Error("Failed to create game: No game ID returned");
       }
 
+      setGame(newGame);
+      setPlayers([]);
       router.push(`/game/${newGame.id}`);
     } catch (error) {
       logError(error, "handleCreateGame");
@@ -93,7 +97,7 @@ export function useCreateGame(): UseCreateGameReturn {
     } finally {
       setCreateLoading(false);
     }
-  }, [settings, router, validateGameSettings]);
+  }, [settings, router, validateGameSettings, setGame, setPlayers]);
 
   const ButtonComponent = (
     <Button size="lg" onClick={handleCreateGame} disabled={createLoading}>

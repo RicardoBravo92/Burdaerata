@@ -163,7 +163,6 @@ export default function GameScreen() {
 if (gameData.status === "waiting") {
     return (
       <div className="flex flex-col flex-1">
-        {/* Header sticky */}
         <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
           <Button
             variant="ghost"
@@ -188,7 +187,6 @@ if (gameData.status === "waiting") {
   if (gameData.status === "playing") {
     return (
       <div className="flex flex-col flex-1">
-        {/* Header sticky */}
         <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
           <Button
             variant="ghost"
@@ -204,42 +202,6 @@ if (gameData.status === "waiting") {
         </div>
         
         <div className="flex-1">
-          {currentRound ? (
-            <PlayView
-              currentRound={currentRound}
-              players={players || []}
-              answers={answers}
-              isTransitioning={isTransitioning}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-screen">
-              <Skeleton className="h-[200px] w-[340px] rounded-xl" />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (gameData.status === "playing") {
-    return (
-      <div className="min-h-screen bg-[#99184e] flex flex-col">
-        {/* Header fixo */}
-        <div className="fixed top-16 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
-          <Button
-            variant="ghost"
-            onClick={handleLeaveGame}
-            className="text-white hover:bg-white/20"
-          >
-            ← Leave
-          </Button>
-          <div className="text-white font-bold">
-            Round {currentRound?.round_number || 1}
-          </div>
-          <div className="w-16" /> {/* Espaciador para balance */}
-        </div>
-        
-        <div className="flex-1 pt-20">
           {currentRound ? (
             <PlayView
               currentRound={currentRound}

@@ -13,6 +13,7 @@ import {
 import JoinGameModal from "@/components/modals/joinGameModal";
 import { joinGameAction } from "@/lib/actions/game.actions";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
+import { useGame } from "@/providers/GameProvider";
 
 export interface UseJoinGameReturn {
   code: string;
@@ -24,6 +25,7 @@ export interface UseJoinGameReturn {
 
 export function useJoinGame(): UseJoinGameReturn {
   const router = useRouter();
+  const { setGame, setPlayers } = useGame();
   const [code, setCode] = useState("");
   const [joinLoading, setJoinLoading] = useState(false);
 
@@ -35,6 +37,8 @@ export function useJoinGame(): UseJoinGameReturn {
         toast.success("Joined game successfully!", {
           richColors: true,
         });
+        setGame(joinedGame);
+        setPlayers([]);
         router.push(`/game/${joinedGame.id}`);
       } else {
         toast.error("Failed to join game. Check the code.", {
@@ -48,7 +52,7 @@ export function useJoinGame(): UseJoinGameReturn {
     } finally {
       setJoinLoading(false);
     }
-  }, [code, router]);
+  }, [code, router, setGame, setPlayers]);
 
   const Component = (
     <JoinGameModal
