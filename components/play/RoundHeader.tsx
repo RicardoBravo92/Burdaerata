@@ -25,10 +25,7 @@ export default function RoundHeader({
     <div className="px-6 md:max-w-xl w-full md:w-8/10 mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-center text-white">
-            Round {currentRound?.round_number}
-          </h1>
-          <p className="text-center text-base mt-1 text-white font-semibold">
+                    <p className="text-center text-base mt-1 text-white font-semibold">
             {currentRound?.status === "submitting"
               ? "Submit your answers!"
               : "Waiting for judge..."}

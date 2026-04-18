@@ -53,7 +53,7 @@ export default function PlayView(props: UsePlayProps) {
 
   return (
     <div className="flex flex-col" style={{ zoom: 0.8 }}>
-      <div className="flex items-center px-4 pt-2 lg:hidden">
+      <div className="flex justify-end items-center gap-2 px-4 pt-2 lg:hidden">
         <PlayersListModal
           players={players}
           currentRound={currentRound}
