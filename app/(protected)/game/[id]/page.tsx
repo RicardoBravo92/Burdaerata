@@ -162,17 +162,23 @@ export default function GameScreen() {
 
   if (gameData.status === "waiting") {
     return (
-      <div className="min-h-screen bg-[#99184e] flex">
-        <div className="flex-1">
-          <div className="fixed top-20 right-4 md:right-12 z-50">
-            <Button
-              variant="destructive"
-              onClick={handleLeaveGame}
-              className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
-            >
-              Leave
-            </Button>
+      <div className="min-h-screen bg-[#99184e] flex flex-col">
+        {/* Header fixo */}
+        <div className="fixed top-16 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
+          <Button
+            variant="ghost"
+            onClick={handleLeaveGame}
+            className="text-white hover:bg-white/20"
+          >
+            ← Leave
+          </Button>
+          <div className="text-white font-bold">
+            Waiting for players...
           </div>
+          <div className="w-16" />
+        </div>
+        
+        <div className="flex-1 pt-20">
           <LobbyView game={gameData} players={players || []} />
         </div>
       </div>
@@ -181,17 +187,23 @@ export default function GameScreen() {
 
   if (gameData.status === "playing") {
     return (
-      <div className="min-h-screen bg-[#99184e] flex">
-        <div className="flex-1">
-          <div className="fixed top-20 right-4 z-50">
-            <Button
-              variant="destructive"
-              onClick={handleLeaveGame}
-              className="bg-white text-[#99184e] rounded-full font-medium text-sm h-9 px-4 hover:bg-white/90 shadow"
-            >
-              Leave
-            </Button>
+      <div className="min-h-screen bg-[#99184e] flex flex-col">
+        {/* Header fixo */}
+        <div className="fixed top-16 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-[#99184e]">
+          <Button
+            variant="ghost"
+            onClick={handleLeaveGame}
+            className="text-white hover:bg-white/20"
+          >
+            ← Leave
+          </Button>
+          <div className="text-white font-bold">
+            Round {currentRound?.round_number || 1}
           </div>
+          <div className="w-16" /> {/* Espaciador para balance */}
+        </div>
+        
+        <div className="flex-1 pt-20">
           {currentRound ? (
             <PlayView
               currentRound={currentRound}

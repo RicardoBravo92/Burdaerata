@@ -29,11 +29,22 @@ class WebSocketClient {
   private reconnectDelay = 1000;
   private gameId: string | null = null;
   private token: string | null = null;
+  private visibilityHandler: (() => void) | null = null;
 
   connect(gameId: string, token: string) {
     this.gameId = gameId;
     this.token = token;
     this.createConnection();
+    
+    if (typeof window !== "undefined" && !this.visibilityHandler) {
+      this.visibilityHandler = () => {
+        if (document.visibilityState === "visible" && this.ws?.readyState !== WebSocket.OPEN) {
+          this.reconnectAttempts = 0;
+          this.createConnection();
+        }
+      };
+      document.addEventListener("visibilitychange", this.visibilityHandler);
+    }
   }
 
   private createConnection() {

@@ -46,12 +46,12 @@ export default function CardSelector({
 
   return (
     <div className="mb-6">
-      <div className="flex justify-between items-center mb-4 min-h-[72px] px-2 md:px-6">
-        <h2 className="text-xl font-bold text-gray-800 pl-4 md:pl-0">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4 min-h-[72px] px-2 md:px-6 gap-3">
+        <h2 className="text-xl font-bold text-gray-800">
           Your Cards ({selectedCards.length}/{requiredCards} selected)
         </h2>
         <button
-          className={`flex items-center md:py-3 py-1 md:px-6 px-2 rounded-2xl ${
+          className={`flex items-center py-2 px-4 md:py-3 md:px-6 rounded-2xl whitespace-nowrap ${
             isComplete && !submitting
               ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
               : "bg-gray-400 cursor-not-allowed"
@@ -60,7 +60,7 @@ export default function CardSelector({
           disabled={!isComplete || submitting}
         >
           {submitting ? <RefreshIcon /> : <SendIcon />}
-          <span className="ml-2 text-sm md:text-base">
+          <span className="ml-2">
             {submitting ? "Submitting..." : "Submit Answer"}
           </span>
         </button>

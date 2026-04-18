@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -39,19 +39,12 @@ export function useGameScreen(
   const router = useRouter();
   const { setMyCards, setGame, setRound, setChatMessages } = useGame();
 
-  const [players, setPlayers] = useState<GamePlayer[] | null>(null);
+  const [players, setPlayers] = useState<GamePlayer[]>([]);
   const [gameData, setGameData] = useState<Game | null>(null);
   const [currentRound, setCurrentRound] = useState<Round | null>(null);
   const [answers, setAnswers] = useState<RoundAnswer[]>([]);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const currentRoundRef = useRef<Round | null>(null);
-
-  // Update ref whenever currentRound changes
-  useEffect(() => {
-    currentRoundRef.current = currentRound;
-  }, [currentRound]);
-
 
   const fetchInitialData = useCallback(async () => {
     try {
@@ -63,20 +56,21 @@ export function useGameScreen(
 
       setGameData(game);
       setGame(game);
-      setPlayers(playerList);
+      setPlayers(playerList || []);
 
       if (game?.status === "playing" && rounds) {
         setCurrentRound(rounds);
         setRound(rounds);
-        const roundAnswers = await fetchRoundAnswersAction(rounds.id);
+        const [roundAnswers, cards] = await Promise.all([
+          fetchRoundAnswersAction(rounds.id),
+          fetchMyCardsAction(gameId),
+        ]);
         setAnswers(roundAnswers);
-        const cards = await fetchMyCardsAction(gameId);
         setMyCards(cards.cards);
       }
-
-      setLoading(false);
     } catch (error) {
       logError(error, "fetchData");
+    } finally {
       setLoading(false);
     }
   }, [gameId, setGame, setRound, setMyCards]);
@@ -87,7 +81,7 @@ export function useGameScreen(
   }, [gameId, userId, fetchInitialData]);
 
   useEffect(() => {
-    if (!gameId || !userId) return;
+    if (!gameId || !userId || !gameData) return;
 
     let isMounted = true;
 
@@ -101,17 +95,13 @@ export function useGameScreen(
         const handlePlayerJoined = () => {
           if (!isMounted) return;
           fetchGamePlayersAction(gameId).then(setPlayers);
-          if (players?.some((player) => player.user_id !== userId)) {
-            toast.info("A player joined", { richColors: true });
-          }
+          toast.info("A player joined", { richColors: true });
         };
 
         const handlePlayerLeft = () => {
           if (!isMounted) return;
           fetchGamePlayersAction(gameId).then(setPlayers);
-          if (players?.some((player) => player.user_id !== userId)) {
-            toast.info("A player left", { richColors: true });
-          }
+          toast.info("A player left", { richColors: true });
         };
 
         const handleGameStarted = async () => {
@@ -124,8 +114,8 @@ export function useGameScreen(
           setGameData(newGame);
           setGame(newGame);
           setCurrentRound(newRound);
-          if (newRound) setRound?.(newRound);
-          setPlayers(playersData);
+          setRound?.(newRound);
+          setPlayers(playersData || []);
           if (newRound) {
             const roundAnswers = await fetchRoundAnswersAction(newRound.id);
             setAnswers(roundAnswers);
@@ -136,69 +126,51 @@ export function useGameScreen(
 
         const handleNewRound = async (data: unknown) => {
           if (!isMounted) return;
-          
-          setIsTransitioning(true);
-          
           const round = data as Round;
           setCurrentRound(round);
-          if (round) setRound?.(round);
+          setRound?.(round);
           setAnswers([]);
+          setIsTransitioning(true);
           
           const [cards, playerList] = await Promise.all([
             fetchMyCardsAction(gameId),
             fetchGamePlayersAction(gameId)
           ]);
-          
           setMyCards(cards.cards);
-          setPlayers(playerList);
+          setPlayers(playerList || []);
           
           setTimeout(() => {
             if (isMounted) setIsTransitioning(false);
           }, 3500);
         };
 
-        const handleAnswerSubmitted = (data: any) => {
+        const handleAnswerSubmitted = (data: unknown) => {
           if (!isMounted) return;
           const newAnswer = data as RoundAnswer;
-          setAnswers((prev) => {
-            const exists = prev.some((a) => a.id === newAnswer.id);
-            if (exists) return prev;
-            return [...prev, newAnswer];
-          });
+          setAnswers(prev => prev.some(a => a.id === newAnswer.id) ? prev : [...prev, newAnswer]);
         };
 
-        const handleRoundFinished = async (data: unknown) => {
-          if (!isMounted) return;
-          const payload = data as { round_id: string; winning_answer_id: string };
-          const [roundAnswers, playerList, lastRound] = await Promise.all([
-            fetchRoundAnswersAction(payload.round_id),
+        const handleRoundFinished = async () => {
+          if (!currentRound) return;
+          const [roundAnswers, playerList] = await Promise.all([
+            fetchRoundAnswersAction(currentRound.id),
             fetchGamePlayersAction(gameId),
-            fetchLastRoundAction(gameId)
           ]);
-          if (lastRound) {
-            setCurrentRound(lastRound);
-            setRound?.(lastRound);
-          }
           setAnswers(roundAnswers);
-          setPlayers(playerList);
+          setPlayers(playerList || []);
           toast.success("Round ended", { richColors: true });
         };
 
-
-        const handleGameFinished = async () => {
+        const handleGameFinished = () => {
           if (!isMounted) return;
-          
-          const playerList = await fetchGamePlayersAction(gameId);
-          setPlayers(playerList);
-          
           toast.info("Game finished!", { richColors: true });
-          setGameData((prev) => (prev ? { ...prev, status: "finished" } : null));
+          setGameData(prev => prev ? { ...prev, status: "finished" } : null);
           if (setChatMessages) setChatMessages([]);
         };
 
         const handleGameDeleted = () => {
           if (!isMounted) return;
-          toast.error("Game was deleted not enough players", { richColors: true });
+          toast.error("Game was deleted", { richColors: true });
           if (setChatMessages) setChatMessages([]);
           router.replace("/game");
         };
@@ -228,19 +200,16 @@ export function useGameScreen(
       }
     }
 
-    const cleanupPromise = initWebSocket();
+    const cleanup = initWebSocket();
 
     return () => {
       isMounted = false;
-      cleanupPromise?.then((cleanup) => cleanup?.());
+      cleanup?.then((fn) => fn?.());
     };
-  }, [gameId, userId, getToken, router]);
+  }, [gameId, userId, gameData?.status, getToken, router, currentRound, setGame, setRound, setMyCards, setChatMessages]);
 
   const handleLeaveGame = useCallback(async () => {
-    const confirmed =
-      typeof window !== "undefined"
-        ? window.confirm("Are you sure you want to leave the game?")
-        : false;
+    const confirmed = window.confirm("Are you sure you want to leave the game?");
     if (!confirmed) return;
 
     try {
