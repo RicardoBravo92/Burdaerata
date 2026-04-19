@@ -1,12 +1,20 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { toast } from "sonner";
-import { useGame } from "@/providers/GameProvider";
-import { useUser } from "@clerk/clerk-react";
-import { getErrorMessage, logError } from "@/lib/errorHandler";
-import { submitAnswerAction, selectWinnerAction, fetchQuestionAction, startNextRoundAction } from "@/lib/actions/game.actions";
-import type { Round, RoundAnswer, GamePlayer } from "@/lib/types";
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
+import { useGame } from '@/providers/GameProvider';
+import { useUser } from '@clerk/clerk-react';
+import { getErrorMessage, logError } from '@/lib/errorHandler';
+import {
+  submitAnswerAction,
+  selectWinnerAction,
+  fetchQuestionAction,
+  startNextRoundAction,
+  fetchGameAction,
+  fetchLastRoundAction,
+  fetchGamePlayersAction,
+} from '@/lib/actions/game.actions';
+import type { Round, RoundAnswer, GamePlayer } from '@/lib/types';
 
 export interface UsePlayProps {
   currentRound: Round;
@@ -37,16 +45,16 @@ export function usePlay({
   players,
   answers,
 }: UsePlayProps): UsePlayReturn {
-  const { myCards, setMyCards } = useGame();
+  const { myCards, setMyCards, game, setGame, setRound, setPlayers } =
+    useGame();
   const { user } = useUser();
   const userId = user?.id;
-  const { game } = useGame();
 
   const [loading, setLoading] = useState(false);
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
   const [startingNextRound, setStartingNextRound] = useState(false);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
-  const [questionText, setQuestionText] = useState<string>("");
+  const [questionText, setQuestionText] = useState<string>('');
   const [blankCount, setBlankCount] = useState<number>(1);
 
   useEffect(() => {
@@ -57,11 +65,13 @@ export function usePlay({
     async function loadQuestion() {
       if (currentRound?.question_card_id) {
         try {
-          const question = await fetchQuestionAction(currentRound.question_card_id);
+          const question = await fetchQuestionAction(
+            currentRound.question_card_id,
+          );
           setQuestionText(question.text);
           setBlankCount(question.blank_count || 1);
         } catch (error) {
-          logError(error, "loadQuestion");
+          logError(error, 'loadQuestion');
         }
       }
     }
@@ -70,8 +80,14 @@ export function usePlay({
 
   const isJudge = currentRound?.judge_user_id === userId;
   const isHost = game?.host_player_id === userId;
-  const hasSubmitted = answers.some((answer: RoundAnswer) => answer.user_id === userId);
-  const canSubmit = !isJudge && !hasSubmitted && currentRound?.status === "submitting" && !submittingAnswer;
+  const hasSubmitted = answers.some(
+    (answer: RoundAnswer) => answer.user_id === userId,
+  );
+  const canSubmit =
+    !isJudge &&
+    !hasSubmitted &&
+    currentRound?.status === 'submitting' &&
+    !submittingAnswer;
 
   const onCardSelect = useCallback(
     (card: string) => {
@@ -90,19 +106,19 @@ export function usePlay({
 
       setSelectedCards(updatedSelection);
     },
-    [selectedCards, blankCount]
+    [selectedCards, blankCount],
   );
 
   const handleSubmitAnswer = useCallback(async () => {
     if (selectedCards.length === 0) {
-      toast.warning("Please select at least one card", { richColors: true });
+      toast.warning('Please select at least one card', { richColors: true });
       return;
     }
 
     if (selectedCards.length !== blankCount) {
       toast.warning(
-        `You must select exactly ${blankCount} card${blankCount > 1 ? "s" : ""}`,
-        { richColors: true }
+        `You must select exactly ${blankCount} card${blankCount > 1 ? 's' : ''}`,
+        { richColors: true },
       );
       return;
     }
@@ -113,13 +129,13 @@ export function usePlay({
       const { newCards } = await submitAnswerAction(
         currentRound.id,
         cardIds,
-        currentRound.game_id
+        currentRound.game_id,
       );
       setMyCards(newCards);
       setSelectedCards([]);
-      toast.success("Answer submitted!", { richColors: true });
+      toast.success('Answer submitted!', { richColors: true });
     } catch (error: unknown) {
-      logError(error, "handleSubmitAnswer");
+      logError(error, 'handleSubmitAnswer');
       toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setSubmittingAnswer(false);
@@ -129,33 +145,41 @@ export function usePlay({
   const handleSelectWinner = useCallback(
     async (answerId: string) => {
       if (!currentRound) {
-        toast.error("Round not available", { richColors: true });
+        toast.error('Round not available', { richColors: true });
         return;
       }
 
       setLoading(true);
       try {
         await selectWinnerAction(currentRound.id, answerId);
-        toast.success("Winner selected!", { richColors: true });
+        const [updatedGame, updatedRound, playerList] = await Promise.all([
+          fetchGameAction(currentRound.game_id),
+          fetchLastRoundAction(currentRound.game_id),
+          fetchGamePlayersAction(currentRound.game_id),
+        ]);
+        setGame(updatedGame);
+        setRound(updatedRound);
+        setPlayers(playerList || []);
+        toast.success('Winner selected!', { richColors: true });
       } catch (error: unknown) {
-        logError(error, "handleSelectWinner");
+        logError(error, 'handleSelectWinner');
         toast.error(getErrorMessage(error), { richColors: true });
       } finally {
         setLoading(false);
       }
     },
-    [currentRound]
+    [currentRound],
   );
-  
+
   const handleStartNextRound = useCallback(async () => {
     if (!currentRound?.game_id) return;
     if (startingNextRound) return;
     setStartingNextRound(true);
     try {
       await startNextRoundAction(currentRound.game_id);
-      toast.success("Round started!", { richColors: true });
+      toast.success('Round started!', { richColors: true });
     } catch (error) {
-      logError(error, "handleStartNextRound");
+      logError(error, 'handleStartNextRound');
       toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setStartingNextRound(false);

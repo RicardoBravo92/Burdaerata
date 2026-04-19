@@ -35,7 +35,9 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
   const isActiveRef = useRef(true);
 
   const setMessagesRef = useRef(propSetMessages);
-  setMessagesRef.current = propSetMessages;
+  useEffect(() => {
+    setMessagesRef.current = propSetMessages;
+  }, [propSetMessages]);
 
   useEffect(() => {
     if (!listenWS) return;
