@@ -33,7 +33,6 @@ export interface UseCreateGameReturn {
 export function useCreateGame(): UseCreateGameReturn {
   const router = useRouter();
   useAuth();
-  const { setGame, setPlayers } = useGame();
   const [createLoading, setCreateLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<GameSettings>({
@@ -86,8 +85,6 @@ export function useCreateGame(): UseCreateGameReturn {
         throw new Error("Failed to create game: No game ID returned");
       }
 
-      setGame(newGame);
-      setPlayers([]);
       router.push(`/game/${newGame.id}`);
     } catch (error) {
       logError(error, "handleCreateGame");
@@ -97,7 +94,7 @@ export function useCreateGame(): UseCreateGameReturn {
     } finally {
       setCreateLoading(false);
     }
-  }, [settings, router, validateGameSettings, setGame, setPlayers]);
+  }, [settings, router, validateGameSettings]);
 
   const ButtonComponent = (
     <Button size="lg" onClick={handleCreateGame} disabled={createLoading}>

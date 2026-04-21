@@ -82,15 +82,6 @@ export default function GameScreen() {
     );
   }
 
-  if (isTransitioning && currentRound) {
-    return (
-      <RoundTransition
-        round={currentRound}
-        players={players || []}
-      />
-    );
-  }
-
   if (!gameData) {
     return (
       <div className="flex items-center justify-center bg-[#99184e] min-h-screen">

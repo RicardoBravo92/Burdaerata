@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useGame } from "@/providers/GameProvider";
 import { useUser } from "@clerk/clerk-react";
 import { getErrorMessage, logError } from "@/lib/errorHandler";
-import { submitAnswerAction, selectWinnerAction, fetchQuestionAction, startNextRoundAction } from "@/lib/actions/game.actions";
+import { submitAnswerAction, selectWinnerAction, fetchQuestionAction, startNextRoundAction, fetchGameAction, fetchLastRoundAction, fetchGamePlayersAction } from "@/lib/actions/game.actions";
 import type { Round, RoundAnswer, GamePlayer } from "@/lib/types";
 
 export interface UsePlayProps {
@@ -37,10 +37,9 @@ export function usePlay({
   players,
   answers,
 }: UsePlayProps): UsePlayReturn {
-  const { myCards, setMyCards } = useGame();
+  const { myCards, setMyCards, game, setGame, setRound, setPlayers } = useGame();
   const { user } = useUser();
   const userId = user?.id;
-  const { game } = useGame();
 
   const [loading, setLoading] = useState(false);
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
@@ -136,6 +135,14 @@ export function usePlay({
       setLoading(true);
       try {
         await selectWinnerAction(currentRound.id, answerId);
+        const [updatedGame, updatedRound, playerList] = await Promise.all([
+          fetchGameAction(currentRound.game_id),
+          fetchLastRoundAction(currentRound.game_id),
+          fetchGamePlayersAction(currentRound.game_id),
+        ]);
+        setGame(updatedGame);
+        setRound(updatedRound);
+        setPlayers(playerList || []);
         toast.success("Winner selected!", { richColors: true });
       } catch (error: unknown) {
         logError(error, "handleSelectWinner");

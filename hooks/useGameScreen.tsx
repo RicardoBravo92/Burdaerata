@@ -179,12 +179,16 @@ export function useGameScreen(
           if (!isMounted) return;
           const roundId = round?.id;
           if (!roundId) return;
-          const [roundAnswers, playerList] = await Promise.all([
+          const [roundAnswers, playerList, gameData, lastRound] = await Promise.all([
             fetchRoundAnswersAction(roundId),
             fetchGamePlayersAction(gameId),
+            fetchGameAction(gameId),
+            fetchLastRoundAction(gameId),
           ]);
           setAnswers(roundAnswers);
           setPlayers(playerList || []);
+          setGame(gameData);
+          setRound(lastRound);
           toast.success("Round ended", { richColors: true });
         };
 

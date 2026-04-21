@@ -31,25 +31,7 @@ export default function PlayView(props: UsePlayProps) {
     isHost,
   } = usePlay(props);
 
-  const { currentRound, players, answers, isTransitioning } = props;
-
-  if (isTransitioning) {
-    return (
-      <div className="flex-1 items-center justify-center bg-[#99184e] min-h-screen">
-        <div className="items-center space-y-6 text-center">
-          <div className="bg-white/20 p-6 rounded-full">
-            <span className="text-2xl">🔄</span>
-          </div>
-          <h1 className="text-white text-3xl font-bold text-center">
-            Starting next round
-          </h1>
-          <p className="text-white/80 text-lg text-center">
-            Get ready for the next challenge!
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const { currentRound, players, answers } = props;
 
   return (
     <div className="flex flex-col" style={{ zoom: 0.8 }}>
