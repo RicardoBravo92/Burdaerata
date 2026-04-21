@@ -82,8 +82,6 @@ export default function GameScreen() {
     );
   }
 
-<<<<<<< HEAD
-=======
   // if (isTransitioning && currentRound) {
   //   return (
   //     <RoundTransition
@@ -93,7 +91,6 @@ export default function GameScreen() {
   //   );
   // }
 
->>>>>>> a8ddcb0446722b8d9f767178b26fabc187f76257
   if (!gameData) {
     return (
       <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
