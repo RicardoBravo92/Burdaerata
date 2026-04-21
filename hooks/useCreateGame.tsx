@@ -1,23 +1,26 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@/components/ui/item";
-import { createGameAction } from "@/lib/actions/game.actions";
-import { logError } from "@/lib/errorHandler";
-import { GAME_CONSTANTS } from "@/constants/gamesettings";
-import { GameSettingsSection, GameSettings } from "@/components/game/GameSettings";
-import { useAuth } from "@clerk/nextjs";
-import { useGame } from "@/providers/GameProvider";
+} from '@/components/ui/item';
+import { createGameAction } from '@/lib/actions/game.actions';
+import { logError } from '@/lib/errorHandler';
+import { GAME_CONSTANTS } from '@/constants/gamesettings';
+import {
+  GameSettingsSection,
+  GameSettings,
+} from '@/components/game/GameSettings';
+import { useAuth } from '@clerk/nextjs';
+import { useGame } from '@/providers/GameProvider';
 
 export interface UseCreateGameReturn {
   settings: GameSettings;
@@ -44,7 +47,7 @@ export function useCreateGame(): UseCreateGameReturn {
     (key: keyof GameSettings, value: number) => {
       setSettings((prev) => ({ ...prev, [key]: value }));
     },
-    []
+    [],
   );
 
   const toggleSettings = useCallback(() => {
@@ -78,17 +81,19 @@ export function useCreateGame(): UseCreateGameReturn {
     try {
       const newGame = await createGameAction(
         settings.maxPlayers,
-        settings.scoreToWin
+        settings.scoreToWin,
       );
 
       if (!newGame?.id) {
-        throw new Error("Failed to create game: No game ID returned");
+        throw new Error('Failed to create game: No game ID returned');
       }
 
+      // setGame(newGame);
+      // setPlayers([]);
       router.push(`/game/${newGame.id}`);
     } catch (error) {
-      logError(error, "handleCreateGame");
-      toast.error("Failed to create game. Please try again.", {
+      logError(error, 'handleCreateGame');
+      toast.error('Failed to create game. Please try again.', {
         richColors: true,
       });
     } finally {
@@ -97,23 +102,20 @@ export function useCreateGame(): UseCreateGameReturn {
   }, [settings, router, validateGameSettings]);
 
   const ButtonComponent = (
-    <Button size="lg" onClick={handleCreateGame} disabled={createLoading}>
+    <Button size='lg' onClick={handleCreateGame} disabled={createLoading}>
       {createLoading ? (
         <>
-          <Loader2 className="animate-spin mr-2" />
+          <Loader2 className='animate-spin mr-2' />
           Creating...
         </>
       ) : (
-        "Create Game"
+        'Create Game'
       )}
     </Button>
   );
 
   const SettingsComponent = showSettings ? (
-    <GameSettingsSection
-      settings={settings}
-      updateSetting={updateSetting}
-    />
+    <GameSettingsSection settings={settings} updateSetting={updateSetting} />
   ) : null;
 
   return {
@@ -129,15 +131,11 @@ export function useCreateGame(): UseCreateGameReturn {
 }
 
 export default function CreateGame() {
-  const {
-    showSettings,
-    toggleSettings,
-    ButtonComponent,
-    SettingsComponent,
-  } = useCreateGame();
+  const { showSettings, toggleSettings, ButtonComponent, SettingsComponent } =
+    useCreateGame();
 
   return (
-    <Item variant="outline" className="rounded-3xl p-8 md:p-4 shadow-lg">
+    <Item variant='outline' className='rounded-3xl p-8 md:p-4 shadow-lg'>
       <ItemContent>
         <ItemTitle>Create New Game</ItemTitle>
         <ItemDescription>
@@ -147,12 +145,12 @@ export default function CreateGame() {
 
       <ItemActions>
         <Button
-          variant="outline"
+          variant='outline'
           onClick={toggleSettings}
-          size="lg"
+          size='lg'
           aria-expanded={showSettings}
         >
-          {showSettings ? "Hide Settings" : "Game Settings"}
+          {showSettings ? 'Hide Settings' : 'Game Settings'}
         </Button>
         {ButtonComponent}
       </ItemActions>

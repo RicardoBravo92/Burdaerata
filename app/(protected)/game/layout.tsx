@@ -7,7 +7,7 @@ export default function GamePageLayout({
 }) {
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       {children}
     </>
   );

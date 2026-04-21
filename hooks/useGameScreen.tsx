@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   fetchGameAction,
   fetchLastRoundAction,
@@ -10,16 +10,16 @@ import {
   fetchMyCardsAction,
   fetchGamePlayersAction,
   leaveGameAction,
-} from "@/lib/actions/game.actions";
+} from '@/lib/actions/game.actions';
 import {
   connectToGame as connectToGameWS,
   disconnectFromGame as disconnectFromGameWS,
   onGameEvent,
   offGameEvent,
-} from "@/services/gameService";
-import { useGame } from "@/providers/GameProvider";
-import { logError, getErrorMessage } from "@/lib/errorHandler";
-import type { Game, Round, RoundAnswer, GamePlayer } from "@/lib/types";
+} from '@/services/gameService';
+import { useGame } from '@/providers/GameProvider';
+import { logError, getErrorMessage } from '@/lib/errorHandler';
+import type { Game, Round, RoundAnswer, GamePlayer } from '@/lib/types';
 
 export interface UseGameScreenReturn {
   gameData: Game | null;
@@ -34,10 +34,20 @@ export interface UseGameScreenReturn {
 export function useGameScreen(
   gameId: string,
   userId: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ): UseGameScreenReturn {
   const router = useRouter();
-  const { game, players, round, setGame, setGameState, setPlayers, setMyCards, setRound, setChatMessages } = useGame();
+  const {
+    game,
+    players,
+    round,
+    setGame,
+    setGameState,
+    setPlayers,
+    setMyCards,
+    setRound,
+    setChatMessages,
+  } = useGame();
 
   const [answers, setAnswers] = useState<RoundAnswer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +64,7 @@ export function useGameScreen(
       setGame(gameData);
       setPlayers(playerList || []);
 
-      if (gameData?.status === "playing" && rounds) {
+      if (gameData?.status === 'playing' && rounds) {
         setRound(rounds);
         const [roundAnswers, cards] = await Promise.all([
           fetchRoundAnswersAction(rounds.id),
@@ -64,7 +74,7 @@ export function useGameScreen(
         setMyCards(cards.cards);
       }
     } catch (error) {
-      logError(error, "fetchData");
+      logError(error, 'fetchData');
     } finally {
       setLoading(false);
     }
@@ -73,7 +83,7 @@ export function useGameScreen(
   const initWithGlobalState = useCallback(async () => {
     if (game && game.id === gameId && players.length > 0) {
       setLoading(false);
-      if (game.status === "playing" && round) {
+      if (game.status === 'playing' && round) {
         const [roundAnswers, cards] = await Promise.all([
           fetchRoundAnswersAction(round.id),
           fetchMyCardsAction(gameId),
@@ -105,7 +115,7 @@ export function useGameScreen(
 
   useEffect(() => {
     if (!gameId || !userId) return;
-    
+
     initWithGlobalState().then((hasData) => {
       if (!hasData) {
         fetchInitialData();
@@ -128,13 +138,13 @@ export function useGameScreen(
         const handlePlayerJoined = () => {
           if (!isMounted) return;
           fetchPlayers();
-          toast.info("A player joined", { richColors: true });
+          toast.info('A player joined', { richColors: true });
         };
 
         const handlePlayerLeft = () => {
           if (!isMounted) return;
           fetchPlayers();
-          toast.info("A player left", { richColors: true });
+          toast.info('A player left', { richColors: true });
         };
 
         const handleGameStarted = async () => {
@@ -160,10 +170,10 @@ export function useGameScreen(
           setRound(roundData);
           setAnswers([]);
           setIsTransitioning(true);
-          
-          fetchMyCardsAction(gameId).then(c => setMyCards(c.cards));
-          fetchGamePlayersAction(gameId).then(p => setPlayers(p || []));
-          
+
+          fetchMyCardsAction(gameId).then((c) => setMyCards(c.cards));
+          fetchGamePlayersAction(gameId).then((p) => setPlayers(p || []));
+
           setTimeout(() => {
             if (isMounted) setIsTransitioning(false);
           }, 2000);
@@ -172,62 +182,69 @@ export function useGameScreen(
         const handleAnswerSubmitted = (data: unknown) => {
           if (!isMounted) return;
           const newAnswer = data as RoundAnswer;
-          setAnswers(prev => prev.some(a => a.id === newAnswer.id) ? prev : [...prev, newAnswer]);
+          setAnswers((prev) =>
+            prev.some((a) => a.id === newAnswer.id)
+              ? prev
+              : [...prev, newAnswer],
+          );
         };
 
         const handleRoundFinished = async () => {
           if (!isMounted) return;
           const roundId = round?.id;
           if (!roundId) return;
-          const [roundAnswers, playerList, gameData, lastRound] = await Promise.all([
-            fetchRoundAnswersAction(roundId),
-            fetchGamePlayersAction(gameId),
-            fetchGameAction(gameId),
-            fetchLastRoundAction(gameId),
-          ]);
+          const [roundAnswers, playerList, gameData, lastRound] =
+            await Promise.all([
+              fetchRoundAnswersAction(roundId),
+              fetchGamePlayersAction(gameId),
+              fetchGameAction(gameId),
+              fetchLastRoundAction(gameId),
+            ]);
           setAnswers(roundAnswers);
           setPlayers(playerList || []);
           setGame(gameData);
           setRound(lastRound);
-          toast.success("Round ended", { richColors: true });
+          toast.success('Round ended', { richColors: true });
         };
 
         const handleGameFinished = () => {
           if (!isMounted) return;
-          toast.info("Game finished!", { richColors: true });
-          setGameState(prev => prev ? { ...prev, status: "finished" } : null);
+          toast.info('Game finished!', { richColors: true });
+          setGameState((prev) =>
+            prev ? { ...prev, status: 'finished' } : null,
+          );
           setChatMessages([]);
         };
 
         const handleGameDeleted = () => {
           if (!isMounted) return;
-          toast.error("Game was deleted", { richColors: true });
+          toast.error('Game was deleted', { richColors: true });
           setChatMessages([]);
-          router.replace("/game");
+          router.replace('/game');
         };
 
-        onGameEvent("player_joined", handlePlayerJoined);
-        onGameEvent("player_left", handlePlayerLeft);
-        onGameEvent("game_started", handleGameStarted);
-        onGameEvent("new_round", handleNewRound);
-        onGameEvent("answer_submitted", handleAnswerSubmitted);
-        onGameEvent("round_finished", handleRoundFinished);
-        onGameEvent("game_finished", handleGameFinished);
-        onGameEvent("game_deleted", handleGameDeleted);
+        onGameEvent('player_joined', handlePlayerJoined);
+        onGameEvent('player_left', handlePlayerLeft);
+        onGameEvent('game_started', handleGameStarted);
+        onGameEvent('new_round', handleNewRound);
+        onGameEvent('answer_submitted', handleAnswerSubmitted);
+        onGameEvent('round_finished', handleRoundFinished);
+        onGameEvent('game_finished', handleGameFinished);
+        onGameEvent('game_deleted', handleGameDeleted);
 
         return () => {
           disconnectFromGameWS();
-          offGameEvent("player_joined", handlePlayerJoined);
-          offGameEvent("player_left", handlePlayerLeft);
-          offGameEvent("game_started", handleGameStarted);
-          offGameEvent("new_round", handleNewRound);
-          offGameEvent("answer_submitted", handleAnswerSubmitted);
-          offGameEvent("round_finished", handleRoundFinished);
-          offGameEvent("game_finished", handleGameFinished);
-          offGameEvent("game_deleted", handleGameDeleted);
+          offGameEvent('player_joined', handlePlayerJoined);
+          offGameEvent('player_left', handlePlayerLeft);
+          offGameEvent('game_started', handleGameStarted);
+          offGameEvent('new_round', handleNewRound);
+          offGameEvent('answer_submitted', handleAnswerSubmitted);
+          offGameEvent('round_finished', handleRoundFinished);
+          offGameEvent('game_finished', handleGameFinished);
+          offGameEvent('game_deleted', handleGameDeleted);
         };
       } catch (error) {
-        logError(error, "initWebSocket");
+        logError(error, 'initWebSocket');
       }
     }
 
@@ -237,19 +254,37 @@ export function useGameScreen(
       isMounted = false;
       cleanup?.then((fn) => fn?.());
     };
-  }, [gameId, userId, getToken, router, round, game, fetchPlayers, fetchGameData, fetchRoundData, setGame, setGameState, setPlayers, setRound, setMyCards, setChatMessages]);
+  }, [
+    gameId,
+    userId,
+    getToken,
+    router,
+    round,
+    game,
+    fetchPlayers,
+    fetchGameData,
+    fetchRoundData,
+    setGame,
+    setGameState,
+    setPlayers,
+    setRound,
+    setMyCards,
+    setChatMessages,
+  ]);
 
   const handleLeaveGame = useCallback(async () => {
-    const confirmed = window.confirm("Are you sure you want to leave the game?");
+    const confirmed = window.confirm(
+      'Are you sure you want to leave the game?',
+    );
     if (!confirmed) return;
 
     try {
       await leaveGameAction(gameId);
-      toast.info("You left the game", { richColors: true });
+      toast.info('You left the game', { richColors: true });
       setChatMessages([]);
-      router.replace("/game");
+      router.replace('/game');
     } catch (error) {
-      logError(error, "handleLeaveGame");
+      logError(error, 'handleLeaveGame');
       toast.error(getErrorMessage(error), { richColors: true });
     }
   }, [gameId, router, setChatMessages]);

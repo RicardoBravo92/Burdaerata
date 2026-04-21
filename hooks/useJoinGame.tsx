@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@/components/ui/item";
-import JoinGameModal from "@/components/modals/joinGameModal";
-import { joinGameAction } from "@/lib/actions/game.actions";
-import { getErrorMessage, logError } from "@/lib/errorHandler";
+} from '@/components/ui/item';
+import JoinGameModal from '@/components/modals/joinGameModal';
+import { joinGameAction } from '@/lib/actions/game.actions';
+import { getErrorMessage, logError } from '@/lib/errorHandler';
 
 export interface UseJoinGameReturn {
   code: string;
@@ -24,7 +24,7 @@ export interface UseJoinGameReturn {
 
 export function useJoinGame(): UseJoinGameReturn {
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
 
   const handleJoinGame = useCallback(async () => {
@@ -32,18 +32,18 @@ export function useJoinGame(): UseJoinGameReturn {
     try {
       const joinedGame = await joinGameAction(code);
       if (joinedGame?.id) {
-        toast.success("Joined game successfully!", {
+        toast.success('Joined game successfully!', {
           richColors: true,
         });
         router.push(`/game/${joinedGame.id}`);
       } else {
-        toast.error("Failed to join game. Check the code.", {
+        toast.error('Failed to join game. Check the code.', {
           richColors: true,
         });
-        setCode("");
+        setCode('');
       }
     } catch (error) {
-      logError(error, "handleJoinGame");
+      logError(error, 'handleJoinGame');
       toast.error(getErrorMessage(error), { richColors: true });
     } finally {
       setJoinLoading(false);
@@ -73,8 +73,8 @@ export default function JoinGame() {
 
   return (
     <Item
-      variant="outline"
-      className="bg-white rounded-3xl p-8 md:p-4 shadow-lg"
+      variant='outline'
+      className='bg-white rounded-3xl p-8 md:p-4 shadow-lg'
     >
       <ItemContent>
         <ItemTitle>Join Game</ItemTitle>
