@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { wsClient, WebSocketEvent } from "@/lib/websocket";
 import { cardService } from "./cardService";
-import type { Game, GamePlayer, Round, RoundAnswer, playerCards } from "@/lib/types";
+import type { Game, GamePlayer, Round, RoundAnswer } from "@/lib/types";
 
 interface CreateGameParams {
   max_players?: number;
@@ -18,24 +18,10 @@ interface CreateGameResponse {
   public: boolean;
 }
 
-interface JoinGameParams {
-  code: string;
-}
-
-interface CreateRoundAnswerParams {
-  round_id: string;
-  cards_used: string[];
-}
-
 interface PlayerCardsResponse {
   game_id: string;
   user_id: string;
   cards: string[];
-}
-
-interface SelectWinnerParams {
-  round_id: string;
-  winning_answer_id: string;
 }
 
 export async function createGame(params?: CreateGameParams): Promise<Game> {
