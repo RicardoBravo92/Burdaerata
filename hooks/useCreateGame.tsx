@@ -84,14 +84,17 @@ export function useCreateGame(): UseCreateGameReturn {
         settings.scoreToWin,
       );
 
+      console.log('Game created:', newGame);
+
       if (!newGame?.id) {
         throw new Error('Failed to create game: No game ID returned');
       }
 
-      // setGame(newGame);
-      // setPlayers([]);
+      console.log('Attempting redirect to:', `/game/${newGame.id}`);
       router.push(`/game/${newGame.id}`);
+      console.log('Redirect called');
     } catch (error) {
+      console.error('Error creating game:', error);
       logError(error, 'handleCreateGame');
       toast.error('Failed to create game. Please try again.', {
         richColors: true,
