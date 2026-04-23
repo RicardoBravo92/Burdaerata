@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -123,8 +123,13 @@ export function useGameScreen(
     });
   }, [gameId, userId, fetchInitialData, initWithGlobalState]);
 
+  const roundRef = useRef(round);
   useEffect(() => {
-    if (!gameId || !userId || !game) return;
+    roundRef.current = round;
+  }, [round]);
+
+  useEffect(() => {
+    if (!gameId || !userId) return;
 
     let isMounted = true;
 
@@ -191,7 +196,7 @@ export function useGameScreen(
 
         const handleRoundFinished = async () => {
           if (!isMounted) return;
-          const roundId = round?.id;
+          const roundId = roundRef.current?.id;
           if (!roundId) return;
           const [roundAnswers, playerList, gameData, lastRound] =
             await Promise.all([
@@ -259,8 +264,6 @@ export function useGameScreen(
     userId,
     getToken,
     router,
-    round,
-    game,
     fetchPlayers,
     fetchGameData,
     fetchRoundData,
