@@ -51,13 +51,16 @@ class WebSocketClient {
     if (!this.gameId || !this.token) return;
 
     const url = `${WS_BASE_URL}/api/v1/ws/${this.gameId}?token=${this.token}`;
+    console.log('Creating WebSocket connection to:', url.split('?')[0]);
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
+      console.log('WebSocket connected!');
       this.reconnectAttempts = 0;
     };
 
     this.ws.onmessage = (event) => {
+      console.log('WS Message received:', event.data);
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.emit(message.event, message.data);
@@ -67,6 +70,7 @@ class WebSocketClient {
     };
 
     this.ws.onclose = () => {
+      console.log('WebSocket closed, attempting reconnect...');
       this.attemptReconnect();
     };
 
