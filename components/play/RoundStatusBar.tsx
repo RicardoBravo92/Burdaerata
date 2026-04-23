@@ -28,7 +28,7 @@ export default function RoundStatusBar({
           <button
             onClick={onNextRound}
             disabled={loading}
-            className="bg-[#99184e] text-white px-6 py-2 rounded-full font-bold hover:bg-[#871444] transition-colors shadow-lg disabled:opacity-50"
+            className="bg-primary text-white px-6 py-2 rounded-full font-bold hover:bg-primary/90 transition-colors shadow-lg disabled:opacity-50"
           >
             {loading ? "Starting..." : "Next Round"}
           </button>

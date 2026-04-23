@@ -8,7 +8,7 @@ export default function HomeTab() {
   return (
     <>
       <Header />
-      <div className='items-center justify-center p-6 bg-[#99184e] min-h-screen'>
+      <div className='items-center justify-center p-6 bg-primary min-h-screen'>
         <ItemGroup className='w-full max-w-md md:max-w-2xl lg:max-w-2xl mx-auto flex flex-col gap-6'>
           <CreateGame />
           <JoinGame />

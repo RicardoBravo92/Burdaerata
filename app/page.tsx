@@ -13,13 +13,13 @@ import Header from "@/components/header";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#99184e]">
+    <div className="min-h-screen bg-primary">
       <Header />
       <div className="px-4 py-4 md:py-10">
         <Card className="max-w-md md:max-w-2xl lg:max-w-2xl mx-auto bg-linear-to-br from-violet-50 to-fuchsia-50 border-none shadow-xl rounded-3xl px-6 md:py-4 ">
         {/* Hero Section */}
         <Item className="text-center">
-          <ItemTitle className="text-2xl font-bold text-[#99184e]">
+          <ItemTitle className="text-2xl font-bold text-primary">
             ¡Welcome to Burdaerata!
           </ItemTitle>
           <ItemDescription className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
@@ -51,7 +51,7 @@ export default function Home() {
               className="bg-white rounded-2xl shadow-lg text-center"
             >
               <ItemTitle className="text-2xl">{feature.icon}</ItemTitle>
-              <ItemTitle className="text-xs font-bold  text-[#6c47ff]">
+              <ItemTitle className="text-xs font-bold  text-secondary">
                 {feature.title}
               </ItemTitle>
               <ItemDescription className="text-gray-600">
@@ -64,7 +64,7 @@ export default function Home() {
         {/* CTA Section */}
         <Item
           variant="outline"
-          className="rounded-3xl p-6 md:p-2 text-center border-2 border-[#99184e]"
+          className="rounded-3xl p-6 md:p-2 text-center border-2 border-primary"
         >
           <ItemContent className="gap-1">
             <ItemTitle className="text-xl md:text-xl font-bold mx-auto">

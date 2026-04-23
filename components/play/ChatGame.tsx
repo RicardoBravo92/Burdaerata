@@ -85,7 +85,7 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
     <div className="flex flex-col h-full w-full bg-white rounded-3xl">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3 bg-white z-10 shadow-sm rounded-t-3xl">
-        <div className="bg-[#99184e]/10 p-2 text-[#99184e] rounded-full">
+        <div className="bg-primary/10 p-2 text-primary rounded-full">
           <MessageCircleIcon className="w-5 h-5" />
         </div>
         <div>
@@ -124,7 +124,7 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
                   className={`
                     px-4 py-2.5 rounded-2xl max-w-[85%] text-sm
                     ${isMe 
-                      ? 'bg-[#99184e] text-white' 
+                      ? 'bg-primary text-white' 
                       : 'bg-white text-gray-800 border border-gray-200'}
                   `}
                 >
@@ -140,7 +140,7 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
       <div className="p-4 bg-white border-t border-gray-100 rounded-b-3xl">
         <form 
           onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-          className="flex items-center gap-2 bg-gray-100 w-full rounded-full pr-2 pl-4 py-1.5 focus-within:ring-2 focus-within:ring-[#99184e]/20 focus-within:bg-gray-50"
+          className="flex items-center gap-2 bg-gray-100 w-full rounded-full pr-2 pl-4 py-1.5 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-gray-50"
         >
           <input
             type="text"
@@ -153,7 +153,7 @@ export default function ChatGame({ messages: propMessages, setMessages: propSetM
           <Button 
             type="submit" 
             size="icon"
-            className="rounded-full bg-[#99184e] hover:bg-[#871444] h-9 w-9 flex-shrink-0"
+            className="rounded-full bg-primary hover:bg-primary/90 h-9 w-9 flex-shrink-0"
             disabled={!newMessage.trim()}
           >
             <SendIcon className="w-4 h-4 text-white" />

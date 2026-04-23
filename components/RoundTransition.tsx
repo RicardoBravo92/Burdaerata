@@ -36,7 +36,7 @@ export default function RoundTransition({
   }, [round?.question_card_id]);
 
   return (
-    <div className='fixed inset-0 bg-gradient-to-br from-[#99184e] via-[#6c47ff] to-[#99184e] z-50 flex items-center justify-center p-6'>
+    <div className='fixed inset-0 bg-gradient-to-br from-primary via-secondary to-primary z-50 flex items-center justify-center p-6'>
       <div className='max-w-2xl w-full'>
         <div className='absolute inset-0 overflow-hidden'>
           <div className='absolute -top-1/2 -left-1/2 w-full h-full bg-white/5 rounded-full blur-3xl animate-pulse'></div>

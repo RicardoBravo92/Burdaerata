@@ -45,7 +45,7 @@ export default function GameScreen() {
 
   if (loading || (!gameData && !players)) {
     return (
-      <div className='flex flex-col items-center justify-center gap-2 bg-[#99184e] min-h-screen'>
+      <div className='flex flex-col items-center justify-center gap-2 bg-primary min-h-screen'>
         <Skeleton className='h-[70px] w-[340px] md:w-[720px] rounded-xl' />
         <Skeleton className='h-[200px] w-[340px] md:w-[720px] rounded-xl' />
         <Skeleton className='h-[100px] w-[340px] md:w-[720px] rounded-xl' />
@@ -55,9 +55,9 @@ export default function GameScreen() {
 
   if (shouldShowJoinPrompt && gameData?.status === 'waiting') {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
+      <div className='flex items-center justify-center bg-primary min-h-screen'>
         <div className='bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center'>
-          <h2 className='text-lg font-bold text-[#99184e] mb-2'>
+          <h2 className='text-lg font-bold text-primary mb-2'>
             Join the game
           </h2>
           <p className='text-gray-700 mb-4'>
@@ -72,7 +72,7 @@ export default function GameScreen() {
             </button>
             <button
               onClick={() => router.replace('/game')}
-              className='px-4 h-9 rounded-full bg-[#99184e] text-white hover:bg-[#871444]'
+              className='px-4 h-9 rounded-full bg-primary text-white hover:bg-primary/90'
             >
               Join
             </button>
@@ -93,7 +93,7 @@ export default function GameScreen() {
 
   if (!gameData) {
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
+      <div className='flex items-center justify-center bg-primary min-h-screen'>
         <div className='items-center space-y-4 p-6 text-center'>
           <AlertIcon />
           <h1 className='text-white text-xl font-semibold text-center'>
@@ -105,7 +105,7 @@ export default function GameScreen() {
           </p>
           <Button
             onClick={() => router.replace('/game')}
-            className='w-full hover:bg-white/90 font-bold h-12 rounded-full text-lg border-none mt-4 bg-white text-[#99184e]'
+            className='w-full hover:bg-white/90 font-bold h-12 rounded-full text-lg border-none mt-4 bg-white text-primary'
           >
             Exit to Lobby
           </Button>
@@ -120,12 +120,12 @@ export default function GameScreen() {
     );
 
     return (
-      <div className='flex items-center justify-center bg-[#99184e] min-h-screen p-6'>
+      <div className='flex items-center justify-center bg-primary min-h-screen p-6'>
         <div className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center'>
           <div className='bg-yellow-100 p-4 rounded-full mb-4'>
             <TrophyIcon />
           </div>
-          <h1 className='text-[#99184e] text-3xl font-bold text-center mb-6'>
+          <h1 className='text-primary text-3xl font-bold text-center mb-6'>
             Game Over!
           </h1>
 
@@ -149,7 +149,7 @@ export default function GameScreen() {
                     {p.profile?.full_name || p.user?.full_name || 'Player'}
                   </span>
                 </div>
-                <div className='bg-[#99184e] text-white px-3 py-1 rounded-full text-sm font-bold'>
+                <div className='bg-primary text-white px-3 py-1 rounded-full text-sm font-bold'>
                   {p.score || 0} pts
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function GameScreen() {
 
           <Button
             onClick={() => router.replace('/game')}
-            className='w-full bg-[#99184e] hover:bg-[#7a1340] text-white font-bold h-12 rounded-full text-lg'
+            className='w-full bg-primary hover:bg-primary/80 text-white font-bold h-12 rounded-full text-lg'
           >
             Exit to Lobby
           </Button>
@@ -174,11 +174,11 @@ export default function GameScreen() {
           <Button
             variant='ghost'
             onClick={handleLeaveGame}
-            className='text-[#99184e] hover:bg-white/20'
+            className='text-primary hover:bg-white/20'
           >
             ← Leave
           </Button>
-          <div className='text-[#99184e] font-bold'>Waiting for players...</div>
+          <div className='text-primary font-bold'>Waiting for players...</div>
           <div className='w-16' />
         </div>
 
@@ -196,11 +196,11 @@ export default function GameScreen() {
           <Button
             variant='ghost'
             onClick={handleLeaveGame}
-            className='text-[#99184e] hover:bg-white/20'
+            className='text-primary hover:bg-white/20'
           >
             ← Leave
           </Button>
-          <div className='text-[#99184e] font-bold'>
+          <div className='text-primary font-bold'>
             Round {currentRound?.round_number || 1}
           </div>
           <div className='w-16' />
@@ -225,7 +225,7 @@ export default function GameScreen() {
   }
 
   return (
-    <div className='flex items-center justify-center bg-[#99184e] min-h-screen'>
+    <div className='flex items-center justify-center bg-primary min-h-screen'>
       <div className='items-center space-y-4 text-center'>
         <HelpIcon />
         <h1 className='text-white text-xl font-semibold'>Unknown Game State</h1>
