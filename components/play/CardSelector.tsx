@@ -106,21 +106,27 @@ export default function CardSelector({
         <CarouselContent className="items-stretch">
           {myCards.map((cardId: string, index: number) => {
             const isSelected = selectedCards.includes(cardId);
+            const isLoading = !cardTexts[cardId];
             const cardText = cardTexts[cardId] || "Loading...";
 
             return (
               <CarouselItem
                 key={index}
-                className="md:basis-1/2 flex"
-                onClick={() => onCardSelect(cardId)}
+                className={`md:basis-1/2 flex ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                onClick={() => {
+                  if (!isLoading) {
+                    onCardSelect(cardId);
+                  }
+                }}
               >
                 <Card
                   className={`
-                    flex-1 cursor-pointer transition-all duration-200
+                    flex-1 transition-all duration-200
+                    ${isLoading ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" : "cursor-pointer"}
                     ${
                       isSelected
                         ? "bg-blue-500 text-white border-blue-500"
-                        : "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50"
+                        : (!isLoading ? "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50" : "")
                     }
                   `}
                 >
