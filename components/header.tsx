@@ -16,12 +16,12 @@ function header() {
       <div className='items-end flex gap-2'>
         <SignedOut>
           <SignInButton>
-            <button className='text-secondary bg-white rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-white/90 transition-colors'>
+            <button className='text-gray-900 bg-white rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-gray-100 transition-colors shadow-sm border border-gray-200'>
               Sign In
             </button>
           </SignInButton>
           <SignUpButton>
-            <button className='bg-white text-secondary rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-white/90 transition-colors'>
+            <button className='text-white bg-primary rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-primary/90 transition-colors shadow-sm'>
               Sign Up
             </button>
           </SignUpButton>
