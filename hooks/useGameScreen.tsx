@@ -146,10 +146,26 @@ export function useGameScreen(
           toast.info('A player joined', { richColors: true });
         };
 
-        const handlePlayerLeft = () => {
+        const handlePlayerLeft = async (data: unknown) => {
           if (!isMounted) return;
+          const payload = data as { user_id: string; remaining: number };
           fetchPlayers();
-          toast.info('A player left', { richColors: true });
+          
+          const oldJudge = roundRef.current?.judge_user_id;
+          
+          if (roundRef.current?.status !== "finished") {
+            setAnswers((prev) => prev.filter((a) => a.user_id !== payload.user_id));
+          }
+          
+          // Re-fetch the round in case the judge was reassigned by the backend
+          const updatedRound = await fetchRoundData();
+          const judgeLeft = oldJudge === payload.user_id;
+          const judgeReassigned = updatedRound && updatedRound.judge_user_id !== oldJudge;
+          if (judgeLeft && judgeReassigned) {
+            toast.info('The judge left! A new judge was assigned.', { richColors: true });
+          } else {
+            toast.info('A player left', { richColors: true });
+          }
         };
 
         const handleGameStarted = async () => {
