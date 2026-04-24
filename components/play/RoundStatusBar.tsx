@@ -2,7 +2,7 @@
 
 import { Round } from "@/lib/types";
 import { useEffect, useState } from "react";
-const timeToStartNextRound = 10;
+import { GAME_CONSTANTS } from "@/constants/gamesettings";
 
 interface RoundStatusBarProps {
   currentRound: Round;
@@ -19,21 +19,32 @@ export default function RoundStatusBar({
   onNextRound,
   loading,
 }: RoundStatusBarProps) {
-const [countdown, setCountdown] = useState(timeToStartNextRound);
+const [countdown, setCountdown] = useState(GAME_CONSTANTS.timeToStartNextRound);
 
   useEffect(() => {
-    if (currentRound?.status === "finished" && isHost) {
-      const timer = setInterval(() => {
-        setCountdown((prevCountdown) => prevCountdown - 1);
+    let timer: NodeJS.Timeout;
+
+    if (currentRound?.status === "finished") {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            if (isHost && prev === 1) {
+              onNextRound?.();
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-      return () => clearInterval(timer);
+    } else {
+      setCountdown(GAME_CONSTANTS.timeToStartNextRound);
     }
-    
-    if (countdown === 0 && currentRound?.status === "finished") {
-      onNextRound?.();
-      setCountdown(timeToStartNextRound);
-    }
-  }, [currentRound?.status, isHost, onNextRound, countdown]);
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [currentRound?.status, isHost, onNextRound]);
   
 
   return (

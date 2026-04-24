@@ -5,4 +5,5 @@ export const GAME_CONSTANTS = {
   MAX_SCORE: 20,
   DEFAULT_PLAYERS: 8,
   DEFAULT_SCORE: 10,
+  timeToStartNextRound: 3,
 };
