@@ -107,7 +107,7 @@ export default function CardSelector({
             return (
               <CarouselItem
                 key={index}
-                className={`md:basis-1/2 lg:basis-1/3 flex ${
+                className={`md:basis-1/2 flex ${
                   isLoading ? "opacity-60 cursor-not-allowed" : ""
                 }`}
                 onClick={() => {
@@ -117,7 +117,7 @@ export default function CardSelector({
                 }}
               >
                 <Card
-                  className={`flex-1 transition-all duration-200 border-none overflow-hidden ${
+                  className={`flex-1 transition-all duration-200 border-none py-0 gap-0 ${
                     isLoading
                       ? "bg-muted text-muted-foreground cursor-not-allowed"
                       : "cursor-pointer bg-card card-face hover:-translate-y-1"
@@ -128,7 +128,7 @@ export default function CardSelector({
                   }`}
                 >
                   <div
-                    className={`h-1.5 w-full ${
+                    className={`h-1.5 w-full rounded-t-[1.25rem] ${
                       isSelected ? "bg-gold" : "bg-primary"
                     }`}
                   />
