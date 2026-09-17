@@ -9,14 +9,14 @@ import {
 
 function header() {
   return (
-    <header className='sticky top-0 z-50 flex justify-between items-center p-4 gap-4 h-12 md:h-16 bg-sidebar  text-sidebar-foreground shadow-sm shrink-0'>
-      <h1 className='text-base md:text-xl font-bold   my-2 text-start'>
+    <header className='sticky top-0 z-50 flex justify-between items-center p-4 gap-4 h-12 md:h-16 bg-felt/90 backdrop-blur text-felt-foreground border-b border-white/10 shrink-0'>
+      <h1 className='text-base md:text-xl font-bold my-2 text-start text-white'>
         Burdaerata
       </h1>
       <div className='items-end flex gap-2'>
         <SignedOut>
           <SignInButton>
-            <button className='text-gray-900 bg-white rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-gray-100 transition-colors shadow-sm border border-gray-200'>
+            <button className='text-felt-foreground bg-white/10 rounded-full font-medium text-sm h-6 md:h-8 px-2 md:px-4 hover:bg-white/20 transition-colors shadow-sm border border-white/15'>
               Sign In
             </button>
           </SignInButton>
@@ -27,7 +27,7 @@ function header() {
           </SignUpButton>
         </SignedOut>
         <SignedIn>
-          <UserButton appearance={{ variables: { colorPrimary: '#6c47ff' } }} />
+          <UserButton appearance={{ variables: { colorPrimary: '#c92f42' } }} />
         </SignedIn>
       </div>
     </header>

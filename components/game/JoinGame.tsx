@@ -15,15 +15,15 @@ export default function JoinGame() {
   return (
     <Item
       variant="outline"
-      className="bg-white rounded-3xl p-8 md:p-4 shadow-lg"
+      className="bg-card card-face rounded-[1.75rem] p-6 md:p-7 border-none shadow-2xl shadow-black/40"
     >
       <ItemContent>
-        <ItemTitle>Join Game</ItemTitle>
-        <ItemDescription>
+        <ItemTitle className="text-felt text-xl">Join Game</ItemTitle>
+        <ItemDescription className="text-felt/60">
           Enter a game code to join an existing game
         </ItemDescription>
       </ItemContent>
-      <ItemActions>{Component}</ItemActions>
+      <ItemActions className="flex-wrap">{Component}</ItemActions>
     </Item>
   );
 }

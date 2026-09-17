@@ -44,7 +44,30 @@ body {
   animation: slide-in-up 0.8s ease-out forwards;
 }
 
+/* Felt table backdrop — the game surface */
+.bg-felt {
+  background-color: var(--felt);
+  background-image:
+    radial-gradient(80rem 40rem at 50% -10%, var(--felt-glow) 0%, transparent 60%),
+    radial-gradient(60rem 34rem at 90% 110%, var(--felt-glow) 0%, transparent 55%);
+}
+
+.card-face {
+  background: var(--card);
+  box-shadow: var(--shadow-xl);
+  border-radius: 1.25rem;
+}
+
+.card-face-selected {
+  box-shadow: var(--shadow-xl), 0 0 0 3px var(--gold);
+}
+
 :root {
+  --felt: oklch(0.1850 0.0280 357.1000);
+  --felt-glow: oklch(0.3000 0.0700 357.1000);
+  --felt-foreground: oklch(0.9400 0.0040 286.3202);
+  --gold: oklch(0.7950 0.1390 81.0000);
+  --gold-foreground: oklch(0.2800 0.0550 60.0000);
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0.1448 0 0);
   --card: oklch(1.0000 0 0);
@@ -100,6 +123,11 @@ body {
 }
 
 .dark {
+  --felt: oklch(0.1200 0.0200 357.1000);
+  --felt-glow: oklch(0.2200 0.0600 357.1000);
+  --felt-foreground: oklch(0.9400 0.0040 286.3202);
+  --gold: oklch(0.7950 0.1390 81.0000);
+  --gold-foreground: oklch(0.2800 0.0550 60.0000);
   --background: oklch(0.1448 0 0);
   --foreground: oklch(0.9851 0 0);
   --card: oklch(0.1448 0 0);
@@ -185,6 +213,11 @@ body {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-felt: var(--felt);
+  --color-felt-glow: var(--felt-glow);
+  --color-felt-foreground: var(--felt-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

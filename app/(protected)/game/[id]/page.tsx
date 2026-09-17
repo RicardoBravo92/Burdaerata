@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import LobbyView from '@/components/LobbyView';
 import PlayView from '@/components/PlayView';
-import RoundTransition from '@/components/RoundTransition';
 import { GamePlayer } from '@/lib/types';
 import { useUser } from '@clerk/nextjs';
 import { useAuth } from '@clerk/nextjs';
@@ -45,7 +44,7 @@ export default function GameScreen() {
 
   if (loading || (!gameData && !players)) {
     return (
-      <div className='flex flex-col items-center justify-center gap-2 bg-primary min-h-screen'>
+      <div className='flex flex-col items-center justify-center gap-3 bg-felt min-h-screen'>
         <Skeleton className='h-[70px] w-[340px] md:w-[720px] rounded-xl' />
         <Skeleton className='h-[200px] w-[340px] md:w-[720px] rounded-xl' />
         <Skeleton className='h-[100px] w-[340px] md:w-[720px] rounded-xl' />
@@ -55,18 +54,18 @@ export default function GameScreen() {
 
   if (shouldShowJoinPrompt && gameData?.status === 'waiting') {
     return (
-      <div className='flex items-center justify-center bg-primary min-h-screen'>
-        <div className='bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center'>
-          <h2 className='text-lg font-bold text-primary mb-2'>
+      <div className='flex items-center justify-center bg-felt min-h-screen px-4'>
+        <div className='bg-card shadow-2xl shadow-black/40 rounded-[1.75rem] p-6 max-w-sm w-full text-center card-face'>
+          <h2 className='text-lg font-bold text-felt mb-2'>
             Join the game
           </h2>
-          <p className='text-gray-700 mb-4'>
+          <p className='text-felt/60 mb-4'>
             You are not part of this game. Do you want to join?
           </p>
           <div className='flex justify-center gap-3'>
             <button
               onClick={() => router.replace('/game')}
-              className='px-4 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50'
+              className='px-4 h-9 rounded-full border border-felt/20 text-felt hover:bg-felt/5'
             >
               Cancel
             </button>
@@ -82,24 +81,15 @@ export default function GameScreen() {
     );
   }
 
-  // if (isTransitioning && currentRound) {
-  //   return (
-  //     <RoundTransition
-  //       round={currentRound}
-  //       players={players || []}
-  //     />
-  //   );
-  // }
-
   if (!gameData) {
     return (
-      <div className='flex items-center justify-center bg-primary min-h-screen'>
+      <div className='flex items-center justify-center bg-felt min-h-screen'>
         <div className='items-center space-y-4 p-6 text-center'>
           <AlertIcon />
           <h1 className='text-white text-xl font-semibold text-center'>
             Game Not Found
           </h1>
-          <p className='text-white/70 text-center text-base'>
+          <p className='text-felt-foreground/70 text-center text-base'>
             The game you&apos;re looking for doesn&apos;t exist or you
             don&apos;t have access.
           </p>
@@ -120,12 +110,12 @@ export default function GameScreen() {
     );
 
     return (
-      <div className='flex items-center justify-center bg-primary min-h-screen p-6'>
-        <div className='bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl flex flex-col items-center'>
-          <div className='bg-yellow-100 p-4 rounded-full mb-4'>
+      <div className='flex items-center justify-center bg-felt min-h-screen p-6'>
+        <div className='bg-card rounded-[2rem] p-8 max-w-md w-full shadow-2xl shadow-black/40 flex flex-col items-center card-face'>
+          <div className='bg-gold/15 p-4 rounded-full mb-4'>
             <TrophyIcon />
           </div>
-          <h1 className='text-primary text-3xl font-bold text-center mb-6'>
+          <h1 className='text-felt text-3xl font-bold text-center mb-6'>
             Game Over!
           </h1>
 
@@ -135,21 +125,27 @@ export default function GameScreen() {
                 key={p.id}
                 className={`flex justify-between items-center p-3 rounded-xl border ${
                   index === 0
-                    ? 'bg-yellow-50 border-yellow-300'
-                    : 'bg-gray-50 border-gray-100'
+                    ? 'bg-gold/10 border-gold/50'
+                    : 'bg-muted border-transparent'
                 }`}
               >
                 <div className='flex items-center gap-3'>
                   <span
-                    className={`font-bold ${index === 0 ? 'text-yellow-600' : 'text-gray-400'}`}
+                    className={`font-bold ${
+                      index === 0 ? 'text-gold-foreground' : 'text-felt/40'
+                    }`}
                   >
                     #{index + 1}
                   </span>
-                  <span className='font-semibold text-gray-800'>
+                  <span className='font-semibold text-felt'>
                     {p.profile?.full_name || p.user?.full_name || 'Player'}
                   </span>
                 </div>
-                <div className='bg-primary text-white px-3 py-1 rounded-full text-sm font-bold'>
+                <div
+                  className={`text-white px-3 py-1 rounded-full text-sm font-bold ${
+                    index === 0 ? 'bg-gold' : 'bg-felt/40'
+                  }`}
+                >
                   {p.score || 0} pts
                 </div>
               </div>
@@ -170,15 +166,17 @@ export default function GameScreen() {
   if (gameData.status === 'waiting') {
     return (
       <div className='flex flex-col flex-1'>
-        <div className='sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-white'>
+        <div className='sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-felt/90 backdrop-blur border-b border-white/10'>
           <Button
             variant='ghost'
             onClick={handleLeaveGame}
-            className='text-primary hover:bg-white/20'
+            className='text-felt-foreground hover:text-white hover:bg-white/10'
           >
             ← Leave
           </Button>
-          <div className='text-primary font-bold'>Waiting for players...</div>
+          <div className='text-felt-foreground font-bold'>
+            Waiting for players...
+          </div>
           <div className='w-16' />
         </div>
 
@@ -192,15 +190,15 @@ export default function GameScreen() {
   if (gameData.status === 'playing') {
     return (
       <div className='flex flex-col flex-1'>
-        <div className='sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-white'>
+        <div className='sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-felt/90 backdrop-blur border-b border-white/10'>
           <Button
             variant='ghost'
             onClick={handleLeaveGame}
-            className='text-primary hover:bg-white/20'
+            className='text-felt-foreground hover:text-white hover:bg-white/10'
           >
             ← Leave
           </Button>
-          <div className='text-primary font-bold'>
+          <div className='text-felt-foreground font-bold'>
             Round {currentRound?.round_number || 1}
           </div>
           <div className='w-16' />
@@ -215,7 +213,7 @@ export default function GameScreen() {
               isTransitioning={isTransitioning}
             />
           ) : (
-            <div className='flex items-center justify-center h-screen'>
+            <div className='flex items-center justify-center h-screen bg-felt'>
               <Skeleton className='h-[200px] w-[340px] rounded-xl' />
             </div>
           )}
@@ -225,7 +223,7 @@ export default function GameScreen() {
   }
 
   return (
-    <div className='flex items-center justify-center bg-primary min-h-screen'>
+    <div className='flex items-center justify-center bg-felt min-h-screen'>
       <div className='items-center space-y-4 text-center'>
         <HelpIcon />
         <h1 className='text-white text-xl font-semibold'>Unknown Game State</h1>

@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
+import { Send, Loader2, CheckCircle2 } from "lucide-react";
 
 interface CardSelectorProps {
   myCards: string[];
@@ -19,9 +20,6 @@ interface CardSelectorProps {
   onSubmit: () => void;
   submitting: boolean;
 }
-
-const RefreshIcon = () => <span className="text-2xl">🔄</span>;
-const SendIcon = () => <span className="text-2xl">📤</span>;
 
 export default function CardSelector({
   myCards,
@@ -45,64 +43,61 @@ export default function CardSelector({
   }, [myCards]);
 
   return (
-    <div className="mb-6">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 min-h-[72px] px-2 md:px-6 gap-3">
-        <h2 className="text-xl font-bold text-gray-800">
-          Your Cards ({selectedCards.length}/{requiredCards} selected)
-        </h2>
+    <div className="mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4 px-2 md:px-4">
+        <div>
+          <h2 className="text-lg font-bold text-felt">
+            Your Cards
+          </h2>
+          <p className="text-sm text-felt/60 font-medium">
+            Pick {requiredCards} card{requiredCards > 1 ? "s" : ""} to complete
+            the answer ({selectedCards.length}/{requiredCards})
+          </p>
+        </div>
         <button
-          className={`flex items-center py-2 px-4 md:py-3 md:px-6 rounded-2xl whitespace-nowrap ${
+          className={`flex items-center gap-2 py-2.5 px-5 rounded-2xl whitespace-nowrap transition-all duration-200 ${
             isComplete && !submitting
-              ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-              : "bg-gray-400 cursor-not-allowed"
-          } text-white font-bold transition-colors duration-200`}
+              ? "bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-lg shadow-primary/30 hover:-translate-y-0.5"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          } font-bold`}
           onClick={isComplete ? onSubmit : undefined}
           disabled={!isComplete || submitting}
         >
-          {submitting ? <RefreshIcon /> : <SendIcon />}
-          <span className="ml-2">
-            {submitting ? "Submitting..." : "Submit Answer"}
-          </span>
+          {submitting ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Send className="w-5 h-5" />
+          )}
+          {submitting ? "Submitting..." : "Submit Answer"}
         </button>
       </div>
 
       {selectedCards.length > 0 && !isComplete && (
-        <div className="px-4 md:px-6 mb-3">
-          <p className="text-sm text-gray-500 mb-1">
-            Select {requiredCards - selectedCards.length} more:
+        <div className="px-4 md:px-6 mb-3 flex items-center gap-2">
+          <p className="text-sm font-semibold text-felt/70">
+            Selected ({selectedCards.length}/{requiredCards}):
           </p>
-          <ul className="flex flex-wrap gap-2">
-            {selectedCards.map((cardId, i) => (
-              <li 
-                key={i} 
-                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
-              >
-                {cardTexts[cardId] || "..."}
-              </li>
-            ))}
-          </ul>
+          {selectedCards.map((cardId, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 text-xs bg-gold/20 text-gold-foreground px-2.5 py-1 rounded-full font-semibold"
+            >
+              {cardTexts[cardId] || "..."}
+            </span>
+          ))}
         </div>
       )}
 
       {isComplete && (
-        <div className="px-4 md:px-6 mb-3">
-          <p className="text-sm text-green-600 mb-1">
-            Your answer:
+        <div className="px-4 md:px-6 mb-3 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+          <p className="text-sm font-bold text-green-700">
+            Your answer is ready — hit submit!
           </p>
-          <ul className="flex flex-wrap gap-2">
-            {selectedCards.map((cardId, i) => (
-              <li 
-                key={i} 
-                className="text-sm bg-green-100 text-green-700 px-3 py-1.5 rounded-full"
-              >
-                {cardTexts[cardId] || "..."}
-              </li>
-            ))}
-          </ul>
         </div>
       )}
 
-      <Carousel className="mx-10">
+      <Carousel className="mx-8 md:mx-12">
         <CarouselContent className="items-stretch">
           {myCards.map((cardId: string, index: number) => {
             const isSelected = selectedCards.includes(cardId);
@@ -112,7 +107,9 @@ export default function CardSelector({
             return (
               <CarouselItem
                 key={index}
-                className={`md:basis-1/2 flex ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                className={`md:basis-1/2 lg:basis-1/3 flex ${
+                  isLoading ? "opacity-60 cursor-not-allowed" : ""
+                }`}
                 onClick={() => {
                   if (!isLoading) {
                     onCardSelect(cardId);
@@ -120,20 +117,30 @@ export default function CardSelector({
                 }}
               >
                 <Card
-                  className={`
-                    flex-1 transition-all duration-200
-                    ${isLoading ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed" : "cursor-pointer"}
-                    ${
-                      isSelected
-                        ? "bg-blue-500 text-white border-blue-500"
-                        : (!isLoading ? "bg-blue-100 text-gray-800 border-blue-100 hover:bg-gray-50" : "")
-                    }
-                  `}
+                  className={`flex-1 transition-all duration-200 border-none overflow-hidden ${
+                    isLoading
+                      ? "bg-muted text-muted-foreground cursor-not-allowed"
+                      : "cursor-pointer bg-card card-face hover:-translate-y-1"
+                  } ${
+                    isSelected
+                      ? "card-face-selected bg-gradient-to-b from-white to-gold/15"
+                      : ""
+                  }`}
                 >
-                  <CardContent className="flex items-center justify-center p-6 min-h-[200px] h-full">
-                    <span className="text-xl font-semibold text-center wrap-break-word w-full leading-relaxed">
+                  <div
+                    className={`h-1.5 w-full ${
+                      isSelected ? "bg-gold" : "bg-primary"
+                    }`}
+                  />
+                  <CardContent className="flex flex-col items-center justify-center p-4 min-h-[180px] h-full gap-2">
+                    <span className="text-lg font-semibold text-felt text-center wrap-break-word w-full leading-snug">
                       {cardText}
                     </span>
+                    {isSelected && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-gold-foreground bg-gold/20 px-2.5 py-0.5 rounded-full">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Selected
+                      </span>
+                    )}
                   </CardContent>
                 </Card>
               </CarouselItem>

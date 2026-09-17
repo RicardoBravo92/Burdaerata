@@ -1,6 +1,7 @@
 "use client";
 
 import { Round } from "@/lib/types";
+import { CheckCircle2, Crown } from "lucide-react";
 
 interface RoundStatusMessagesProps {
   hasSubmitted: boolean;
@@ -9,9 +10,6 @@ interface RoundStatusMessagesProps {
   playersCount: number;
   currentRound: Round;
 }
-
-const CheckIcon = () => <span className="text-2xl">✅</span>;
-const StarIcon = () => <span className="text-2xl">⭐</span>;
 
 export default function RoundStatusMessages({
   hasSubmitted,
@@ -23,10 +21,10 @@ export default function RoundStatusMessages({
   return (
     <>
       {hasSubmitted && !isJudge && (
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 flex items-center">
-          <CheckIcon />
-          <span className="text-green-800 font-semibold ml-3">
-            Answer submitted! Waiting for others...
+        <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-4 flex items-center mx-2">
+          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+          <span className="text-green-800 font-semibold ml-2.5 text-sm">
+            Answer submitted! Waiting for the rest of the table...
           </span>
         </div>
       )}
@@ -34,10 +32,10 @@ export default function RoundStatusMessages({
       {isJudge &&
         answersCount < playersCount - 1 &&
         currentRound?.status === "submitting" && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-center">
-            <StarIcon />
-            <span className="text-amber-800 font-semibold ml-3">
-              You are the judge! Waiting for answers... ({answersCount}/
+          <div className="bg-gold/10 border border-gold/40 rounded-2xl px-4 py-3 mb-4 flex items-center mx-2">
+            <Crown className="w-5 h-5 text-gold-foreground shrink-0" />
+            <span className="text-gold-foreground font-semibold ml-2.5 text-sm">
+              You are the judge! Waiting for answers ({answersCount}/
               {playersCount - 1})
             </span>
           </div>
@@ -45,4 +43,3 @@ export default function RoundStatusMessages({
     </>
   );
 }
-

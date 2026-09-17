@@ -47,10 +47,13 @@ export default function ChatModal({ messages, setMessages, currentUserId }: Chat
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant='outline' className='mr-2 my-2 w-10 h-10 bg-indigo-500 hover:bg-indigo-600 text-white border-indigo-600 lg:hidden shadow-md relative'>
+        <Button
+          variant='outline'
+          className='w-10 h-10 bg-white/10 text-felt-foreground border-white/20 hover:bg-white/20 lg:hidden relative'
+        >
           <MessageCircle className="w-5 h-5"/>
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

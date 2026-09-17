@@ -19,19 +19,23 @@ export default function CreateGame() {
   } = useCreateGame();
 
   return (
-    <Item variant="outline" className="rounded-3xl p-8 md:p-4 shadow-lg bg-white">
+    <Item
+      variant="outline"
+      className="bg-card card-face rounded-[1.75rem] p-6 md:p-7 border-none shadow-2xl shadow-black/40"
+    >
       <ItemContent>
-        <ItemTitle>Create New Game</ItemTitle>
-        <ItemDescription>
+        <ItemTitle className="text-felt text-xl">Create New Game</ItemTitle>
+        <ItemDescription className="text-felt/60">
           Start a new game session and invite your friends to join the fun!
         </ItemDescription>
       </ItemContent>
 
-      <ItemActions>
+      <ItemActions className="flex-wrap">
         <Button
           variant="outline"
           onClick={toggleSettings}
           aria-expanded={showSettings}
+          className="border-felt/20 text-felt hover:bg-felt/5"
         >
           {showSettings ? "Hide Settings" : "Game Settings"}
         </Button>

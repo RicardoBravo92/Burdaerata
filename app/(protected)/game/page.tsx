@@ -8,11 +8,21 @@ export default function HomeTab() {
   return (
     <>
       <Header />
-      <div className='items-center justify-center p-6 bg-primary min-h-screen'>
-        <ItemGroup className='w-full max-w-md md:max-w-2xl lg:max-w-2xl mx-auto flex flex-col gap-6'>
-          <CreateGame />
-          <JoinGame />
-        </ItemGroup>
+      <div className='bg-felt min-h-screen'>
+        <div className='max-w-2xl mx-auto px-4 py-10 md:py-14'>
+          <div className='text-center mb-8 animate-fade-in'>
+            <h1 className='text-3xl md:text-4xl font-black text-white mb-2'>
+              Game Night
+            </h1>
+            <p className='text-felt-foreground/80 text-base md:text-lg font-medium'>
+              Start a new game or join your friends at the table
+            </p>
+          </div>
+          <ItemGroup className='flex flex-col gap-5'>
+            <CreateGame />
+            <JoinGame />
+          </ItemGroup>
+        </div>
       </div>
     </>
   );
