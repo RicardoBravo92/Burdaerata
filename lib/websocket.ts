@@ -1,4 +1,5 @@
 export type WebSocketEvent =
+  | "connected"
   | "player_joined"
   | "player_left"
   | "game_started"
@@ -55,6 +56,7 @@ class WebSocketClient {
 
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
+      this.emit("connected", null);
     };
 
     this.ws.onmessage = (event) => {

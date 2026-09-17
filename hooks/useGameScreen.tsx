@@ -113,6 +113,29 @@ export function useGameScreen(
     return roundData;
   }, [gameId, setRound]);
 
+  // Refetch everything in case events were missed while the socket was down.
+  const resync = useCallback(async () => {
+    try {
+      const gameData = await fetchGameData();
+      const playerList = await fetchGamePlayersAction(gameId);
+      setPlayers(playerList || []);
+
+      if (gameData?.status === 'playing') {
+        const roundData = await fetchRoundData();
+        if (roundData) {
+          const [roundAnswers, cards] = await Promise.all([
+            fetchRoundAnswersAction(roundData.id),
+            fetchMyCardsAction(gameId),
+          ]);
+          setAnswers(roundAnswers);
+          setMyCards(cards.cards);
+        }
+      }
+    } catch (error) {
+      logError(error, 'resync');
+    }
+  }, [gameId, fetchGameData, fetchRoundData, setPlayers, setMyCards]);
+
   useEffect(() => {
     if (!gameId || !userId) return;
 
@@ -139,6 +162,11 @@ export function useGameScreen(
         if (!token || !isMounted) return;
 
         connectToGameWS(gameId, token);
+
+        const handleConnected = () => {
+          if (!isMounted) return;
+          resync();
+        };
 
         const handlePlayerJoined = () => {
           if (!isMounted) return;
@@ -244,6 +272,7 @@ export function useGameScreen(
           router.replace('/game');
         };
 
+        onGameEvent('connected', handleConnected);
         onGameEvent('player_joined', handlePlayerJoined);
         onGameEvent('player_left', handlePlayerLeft);
         onGameEvent('game_started', handleGameStarted);
@@ -255,6 +284,7 @@ export function useGameScreen(
 
         return () => {
           disconnectFromGameWS();
+          offGameEvent('connected', handleConnected);
           offGameEvent('player_joined', handlePlayerJoined);
           offGameEvent('player_left', handlePlayerLeft);
           offGameEvent('game_started', handleGameStarted);
@@ -283,6 +313,7 @@ export function useGameScreen(
     fetchPlayers,
     fetchGameData,
     fetchRoundData,
+    resync,
     setGame,
     setGameState,
     setPlayers,

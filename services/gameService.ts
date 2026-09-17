@@ -90,8 +90,8 @@ export async function submitAnswer(
 export async function selectWinner(
   roundId: string,
   winningAnswerId: string
-): Promise<{ success: boolean }> {
-  return api.post<{ success: boolean }>(`/api/v1/games/rounds/${roundId}/winner`, {
+): Promise<RoundAnswer> {
+  return api.post<RoundAnswer>(`/api/v1/games/rounds/${roundId}/winner`, {
     winning_answer_id: winningAnswerId,
   });
 }
