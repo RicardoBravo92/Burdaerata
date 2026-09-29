@@ -8,7 +8,6 @@ import {
   getMyCards,
   getGamePlayers,
   submitAnswer,
-  updateMyCards,
   createGame,
   joinGame,
   startGame,

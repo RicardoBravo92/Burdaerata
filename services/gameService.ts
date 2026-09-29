@@ -102,15 +102,6 @@ export async function getMyCards(
   return api.get<PlayerCardsResponse>(`/api/v1/games/${gameId}/players/me/cards`);
 }
 
-export async function updateMyCards(
-  gameId: string,
-  cards: string[]
-): Promise<PlayerCardsResponse> {
-  return api.put<PlayerCardsResponse>(`/api/v1/games/${gameId}/players/me/cards`, {
-    cards,
-  });
-}
-
 export async function leaveGame(gameId: string): Promise<{ success: boolean }> {
   return api.post<{ success: boolean }>(`/api/v1/games/${gameId}/leave`);
 }
